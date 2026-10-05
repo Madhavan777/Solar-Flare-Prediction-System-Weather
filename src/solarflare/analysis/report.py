@@ -77,8 +77,8 @@ def _bootstrap_section(payload: dict) -> list[str]:
     lines += [
         "",
         f"Resampled partitions ranged from {windows['min']:,} to {windows['max']:,} windows "
-        f"(median {windows['median']:,}) and from {positives['min']} to "
-        f"{positives['max']} positives (median {positives['median']}). That spread is the "
+        f"(median {windows['median']:,}) and from {positives['min']:,} to "
+        f"{positives['max']:,} positives (median {positives['median']:,}). That spread is the "
         "honest picture: P5's effective sample size is set by how many *regions* flared, "
         "not by its 75,365 windows.",
         "",
@@ -152,14 +152,37 @@ def _calibration_section(payload: dict) -> list[str]:
             f"{variant['over_forecast_ratio']:.2f}x |"
         )
     shifts = payload["roc_auc_shift_under_recalibration"]
+    platt_shift = abs(shifts.get("platt_on_validation", 0.0))
+    isotonic_shift = abs(shifts.get("isotonic_on_validation", 0.0))
     lines += [
         "",
         "Both recalibrations were fitted on the **validation partition only** and are "
         "reported for contrast. Neither is the selected model and neither changes any "
-        "published number. As a check that the recalibrations really are monotone, the "
-        "ROC-AUC moves by "
-        + ", ".join(f"{abs(v):.2e} ({k.split('_')[0]})" for k, v in shifts.items())
-        + " — i.e. not at all beyond floating-point noise.",
+        "published number.",
+        "",
+        "The ROC-AUC shift under each is worth reading carefully, because the two "
+        "recalibrations are not the same kind of function:",
+        "",
+        f"* **Platt scaling moves the ROC-AUC by {platt_shift:.2e}** — exactly nothing. "
+        "It is a one-parameter logistic in the logit, which is *strictly* increasing, so "
+        "it cannot reorder any pair of windows. This is the clean demonstration that "
+        "calibration and discrimination are separate properties: the Brier score "
+        f"improves from {payload['brier_frozen']:.4f} to "
+        f"{payload['variants']['platt_on_validation']['brier']:.4f} while the ranking is "
+        "untouched.",
+        f"* **Isotonic regression moves it by {isotonic_shift:.2e}**, from "
+        f"{payload['variants']['frozen_class_weighted']['roc_auc']:.4f} to "
+        f"{payload['variants']['isotonic_on_validation']['roc_auc']:.4f}. That is a real "
+        "change, not numerical noise, and it is expected: isotonic regression is "
+        "monotone *non-decreasing*, so it maps whole intervals of probability onto a "
+        "single value. The ties it creates destroy ordering information, which costs "
+        "both ROC-AUC and PR-AUC "
+        f"({payload['variants']['isotonic_on_validation']['pr_auc']:.4f} against "
+        f"{payload['variants']['frozen_class_weighted']['pr_auc']:.4f}).",
+        "",
+        "So the general claim is the narrower one: a *strictly* monotone recalibration "
+        "leaves every ranking metric untouched. Isotonic regression is not strictly "
+        "monotone and does not.",
         "",
     ]
     return lines

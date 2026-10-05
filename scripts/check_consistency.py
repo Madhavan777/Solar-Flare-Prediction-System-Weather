@@ -13,6 +13,8 @@ Four independent passes:
    tied to a value computed from ``results/``.
 4. **Language.** Overclaiming words, names that must not appear, and American
    spellings.
+5. **Links.** Every relative link and backticked repository path in the
+   documents must resolve to a file that exists.
 
 Run directly, or as ``python -m solarflare check``.
 """
@@ -426,6 +428,58 @@ def check_claims(checker: Checker, truth: dict) -> None:
 
 
 # --------------------------------------------------------------------------- #
+# pass 5 - links and file references
+# --------------------------------------------------------------------------- #
+LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
+PATHREF_RE = re.compile(
+    r"`((?:src|docs|results|figures|models|dashboard|tests|scripts|data|build)/[^`\s]+)`"
+)
+
+#: Paths referenced in the documents that are deliberately absent. Each is
+#: discussed in the text as something that does not exist.
+KNOWN_ABSENT = {
+    # RECON.md D4 records that the brief lists this script but it is not here.
+    "src/make_course_outcomes.py",
+    # Scratch output from `solarflare train`, not in version control.
+    "build/retrain",
+}
+
+
+def check_links(checker: Checker) -> None:
+    """Every relative link and backticked repository path must resolve."""
+    docs = [
+        paths.ROOT / "README.md",
+        *sorted(paths.DOCS.glob("*.md")),
+        paths.RESULTS_EXTRA / "RESULTS.md",
+    ]
+
+    for doc in docs:
+        if not doc.is_file():
+            checker.check(False, f"missing document: {paths.relative(doc)}")
+            continue
+        text = doc.read_text(encoding="utf-8")
+
+        for label, target in LINK_RE.findall(text):
+            if target.startswith(("http://", "https://", "#", "mailto:")):
+                continue
+            resolved = (doc.parent / target.split("#")[0]).resolve()
+            checker.check(
+                resolved.exists(),
+                f"{paths.relative(doc)}: broken link [{label}]({target})",
+            )
+
+        for ref in sorted(set(PATHREF_RE.findall(text))):
+            # pytest node ids are "file.py::test_name"; only the file must exist.
+            path_part = ref.split("::")[0].rstrip("/")
+            if any(ch in path_part for ch in "*{}") or path_part in KNOWN_ABSENT:
+                continue
+            checker.check(
+                (paths.ROOT / path_part).exists(),
+                f"{paths.relative(doc)}: path reference `{ref}` does not exist",
+            )
+
+
+# --------------------------------------------------------------------------- #
 # pass 4 - language
 # --------------------------------------------------------------------------- #
 def check_language(checker: Checker) -> None:
@@ -486,6 +540,11 @@ def main() -> int:
     before = checker.checks
     print("4. overclaiming, forbidden names and spelling")
     check_language(checker)
+    print(f"   {checker.checks - before} checks")
+
+    before = checker.checks
+    print("5. links and file references in the documents")
+    check_links(checker)
     print(f"   {checker.checks - before} checks")
 
     print()

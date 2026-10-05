@@ -32,7 +32,7 @@ Figures for these analyses are in `figures/extra/`. The report's own figures in 
 | Alert rate | 0.0745 | [0.0544, 0.0975] |
 | HSS (HSS2 form) | 0.2581 | [0.1569, 0.3569] |
 
-Resampled partitions ranged from 69,123 to 81,475 windows (median 75,314) and from 322 to 1864 positives (median 989). That spread is the honest picture: P5's effective sample size is set by how many *regions* flared, not by its 75,365 windows.
+Resampled partitions ranged from 69,123 to 81,475 windows (median 75,314) and from 322 to 1,864 positives (median 989). That spread is the honest picture: P5's effective sample size is set by how many *regions* flared, not by its 75,365 windows.
 
 ### What these intervals mean for the candidate comparison
 
@@ -50,7 +50,7 @@ The PR-AUC interval is wider still, [0.267, 0.657] around a point estimate of 0.
 
 **Why.** The model was fitted with class_weight='balanced', which up-weights the 1.3 % positive class by about 33x. That is what buys 91.6 % recall, and it necessarily inflates the predicted probabilities: the model is trained as if major flares were far commoner than they are. The outputs are therefore useful as a ranking and against the fixed thresholds, but must not be read as literal chances of a flare.
 
-**What this does not affect.** TSS, precision, recall, F1, HSS and the confusion matrix depend only on which side of the threshold each probability falls; PR-AUC and ROC-AUC depend only on the ranking. A strictly monotone recalibration changes none of them, which the roc_auc_shift_under_recalibration figures below confirm.
+**What this does not affect.** TSS, precision, recall, F1, HSS and the confusion matrix depend only on which side of the threshold each probability falls; PR-AUC and ROC-AUC depend only on the ranking. A STRICTLY monotone recalibration therefore changes none of them: Platt scaling here moves the ROC-AUC by exactly 0. Isotonic regression is monotone non-decreasing rather than strictly increasing, so it creates ties that destroy ordering information and does move both AUCs - see roc_auc_shift_under_recalibration below. That is a property of isotonic regression, not evidence against the general point.
 
 Brier score: **0.0500** for the frozen model, against 0.0130 for a constant forecast at the training base rate. A constant forecast beats the model on Brier score while detecting nothing — which is precisely why Brier score is not used to choose a flare forecaster.
 
@@ -60,7 +60,14 @@ Brier score: **0.0500** for the frozen model, against 0.0130 for a constant fore
 | `platt_on_validation` | no | 0.0090 | 0.4894 | 0.9790 | 0.96x |
 | `isotonic_on_validation` | no | 0.0092 | 0.4391 | 0.9620 | 0.92x |
 
-Both recalibrations were fitted on the **validation partition only** and are reported for contrast. Neither is the selected model and neither changes any published number. As a check that the recalibrations really are monotone, the ROC-AUC moves by 0.00e+00 (platt), 1.69e-02 (isotonic) — i.e. not at all beyond floating-point noise.
+Both recalibrations were fitted on the **validation partition only** and are reported for contrast. Neither is the selected model and neither changes any published number.
+
+The ROC-AUC shift under each is worth reading carefully, because the two recalibrations are not the same kind of function:
+
+* **Platt scaling moves the ROC-AUC by 0.00e+00** — exactly nothing. It is a one-parameter logistic in the logit, which is *strictly* increasing, so it cannot reorder any pair of windows. This is the clean demonstration that calibration and discrimination are separate properties: the Brier score improves from 0.0500 to 0.0090 while the ranking is untouched.
+* **Isotonic regression moves it by 1.69e-02**, from 0.9790 to 0.9620. That is a real change, not numerical noise, and it is expected: isotonic regression is monotone *non-decreasing*, so it maps whole intervals of probability onto a single value. The ties it creates destroy ordering information, which costs both ROC-AUC and PR-AUC (0.4391 against 0.4894).
+
+So the general claim is the narrower one: a *strictly* monotone recalibration leaves every ranking metric untouched. Isotonic regression is not strictly monotone and does not.
 
 ---
 

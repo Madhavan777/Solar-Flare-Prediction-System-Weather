@@ -1,0 +1,49 @@
+{
+ "note": "Definition of the consecutive-window gap statistic. See docs/DATA_CARD.md. Post-hoc description of the data, not a model result.",
+ "definitions": {
+  "by_ar_start": {
+   "group_by": "ar",
+   "ordered_by": "start",
+   "n_windows": 331185,
+   "n_groups": 3205,
+   "n_gaps": 327980,
+   "n_gaps_exactly_1h": 323377,
+   "frac_exactly_1h": 0.9859656076590037,
+   "frac_le_1h": 0.9859656076590037,
+   "frac_le_2h": 0.9863894139886579,
+   "min_gap_h": 1.0,
+   "max_gap_h": 171.0,
+   "median_gap_h": 1.0,
+   "commonest_gaps_h": {
+    "1.0": 323377,
+    "15.0": 748,
+    "14.0": 534,
+    "13.0": 457,
+    "16.0": 333,
+    "12.0": 331
+   }
+  },
+  "by_ar_end": {
+   "group_by": "ar",
+   "ordered_by": "end",
+   "n_windows": 331185,
+   "n_groups": 3205,
+   "n_gaps": 327980,
+   "n_gaps_exactly_1h": 323377,
+   "frac_exactly_1h": 0.9859656076590037,
+   "frac_le_1h": 0.9859656076590037,
+   "frac_le_2h": 0.9863894139886579,
+   "min_gap_h": 1.0,
+   "max_gap_h": 171.0,
+   "median_gap_h": 1.0,
+   "commonest_gaps_h": {
+    "1.0": 323377,
+    "15.0": 748,
+    "14.0": 534,
+    "13.0": 457,
+    "16.0": 333,
+    "12.0": 331
+   }
+  }
+ }
+}

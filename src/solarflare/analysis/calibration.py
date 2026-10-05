@@ -171,8 +171,12 @@ def run() -> dict:
         "what_is_unaffected": (
             "TSS, precision, recall, F1, HSS and the confusion matrix depend only on "
             "which side of the threshold each probability falls; PR-AUC and ROC-AUC "
-            "depend only on the ranking. A strictly monotone recalibration changes none "
-            "of them, which the roc_auc_shift_under_recalibration figures below confirm."
+            "depend only on the ranking. A STRICTLY monotone recalibration therefore "
+            "changes none of them: Platt scaling here moves the ROC-AUC by exactly 0. "
+            "Isotonic regression is monotone non-decreasing rather than strictly "
+            "increasing, so it creates ties that destroy ordering information and does "
+            "move both AUCs - see roc_auc_shift_under_recalibration below. That is a "
+            "property of isotonic regression, not evidence against the general point."
         ),
         "test_base_rate": base_rate,
         "train_base_rate": train_base,
