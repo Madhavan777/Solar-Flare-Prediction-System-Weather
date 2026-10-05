@@ -519,6 +519,138 @@ def check_counts(checker: Checker) -> None:
                 )
 
 
+def check_quoted_claims(checker: Checker) -> None:
+    """The specific figures the documents quote must match the analyses.
+
+    These are the sentences a panel is most likely to challenge - "77.8 % of
+    the false alarms", "15 regions produce half of them", "19 of 19 X-class".
+    Each is matched in the prose and compared with the artefact it came from, so
+    none of them can go stale after a re-run.
+    """
+
+    def load(name: str) -> dict | None:
+        path = paths.RESULTS_EXTRA / f"{name}.json"
+        return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else None
+
+    near, errors = load("near_miss"), load("error_gallery")
+    breaks, bases = load("breakdowns"), load("baselines")
+    operating = load("operating_points")
+
+    #: (regex over the documents, value it must equal, label)
+    claims: list[tuple[str, float | int | None, str]] = []
+
+    if near:
+        head, classes = near["headline"], near["by_negative_class"]
+        claims += [
+            (
+                r"(\d{2}\.\d) % (?:of (?:the|those) )?(?:false alarms|\"false alarms\")",
+                head["share_of_false_alarms_preceding_a_real_flare"] * 100,
+                "share of false alarms preceding a real flare",
+            ),
+            (
+                r"alerts on (?:only )?(\d{2}\.\d) % of C-class",
+                classes["C"]["alert_rate_within_class"] * 100,
+                "alert rate within C-class windows",
+            ),
+            (
+                r"(\d\.\d{2}) % of (?:genuinely )?flare-quiet",
+                classes["F"]["alert_rate_within_class"] * 100,
+                "alert rate within flare-quiet windows",
+            ),
+        ]
+    if errors:
+        claims += [
+            (
+                r"longest is (\d+) consecutive",
+                errors["false_alarms"]["longest_consecutive_runs"][0][
+                    "consecutive_false_alarm_windows"
+                ],
+                "longest run of consecutive false alarms",
+            ),
+            (
+                r"lowest probability assigned to a genuine pre-flare window was\s+\**(\d\.\d+)",
+                errors["misses"]["lowest_probability"],
+                "lowest probability of a missed pre-flare window",
+            ),
+            (
+                r"fall in just (\d+) HARP regions",
+                errors["misses"]["n_distinct_harp_regions"],
+                "number of regions containing a miss",
+            ),
+        ]
+    if breaks:
+        region = breaks["by_harp_region"]
+        claims += [
+            # Matches both "15 regions (2.0 %) produce half" and
+            # "15 of P5's 758 regions (2.0 %) produce half" without capturing
+            # the total in the second phrasing.
+            (
+                r"(\d+)(?: of (?:P5's )?\d+)? regions \(2\.0 %\) produce half",
+                region["regions_producing_half_the_false_alarms"],
+                "regions producing half the false alarms",
+            ),
+            (
+                r"(\d+) regions produce none",
+                region["regions_with_zero_false_alarms"],
+                "regions producing no false alarms",
+            ),
+        ]
+    if bases:
+        claims.append(
+            (
+                r"searching\s+(\d+) one-feature threshold rules",
+                bases["n_single_feature_rules_searched"],
+                "number of single-feature rules searched",
+            )
+        )
+    if operating:
+        claims.append(
+            (
+                r"cost (?:us )?\**(\d\.\d{4})\** TSS",
+                round(
+                    operating["best_tss_on_test_posthoc"][
+                        "tss_cost_of_fixing_threshold_on_validation"
+                    ],
+                    4,
+                ),
+                "TSS cost of fixing the threshold on validation",
+            )
+        )
+
+    docs = [
+        paths.ROOT / "README.md",
+        *sorted(paths.DOCS.glob("*.md")),
+        paths.RESULTS_EXTRA / "RESULTS.md",
+    ]
+    seen: set[str] = set()
+    for doc in docs:
+        if not doc.is_file():
+            continue
+        text = doc.read_text(encoding="utf-8")
+        for pattern, expected, label in claims:
+            if expected is None:
+                continue
+            for match in re.finditer(pattern, text):
+                shown = match.group(1)
+                seen.add(label)
+                places = len(shown.split(".")[1]) if "." in shown else 0
+                want = f"{float(expected):.{places}f}" if places else str(int(expected))
+                checker.check(
+                    shown == want,
+                    f"{paths.relative(doc)}: quotes {shown!r} for {label}, "
+                    f"but the analysis says {want!r}",
+                )
+
+    # A claim nobody quotes is a pattern that has silently stopped matching.
+    for _pattern, expected, label in claims:
+        if expected is not None and label not in seen:
+            checker.check(
+                False,
+                f"no document quotes {label!r} any more - the consistency pattern for it "
+                f"is stale and is no longer checking anything",
+            )
+
+
 def check_links(checker: Checker) -> None:
     """Every relative link and backticked repository path must resolve."""
     docs = [
@@ -624,6 +756,11 @@ def main() -> int:
     before = checker.checks
     print("6. counts stated in prose against the repository")
     check_counts(checker)
+    print(f"   {checker.checks - before} checks")
+
+    before = checker.checks
+    print("7. figures quoted in prose against the analyses")
+    check_quoted_claims(checker)
     print(f"   {checker.checks - before} checks")
 
     print()
