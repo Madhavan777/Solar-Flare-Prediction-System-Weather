@@ -526,6 +526,11 @@ def build_parser() -> argparse.ArgumentParser:
         "and docs/screenshots/.",
     )
     parser.add_argument("--version", action="version", version="solarflare 1.0.0")
+    parser.add_argument(
+        "--traceback",
+        action="store_true",
+        help="show the full stack trace instead of a one-line message on expected errors",
+    )
     sub = parser.add_subparsers(dest="command", metavar="<command>")
 
     p = sub.add_parser("env", help="report the runtime environment")
@@ -622,7 +627,22 @@ def main(argv: list[str] | None = None) -> int:
     if not getattr(args, "func", None):
         parser.print_help()
         return 2
-    return int(args.func(args))
+
+    # A missing input or a wrong library version is an ordinary, expected
+    # condition with an actionable message. Printing a traceback for it buries
+    # that message and looks like a crash, which is the last thing wanted when
+    # someone is running this in front of an audience. Pass --traceback for the
+    # full stack when actually debugging.
+    try:
+        return int(args.func(args))
+    except (FileNotFoundError, env.EnvironmentMismatch, PermissionError) as exc:
+        if getattr(args, "traceback", False):
+            raise
+        print(f"\nFAIL - {exc}", file=sys.stderr)
+        return 1
+    except KeyboardInterrupt:
+        print("\ninterrupted", file=sys.stderr)
+        return 130
 
 
 if __name__ == "__main__":

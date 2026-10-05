@@ -445,6 +445,80 @@ KNOWN_ABSENT = {
 }
 
 
+#: English number words the documents use for small counts.
+NUMBER_WORDS = {
+    "one": 1,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
+    "eleven": 11,
+    "twelve": 12,
+}
+
+
+def _spelled(n: int) -> str:
+    for word, value in NUMBER_WORDS.items():
+        if value == n:
+            return word
+    return str(n)
+
+
+def check_counts(checker: Checker) -> None:
+    """Counts stated in prose must match what the repository actually contains.
+
+    These drift silently as files are added, and a stale "eight files" in a
+    document a panel is reading is exactly the sort of small inaccuracy that
+    undermines everything around it.
+    """
+    actual = {
+        "test files": len(list((paths.ROOT / "tests").glob("test_*.py"))),
+        "post-hoc analyses": len(
+            [
+                p
+                for p in (paths.SRC / "solarflare" / "analysis").glob("*.py")
+                if p.stem not in {"__init__", "_common", "figures", "report"}
+            ]
+        ),
+        "candidate models": len(list(paths.MODELS.glob("*.joblib"))),
+        "additive figures": len(list(paths.FIGURES_EXTRA.glob("*.png"))),
+    }
+
+    patterns = {
+        "test files": r"tests? across (\w+) files",
+        "post-hoc analyses": r"(\w+) post-hoc analyses",
+        "candidate models": r"(\w+) candidates? (?:were |are )?(?:trained|compared)",
+    }
+
+    docs = [
+        paths.ROOT / "README.md",
+        *sorted(paths.DOCS.glob("*.md")),
+        paths.RESULTS_EXTRA / "RESULTS.md",
+    ]
+    for doc in docs:
+        if not doc.is_file():
+            continue
+        text = doc.read_text(encoding="utf-8")
+        for label, pattern in patterns.items():
+            for match in re.finditer(pattern, text, re.IGNORECASE):
+                word = match.group(1).lower()
+                stated = NUMBER_WORDS.get(word)
+                if stated is None and word.isdigit():
+                    stated = int(word)
+                if stated is None:
+                    continue
+                checker.check(
+                    stated == actual[label],
+                    f"{paths.relative(doc)}: says {word!r} {label}, but there are "
+                    f"{actual[label]} ({_spelled(actual[label])})",
+                )
+
+
 def check_links(checker: Checker) -> None:
     """Every relative link and backticked repository path must resolve."""
     docs = [
@@ -545,6 +619,11 @@ def main() -> int:
     before = checker.checks
     print("5. links and file references in the documents")
     check_links(checker)
+    print(f"   {checker.checks - before} checks")
+
+    before = checker.checks
+    print("6. counts stated in prose against the repository")
+    check_counts(checker)
     print(f"   {checker.checks - before} checks")
 
     print()

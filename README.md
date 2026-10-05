@@ -163,7 +163,7 @@ before every write and raises. Additive output goes to `results/extra/`, `figure
 | Path | Contents |
 |---|---|
 | `src/solarflare/` | the package: data, features, metrics, models, verification, CLI |
-| `src/solarflare/analysis/` | the eight post-hoc analyses and their report generator |
+| `src/solarflare/analysis/` | the nine post-hoc analyses and their report generator |
 | `src/common.py`, `src/train_eval.py`, … | the original pipeline scripts, unmodified |
 | `models/` | the seven trained pipelines (28 MB) — **frozen** |
 | `results/` | every published metric, prediction file and log — **frozen** |
@@ -171,7 +171,7 @@ before every write and raises. Additive output goes to `results/extra/`, `figure
 | `figures/` | the report's figures — **frozen** |
 | `figures/extra/` | the eight additive figures |
 | `dashboard/` | the static single-page demo, its generated JSON, and `model.js` |
-| `tests/` | 159 tests across eight files |
+| `tests/` | 159 tests across nine files |
 | `docs/` | the documents listed below |
 | `scripts/` | the consistency checker and the parity-fixture builder |
 | `data/`, `raw_data/` | not in git; see [docs/DATA_CARD.md](docs/DATA_CARD.md) |
