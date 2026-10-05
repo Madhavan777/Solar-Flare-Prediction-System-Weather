@@ -1,0 +1,107 @@
+{
+  "_comment": [
+    "The published numbers, transcribed from the project brief independently of",
+    "results/. scripts/check_consistency.py checks results/ against this file, so a",
+    "silent change to a result artefact is caught even if every document is",
+    "regenerated from it. Do not edit to make a check pass: if results/ and this",
+    "file disagree, something that was frozen has moved."
+  ],
+  "dataset": {
+    "n_windows": 331185,
+    "n_features": 144,
+    "n_sharp_parameters": 24,
+    "n_statistics": 6,
+    "records_per_window": 60,
+    "cadence_minutes": 12,
+    "observation_hours": 12,
+    "window_span_hours": 11.8,
+    "prediction_hours": 24,
+    "n_positive": 6234,
+    "n_m_class": 5689,
+    "n_x_class": 545,
+    "n_negative": 324951,
+    "n_b_class": 18125,
+    "n_c_class": 32584,
+    "n_flare_quiet": 274242,
+    "first_date": "2010-05-01",
+    "last_date": "2018-08-17",
+    "frac_windows_with_any_nan": 0.10433745489680994,
+    "nan_frac_mean": 0.005970712492011007,
+    "feature_nan_frac": 0.0016750666378140449,
+    "bad_quality_frac_mean": 0.04299691511793506
+  },
+  "partitions": {
+    "1": {"n": 73492, "positives": 1254, "n_ar": 700},
+    "2": {"n": 88557, "positives": 1401, "n_ar": 885},
+    "3": {"n": 42510, "positives": 1424, "n_ar": 390},
+    "4": {"n": 51261, "positives": 1165, "n_ar": 472},
+    "5": {"n": 75365, "positives": 990, "n_ar": 758}
+  },
+  "split": {
+    "train": [1, 2, 3],
+    "validation": [4],
+    "test": [5],
+    "n_train": 204559,
+    "n_validation": 51261,
+    "n_test": 75365,
+    "seed": 42
+  },
+  "selection": {
+    "selected": "I2_LR_temporal_C0.01",
+    "rule": "max validation TSS (tie-break: validation PR-AUC)",
+    "alert_threshold": 0.544546643935129,
+    "high_threshold": 0.9672703856605697
+  },
+  "selected_test": {
+    "tp": 907,
+    "fp": 4707,
+    "fn": 83,
+    "tn": 69668,
+    "n": 75365,
+    "positives": 990,
+    "precision": 0.1616,
+    "recall": 0.9162,
+    "f1": 0.2747,
+    "tss": 0.8529,
+    "hss2": 0.2581,
+    "far": 0.8384,
+    "accuracy": 0.9364,
+    "pr_auc": 0.4894,
+    "roc_auc": 0.979,
+    "fpr": 0.0633,
+    "n_alerts": 5614,
+    "alert_rate": 0.0745,
+    "alert_rate_times_base": 5.7,
+    "base_rate": 0.0131,
+    "always_no_flare_accuracy": 0.9869
+  },
+  "candidates_test": {
+    "I1_LR_last":           {"val_tss": 0.846, "val_pr_auc": 0.482, "tss": 0.867, "pr_auc": 0.462, "precision": 0.126, "recall": 0.955, "f1": 0.223, "roc_auc": 0.980},
+    "I2_LR_temporal_C0.01": {"val_tss": 0.862, "val_pr_auc": 0.500, "tss": 0.853, "pr_auc": 0.489, "precision": 0.162, "recall": 0.916, "f1": 0.275, "roc_auc": 0.979},
+    "I2_LR_temporal_C0.1":  {"val_tss": 0.860, "val_pr_auc": 0.484, "tss": 0.861, "pr_auc": 0.479, "precision": 0.149, "recall": 0.931, "f1": 0.257, "roc_auc": 0.978},
+    "I2_LR_temporal_C1":    {"val_tss": 0.853, "val_pr_auc": 0.465, "tss": 0.863, "pr_auc": 0.472, "precision": 0.154, "recall": 0.931, "f1": 0.264, "roc_auc": 0.978},
+    "I2_RF_leaf5":          {"val_tss": 0.854, "val_pr_auc": 0.233, "tss": 0.863, "pr_auc": 0.352, "precision": 0.122, "recall": 0.954, "f1": 0.217, "roc_auc": 0.971},
+    "I2_RF_leaf20":         {"val_tss": 0.852, "val_pr_auc": 0.368, "tss": 0.860, "pr_auc": 0.386, "precision": 0.114, "recall": 0.960, "f1": 0.204, "roc_auc": 0.978},
+    "I2_RF_leaf50_d16":     {"val_tss": 0.848, "val_pr_auc": 0.471, "tss": 0.865, "pr_auc": 0.399, "precision": 0.123, "recall": 0.957, "f1": 0.217, "roc_auc": 0.980}
+  },
+  "top_coefficients": [
+    ["R_VALUE__std", -1.571],
+    ["TOTUSJH__max", 1.123],
+    ["TOTUSJH__last", 1.010],
+    ["SHRGT45__min", 1.010],
+    ["R_VALUE__max", 0.837],
+    ["SHRGT45__last", 0.785]
+  ],
+  "demo_windows": {
+    "flare_case": {"harp": 7115, "noaa_ar": 12673, "flare_class": "X1.3", "probability": 0.9999},
+    "quiet_case": {"harp": 5413, "noaa_ar": null, "probability": 0.0010}
+  },
+  "environment": {
+    "scikit_learn": "1.8.0",
+    "numpy": "2.4.4",
+    "pandas": "3.0.2",
+    "matplotlib": "3.10.9",
+    "joblib": "1.5.3",
+    "playwright": "1.56.0"
+  }
+}
