@@ -30,7 +30,7 @@
   "drop_last": {
    "description": "144 temporal features minus the 24 'last' features (120 features)",
    "n_features": 120,
-   "fit_seconds": 9.4,
+   "fit_seconds": 8.4,
    "threshold_chosen_on": "validation partition P4, maximising TSS",
    "threshold": 0.47964076129920125,
    "validation_tss": 0.8621640441768114,
@@ -44,7 +44,7 @@
   "drop_mean": {
    "description": "144 temporal features minus the 24 'mean' features (120 features)",
    "n_features": 120,
-   "fit_seconds": 7.8,
+   "fit_seconds": 7.5,
    "threshold_chosen_on": "validation partition P4, maximising TSS",
    "threshold": 0.4987955177429545,
    "validation_tss": 0.8620841460790133,
@@ -58,7 +58,7 @@
   "drop_std": {
    "description": "144 temporal features minus the 24 'std' features (120 features)",
    "n_features": 120,
-   "fit_seconds": 8.8,
+   "fit_seconds": 8.5,
    "threshold_chosen_on": "validation partition P4, maximising TSS",
    "threshold": 0.5244354458594096,
    "validation_tss": 0.8697695103512844,
@@ -72,7 +72,7 @@
   "drop_min": {
    "description": "144 temporal features minus the 24 'min' features (120 features)",
    "n_features": 120,
-   "fit_seconds": 8.5,
+   "fit_seconds": 8.3,
    "threshold_chosen_on": "validation partition P4, maximising TSS",
    "threshold": 0.5088952691875867,
    "validation_tss": 0.861704857146382,
@@ -86,7 +86,7 @@
   "drop_max": {
    "description": "144 temporal features minus the 24 'max' features (120 features)",
    "n_features": 120,
-   "fit_seconds": 8.3,
+   "fit_seconds": 8.5,
    "threshold_chosen_on": "validation partition P4, maximising TSS",
    "threshold": 0.5319068387915181,
    "validation_tss": 0.8654376729726135,
@@ -100,7 +100,7 @@
   "drop_slope": {
    "description": "144 temporal features minus the 24 'slope' features (120 features)",
    "n_features": 120,
-   "fit_seconds": 8.8,
+   "fit_seconds": 8.7,
    "threshold_chosen_on": "validation partition P4, maximising TSS",
    "threshold": 0.530018393564754,
    "validation_tss": 0.8665156890187149,
@@ -114,7 +114,7 @@
   "only_last": {
    "description": "only the 24 'last' features",
    "n_features": 24,
-   "fit_seconds": 1.9,
+   "fit_seconds": 1.8,
    "threshold_chosen_on": "validation partition P4, maximising TSS",
    "threshold": 0.5441495397357622,
    "validation_tss": 0.8744206659694074,
@@ -128,7 +128,7 @@
   "only_mean": {
    "description": "only the 24 'mean' features",
    "n_features": 24,
-   "fit_seconds": 1.9,
+   "fit_seconds": 1.7,
    "threshold_chosen_on": "validation partition P4, maximising TSS",
    "threshold": 0.47497481335371344,
    "validation_tss": 0.8687118158029288,
@@ -142,7 +142,7 @@
   "only_std": {
    "description": "only the 24 'std' features",
    "n_features": 24,
-   "fit_seconds": 1.8,
+   "fit_seconds": 1.6,
    "threshold_chosen_on": "validation partition P4, maximising TSS",
    "threshold": 0.5959280223557244,
    "validation_tss": 0.8500071279452465,
@@ -156,7 +156,7 @@
   "only_min": {
    "description": "only the 24 'min' features",
    "n_features": 24,
-   "fit_seconds": 1.9,
+   "fit_seconds": 1.8,
    "threshold_chosen_on": "validation partition P4, maximising TSS",
    "threshold": 0.5583440675992518,
    "validation_tss": 0.863920825662796,
@@ -184,7 +184,7 @@
   "only_slope": {
    "description": "only the 24 'slope' features",
    "n_features": 24,
-   "fit_seconds": 1.8,
+   "fit_seconds": 1.6,
    "threshold_chosen_on": "validation partition P4, maximising TSS",
    "threshold": 0.5140726870631965,
    "validation_tss": 0.20260252247016203,
