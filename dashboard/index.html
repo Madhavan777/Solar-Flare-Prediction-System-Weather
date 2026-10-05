@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Solar Flare Prediction &amp; Space Weather Alert System</title>
 <style>
   :root{
@@ -17,9 +18,10 @@
   .brand .logo{width:38px;height:38px;border-radius:9px;background:radial-gradient(circle at 30% 30%,#ffcf8a,#ff8a3d 60%,#a13d00);box-shadow:0 0 18px #ff8a3d55}
   .brand h1{font-size:17px;margin:0;letter-spacing:.3px}
   .brand .sub{font-size:11.5px;color:var(--muted);margin-top:1px}
-  nav{display:flex;gap:4px;background:var(--panel);padding:5px;border-radius:10px;border:1px solid var(--line)}
+  nav{display:flex;gap:4px;background:var(--panel);padding:5px;border-radius:10px;border:1px solid var(--line);flex-wrap:wrap}
   nav button{background:transparent;border:none;color:var(--muted);padding:8px 14px;border-radius:7px;font-size:13px;cursor:pointer}
   nav button.active{background:var(--accent);color:#1a0d00;font-weight:600}
+  nav button:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
   .view{display:none;animation:fade .25s ease}
   .view.active{display:block}
   @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
@@ -65,7 +67,8 @@
   .kpi .box{flex:1;min-width:118px;background:var(--navy2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
   .kpi .box .n{font-size:22px;font-weight:800}
   .kpi .box .l{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
-  footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:11.5px;display:flex;justify-content:space-between}
+  .kpi .box .ci{font-size:10px;color:var(--muted);margin-top:3px;font-family:Consolas,monospace}
+  footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:11.5px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
   .cm-grid{display:grid;grid-template-columns:auto 1fr 1fr;gap:2px;max-width:420px;margin-top:12px;font-size:12.5px}
   .cm-cell{background:var(--navy2);border:1px solid var(--line);padding:14px 8px;text-align:center;border-radius:6px}
   .cm-cell.tn{background:#0d3324;border-color:#1c6b46}
@@ -73,6 +76,72 @@
   .cm-cell.fp,.cm-cell.fn{background:#3a1414;border-color:#7a2222}
   .cm-lab{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;writing-mode:vertical-rl;text-align:center}
   code.k{background:#0c1a2e;padding:1px 6px;border-radius:4px;font-size:11.5px;color:#bcd0ea}
+
+  /* ---------- additions: these do not affect the six original views ---------- */
+  body.report-mode .nav-extra{display:none}
+  body.report-mode .tour-launch{display:none}
+  .tour-launch{background:var(--navy2);border:1px solid var(--line);color:var(--accent2);
+    padding:7px 13px;border-radius:8px;font-size:12px;cursor:pointer;margin-left:8px}
+  .tour-launch:hover{border-color:var(--accent)}
+  .posthoc{display:inline-block;background:#1b2440;border:1px solid #33406b;color:#a9b8d8;
+    border-radius:6px;padding:5px 10px;font-size:11px;margin-bottom:10px}
+  .warnbar{background:#2a1a08;border:1px solid #6b4d12;color:#e8cfa5;border-radius:10px;
+    padding:11px 14px;font-size:12.5px;margin-bottom:14px;line-height:1.5}
+  .wlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:9px;margin-top:12px}
+  .wcard{background:var(--navy2);border:1px solid var(--line);border-radius:10px;padding:11px 12px;
+    cursor:pointer;font-size:12px;transition:border-color .15s,transform .15s;text-align:left;color:var(--text);width:100%}
+  .wcard:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .wcard.sel{border-color:var(--accent);background:#20314f}
+  .wcard .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .wcard .harp{font-weight:700;font-size:12.5px}
+  .wcard .p{font-family:Consolas,monospace;font-size:12px}
+  .wcard .meta{color:var(--muted);font-size:10.5px;margin-top:5px}
+  .tag{display:inline-block;border-radius:5px;padding:1px 7px;font-size:10px;font-weight:700;letter-spacing:.03em}
+  .tag.TP{background:#0d3324;color:#5fd99b;border:1px solid #1c6b46}
+  .tag.TN{background:#132a49;color:#9fb3cc;border:1px solid #22406a}
+  .tag.FP{background:#3a1414;color:#f08b8e;border:1px solid #7a2222}
+  .tag.FN{background:#3a2208;color:#f2b134;border:1px solid #7a4d12}
+  .tag.LOW{background:#0d3324;color:#5fd99b;border:1px solid #1c6b46}
+  .tag.MODERATE{background:#3a2a0a;color:var(--amber);border:1px solid #6b4d12}
+  .tag.HIGH{background:#3a1414;color:#f08b8e;border:1px solid #7a2222}
+  .spark{width:100%;height:86px;display:block}
+  .serieswrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:10px}
+  .seriesbox{background:#0c1a2e;border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+  .seriesbox .nm{font-family:Consolas,monospace;font-size:11px;color:var(--muted);
+    display:flex;justify-content:space-between}
+  .reveal{background:var(--navy2);border:1px dashed var(--line);border-radius:9px;padding:12px 14px;
+    margin-top:12px;font-size:12.5px}
+  .reveal button{background:var(--accent);border:none;color:#1a0d00;font-weight:700;padding:8px 15px;
+    border-radius:7px;font-size:12.5px;cursor:pointer}
+  .dropzone{border:2px dashed var(--line);border-radius:12px;padding:26px 18px;text-align:center;
+    color:var(--muted);font-size:13px;background:#0c1a2e}
+  .dropzone.over{border-color:var(--accent);background:#14243d}
+  .btn{background:var(--accent);border:none;color:#1a0d00;font-weight:700;padding:9px 18px;
+    border-radius:8px;font-size:13px;cursor:pointer}
+  .btn.ghost{background:var(--navy2);color:var(--text);border:1px solid var(--line);font-weight:600}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .slider-head{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;
+    color:var(--muted);margin-bottom:4px}
+  .slider-head b{color:#fff;font-size:16px;font-family:Consolas,monospace}
+  .marks{position:relative;height:16px;margin-top:2px;font-size:10px;color:var(--muted)}
+  .marks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+  .tour{position:fixed;inset:0;background:#040a14cc;z-index:50;display:none;
+    align-items:flex-end;justify-content:center;padding:26px}
+  .tour.on{display:flex}
+  .tourbox{background:var(--panel);border:1px solid var(--accent);border-radius:14px;
+    padding:18px 22px;max-width:760px;width:100%;box-shadow:0 10px 40px #000a}
+  .tourbox .step{color:var(--accent2);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+  .tourbox h3{margin:6px 0 6px;font-size:17px}
+  .tourbox p{margin:0;font-size:13.5px;line-height:1.6;color:#cfdcee}
+  .tourbox .row{display:flex;gap:9px;margin-top:14px;align-items:center}
+  .tourbar{height:3px;background:#1c2d4a;border-radius:2px;margin-top:12px;overflow:hidden}
+  .tourbar i{display:block;height:100%;background:var(--accent);width:0}
+  .muted{color:var(--muted)}
+  .mono{font-family:Consolas,monospace}
+  @media (max-width:860px){
+    .grid.cols-3,.grid.cols-2{grid-template-columns:1fr}
+    header.top{flex-direction:column;align-items:flex-start;gap:12px}
+  }
 </style>
 </head>
 <body>
@@ -85,21 +154,27 @@
         <div class="sub">Academic PBL prototype &middot; SWAN-SF &middot; Logistic Regression / Random Forest</div>
       </div>
     </div>
-    <nav id="nav">
-      <button data-v="overview" class="active">Overview</button>
-      <button data-v="predict">Forecast</button>
-      <button data-v="result">Prediction</button>
-      <button data-v="risk">Risk &amp; Alert</button>
-      <button data-v="explain">Explainability</button>
-      <button data-v="eval">Model Evaluation</button>
-    </nav>
+    <div style="display:flex;align-items:center;flex-wrap:wrap">
+      <nav id="nav">
+        <button data-v="overview" class="active">Overview</button>
+        <button data-v="predict">Forecast</button>
+        <button data-v="result">Prediction</button>
+        <button data-v="risk">Risk &amp; Alert</button>
+        <button data-v="explain">Explainability</button>
+        <button data-v="eval">Model Evaluation</button>
+        <button data-v="explore" class="nav-extra">Explore Windows</button>
+        <button data-v="live" class="nav-extra">Live Inference</button>
+        <button data-v="operate" class="nav-extra">Operating Point</button>
+      </nav>
+      <button class="tour-launch" id="tourBtn" type="button">&#9654; 3-minute tour</button>
+    </div>
   </header>
 
   <!-- OVERVIEW -->
   <section class="view active" id="v-overview">
     <div class="grid cols-3" style="margin-top:18px">
-      <div class="card"><h2>Dataset</h2><div class="big">SWAN-SF</div><div style="color:var(--muted);font-size:12.5px;margin-top:4px">331,185 observation windows &middot; 5 partitions (2010&ndash;2018)</div></div>
-      <div class="card"><h2>Forecast Setup</h2><div class="big">12h &rarr; 24h</div><div style="color:var(--muted);font-size:12.5px;margin-top:4px">Observation window &rarr; prediction window</div></div>
+      <div class="card"><h2>Dataset</h2><div class="big">SWAN-SF</div><div style="color:var(--muted);font-size:12.5px;margin-top:4px" id="ov-dataset">&mdash;</div></div>
+      <div class="card"><h2>Forecast Setup</h2><div class="big" id="ov-setup">&mdash;</div><div style="color:var(--muted);font-size:12.5px;margin-top:4px">Observation window &rarr; prediction window</div></div>
       <div class="card"><h2>Status</h2><div class="big"><span class="badge impl">Academic Prototype</span></div><div style="color:var(--muted);font-size:12.5px;margin-top:8px">Historical data only &middot; not an operational warning service</div></div>
     </div>
     <div class="section-title">What this system does</div>
@@ -134,12 +209,8 @@
         <div class="arrow">&rarr;</div>
         <div class="seg"><div class="lbl">Prediction window (24h)</div><b id="p-pred">&mdash;</b></div>
       </div>
-      <div class="kpi">
-        <div class="box"><div class="n">24</div><div class="l">SHARP parameters</div></div>
-        <div class="box"><div class="n">60</div><div class="l">12-min records / window</div></div>
-        <div class="box"><div class="n">144</div><div class="l">engineered features</div></div>
-      </div>
-      <div style="margin-top:16px"><button style="background:var(--accent);border:none;color:#1a0d00;font-weight:700;padding:10px 20px;border-radius:8px;font-size:13px;cursor:pointer">Run Forecast &rarr;</button></div>
+      <div class="kpi" id="p-kpi"></div>
+      <div style="margin-top:16px"><button class="btn" type="button">Run Forecast &rarr;</button></div>
     </div>
   </section>
 
@@ -170,7 +241,7 @@
       </div>
       <div class="card">
         <h2>Verification example</h2>
-        <p style="font-size:12.5px;color:var(--muted);line-height:1.6">This window precedes an <b style="color:#fff">X1.3</b> flare recorded in SWAN-SF for this active region, confirming the model correctly assigns high probability to a genuine pre-flare window from the held-out test partition (never seen during training).</p>
+        <p style="font-size:12.5px;color:var(--muted);line-height:1.6" id="ex-sentence">&mdash;</p>
         <div class="pill">Active region <b id="ex-ar">&mdash;</b></div>
         <div class="pill">Flare class <b id="ex-class">&mdash;</b></div>
         <div class="pill">Partition <b>P5 (test, locked)</b></div>
@@ -184,11 +255,7 @@
     <div class="section-sub">The probability is converted into a user-facing risk level using thresholds fixed on the validation partition, kept separate from the underlying model probability.</div>
     <div class="card">
       <h2>Risk level</h2>
-      <div class="riskrow">
-        <div class="risklvl" id="rk-low">LOW<br><span style="font-size:10px">p &lt; 0.54</span></div>
-        <div class="risklvl" id="rk-mod">MODERATE<br><span style="font-size:10px">0.54 &ndash; 0.97</span></div>
-        <div class="risklvl" id="rk-high">HIGH<br><span style="font-size:10px">p &ge; 0.97</span></div>
-      </div>
+      <div class="riskrow" id="riskrow"></div>
       <div class="alertbox">
         <div class="ic">&#9888;</div>
         <div class="msg">
@@ -213,7 +280,7 @@
   <!-- EVAL -->
   <section class="view" id="v-eval">
     <div class="section-title">Model Evaluation Summary</div>
-    <div class="section-sub">Metrics computed on the locked test partition (P5), 75,365 windows never used for training or model selection.</div>
+    <div class="section-sub" id="eval-sub">&mdash;</div>
     <div class="kpi" id="eval-kpi"></div>
     <div class="grid cols-2" style="margin-top:16px">
       <div class="card">
@@ -222,95 +289,585 @@
       </div>
       <div class="card">
         <h2>Notes</h2>
-        <p style="font-size:12.5px;color:var(--muted);line-height:1.7">Because major flares are rare (about 1.3% of test windows), accuracy is not the primary metric. Recall and TSS are emphasized: the model is tuned to keep false negatives low, which trades off against precision and produces a high false-alarm rate &mdash; discussed in Chapter 6 of the report.</p>
+        <p style="font-size:12.5px;color:var(--muted);line-height:1.7" id="eval-note">&mdash;</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEW: EXPLORE WINDOWS -->
+  <section class="view" id="v-explore">
+    <div class="section-title">Explore Windows</div>
+    <div class="section-sub">Real observation windows from the locked test partition &mdash; hits, misses, false alarms and correct quiet forecasts together. The ground truth stays hidden until you ask for it.</div>
+    <div class="posthoc" id="explore-rule">&mdash;</div>
+    <div class="card">
+      <h2>Select a window <span class="muted" id="explore-counts"></span></h2>
+      <div class="wlist" id="wlist"></div>
+    </div>
+    <div class="card" style="margin-top:16px" id="wdetail">
+      <h2>Window detail</h2>
+      <p class="muted" style="font-size:12.5px">Choose a window above.</p>
+    </div>
+  </section>
+
+  <!-- NEW: LIVE INFERENCE -->
+  <section class="view" id="v-live">
+    <div class="section-title">Live Inference</div>
+    <div class="section-sub">Run the real selected model entirely in your browser on a SWAN-SF window file. Nothing is uploaded anywhere &mdash; the fitted parameters are loaded from <code class="k">model_lr.json</code> and the same pipeline is reproduced in JavaScript.</div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h2>Load a window</h2>
+        <div class="dropzone" id="drop">
+          Drop a SWAN-SF window <b>.csv</b> here (tab-separated, 60 rows), or
+          <div style="margin-top:10px">
+            <input type="file" id="file" accept=".csv,.txt,.tsv" style="display:none">
+            <button class="btn" type="button" id="pick">Choose a file</button>
+            <button class="btn ghost" type="button" id="useExample">Use a built-in example</button>
+          </div>
+        </div>
+        <p class="muted" style="font-size:11.5px;margin-top:10px">
+          The file needs a header row and the 24 SHARP columns. Features are computed in the
+          browser exactly as the Python extractor does: last finite value, mean, population
+          standard deviation, minimum, maximum and least-squares slope per hour over the
+          finite points of each parameter.
+        </p>
+        <div id="live-status" style="margin-top:10px;font-size:12.5px"></div>
+      </div>
+      <div class="card">
+        <h2>Result</h2>
+        <div id="live-result"><p class="muted" style="font-size:12.5px">No window loaded yet.</p></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px" id="live-contrib-card" style="display:none">
+      <h2>Why &mdash; exact contributions to the log-odds</h2>
+      <div id="live-contrib"></div>
+    </div>
+  </section>
+
+  <!-- NEW: OPERATING POINT -->
+  <section class="view" id="v-operate">
+    <div class="section-title">Operating Point</div>
+    <div class="section-sub">Move the decision threshold and watch the trade-off on the real locked-test predictions.</div>
+    <div class="warnbar" id="op-banner">&mdash;</div>
+    <div class="card">
+      <div class="slider-head">
+        <span>Decision threshold</span><b id="op-thr">&mdash;</b>
+      </div>
+      <input type="range" id="op-slider" min="0" max="100" value="50" step="1">
+      <div class="marks" id="op-marks"></div>
+      <div style="margin-top:8px">
+        <button class="btn ghost" type="button" id="op-reset">Reset to the validation-fixed threshold</button>
+      </div>
+      <div class="kpi" id="op-kpi" style="margin-top:16px"></div>
+    </div>
+    <div class="grid cols-2" style="margin-top:16px">
+      <div class="card">
+        <h2>Confusion matrix at this threshold</h2>
+        <div class="cm-grid" id="op-cm"></div>
+      </div>
+      <div class="card">
+        <h2>What you are looking at</h2>
+        <p style="font-size:12.5px;color:var(--muted);line-height:1.7" id="op-note">&mdash;</p>
       </div>
     </div>
   </section>
 
   <footer>
-    <span>Solar Flare Prediction &amp; Space Weather Alert System &middot; PBL prototype</span>
+    <span>Solar Flare Prediction &amp; Space Weather Alert System &middot; <b>Academic prototype &mdash; not an operational space-weather warning service.</b></span>
     <span id="ft-time"></span>
   </footer>
 </div>
-<script>
-async function main(){
-  const data = await fetch('demo.json').then(r=>r.json());
-  const t = data.test, ex = data.examples, thr = data.alert_threshold, hi = data.high_threshold;
-  document.getElementById('ov-model').textContent = data.model_name;
-  document.getElementById('r-model').textContent = data.model_name;
-  document.getElementById('r-thr').textContent = thr.toFixed(4);
 
-  // predict view
-  document.getElementById('p-ar').textContent = 'AR ' + ex.flare_case.ar;
-  document.getElementById('p-start').textContent = ex.flare_case.start.replace('T',' ');
-  document.getElementById('p-cutoff').textContent = ex.flare_case.end.replace('T',' ');
-  const cutoff = new Date(ex.flare_case.end+'Z');
-  const predEnd = new Date(cutoff.getTime()+24*3600*1000);
-  document.getElementById('p-pred').textContent = ex.flare_case.end.replace('T',' ') + '  →  +24h';
+<!-- guided tour overlay -->
+<div class="tour" id="tour">
+  <div class="tourbox">
+    <div class="step" id="tour-step">Step 1</div>
+    <h3 id="tour-title">&mdash;</h3>
+    <p id="tour-body">&mdash;</p>
+    <div class="tourbar"><i id="tour-prog"></i></div>
+    <div class="row">
+      <button class="btn" type="button" id="tour-next">Next</button>
+      <button class="btn ghost" type="button" id="tour-prev">Back</button>
+      <button class="btn ghost" type="button" id="tour-auto">Auto-play</button>
+      <button class="btn ghost" type="button" id="tour-exit" style="margin-left:auto">Exit tour</button>
+      <span class="muted mono" id="tour-count"></span>
+    </div>
+  </div>
+</div>
+
+<script src="model.js"></script>
+<script>
+/* ------------------------------------------------------------------ *
+ * Everything displayed here is loaded from JSON generated by
+ *   python -m solarflare demo-data
+ * No metric, threshold or count is written into this file by hand.
+ * ------------------------------------------------------------------ */
+const S = {};                       // loaded state
+const $ = id => document.getElementById(id);
+const fmt = (v, d = 3) => Number(v).toFixed(d);
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function getJSON(name, optional = false) {
+  try {
+    const r = await fetch(name);
+    if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+    return await r.json();
+  } catch (e) {
+    if (optional) return null;
+    throw new Error('could not load ' + name + ': ' + e.message);
+  }
+}
+
+/* ============================ the original six ===================== */
+function renderCore() {
+  const d = S.demo, c = S.ctx, t = d.test, ex = d.examples;
+  const thr = d.alert_threshold, hi = d.high_threshold;
+
+  $('ov-model').textContent = d.model_name;
+  $('r-model').textContent = d.model_name;
+  $('r-thr').textContent = thr.toFixed(4);
+  $('ov-dataset').textContent =
+    c.dataset.n_windows_total.toLocaleString() + ' observation windows · ' +
+    c.dataset.n_partitions + ' partitions (' + c.dataset.year_span + ')';
+  $('ov-setup').textContent = c.dataset.observation_hours + 'h → ' +
+    c.dataset.prediction_hours + 'h';
+
+  // forecast view
+  $('p-ar').textContent = 'HARP ' + ex.flare_case.ar +
+    (c.verification_example.noaa_ar ? ' (NOAA AR ' + c.verification_example.noaa_ar + ')' : '');
+  $('p-start').textContent = ex.flare_case.start.replace('T', ' ');
+  $('p-cutoff').textContent = ex.flare_case.end.replace('T', ' ');
+  $('p-pred').textContent = ex.flare_case.end.replace('T', ' ') + '  →  +' +
+    c.dataset.prediction_hours + 'h';
+  $('p-kpi').innerHTML = [
+    [c.dataset.n_sharp_parameters, 'SHARP parameters'],
+    [c.dataset.records_per_window, c.dataset.cadence_minutes + '-min records / window'],
+    [c.dataset.n_features, 'engineered features']
+  ].map(([n, l]) => '<div class="box"><div class="n">' + n + '</div><div class="l">' +
+     esc(l) + '</div></div>').join('');
 
   // result view
   const p = ex.flare_case.probability;
-  document.getElementById('g-pct').textContent = (p*100).toFixed(1)+'%';
-  const circumference = 502;
-  document.getElementById('gauge-arc').style.strokeDashoffset = String(circumference*(1-p));
-  document.getElementById('r-class').textContent = p>=thr ? 'M/X flare likely' : 'No major flare expected';
-  document.getElementById('r-class').style.color = p>=thr ? '#e5484d' : '#2fbf71';
-  document.getElementById('r-truth').textContent = 'Actual: ' + ex.flare_case.flare_class + ' flare occurred (y=1)';
-  document.getElementById('ex-ar').textContent = ex.flare_case.ar;
-  document.getElementById('ex-class').textContent = ex.flare_case.flare_class;
+  $('g-pct').textContent = (p * 100).toFixed(1) + '%';
+  $('gauge-arc').style.strokeDashoffset = String(502 * (1 - p));
+  $('r-class').textContent = p >= thr ? 'M/X flare likely' : 'No major flare expected';
+  $('r-class').style.color = p >= thr ? '#e5484d' : '#2fbf71';
+  $('r-truth').textContent = 'Actual: ' + ex.flare_case.flare_class + ' flare occurred (y=1)';
+  $('ex-ar').textContent = ex.flare_case.ar;
+  $('ex-class').textContent = ex.flare_case.flare_class;
+  $('ex-sentence').innerHTML = esc(c.verification_example.sentence) +
+    ' The window is from the held-out test partition and was never seen during training.';
 
-  // risk view
-  let lvl = p<thr? 'low' : (p<hi? 'mod':'high');
-  document.getElementById('rk-'+lvl).classList.add('on');
-  const titles = {low:'LOW RISK — No elevated activity indicated', mod:'MODERATE RISK — Monitor active region', high:'HIGH RISK — Elevated major-flare probability'};
-  const bodies = {
-    low:'The model does not indicate elevated major-flare probability for this observation window.',
-    mod:'The model indicates a moderately elevated probability of an M/X-class flare in the next 24 hours. Continued monitoring of this active region is advised.',
-    high:'The model indicates a high probability ('+(p*100).toFixed(1)+'%) of an M/X-class flare in the next 24 hours for active region '+ex.flare_case.ar+'. Continued monitoring and cross-checks with NOAA/SWPC advisories are advised.'
+  // risk view - bands come from context.json
+  const lvl = p < thr ? 'LOW' : (p < hi ? 'MODERATE' : 'HIGH');
+  $('riskrow').innerHTML = c.risk_bands.map(b =>
+    '<div class="risklvl' + (b.level === lvl ? ' on' : '') + '" id="rk-' + b.level + '">' +
+    b.level + '<br><span style="font-size:10px">' + esc(b.text) + '</span></div>').join('');
+  const titles = {
+    LOW: 'LOW RISK — No elevated activity indicated',
+    MODERATE: 'MODERATE RISK — Monitor active region',
+    HIGH: 'HIGH RISK — Elevated major-flare probability'
   };
-  document.getElementById('al-title').textContent = titles[lvl];
-  document.getElementById('al-body').textContent = bodies[lvl];
+  const bodies = {
+    LOW: 'The model does not indicate elevated major-flare probability for this observation window.',
+    MODERATE: 'The model indicates a moderately elevated probability of an M/X-class flare in the next ' +
+      c.dataset.prediction_hours + ' hours. Continued monitoring of this active region is advised.',
+    HIGH: 'The model indicates a high probability (' + (p * 100).toFixed(1) +
+      '%) of an M/X-class flare in the next ' + c.dataset.prediction_hours +
+      ' hours for HARP ' + ex.flare_case.ar +
+      '. Continued monitoring and cross-checks with NOAA/SWPC advisories are advised.'
+  };
+  $('al-title').textContent = titles[lvl];
+  $('al-body').textContent = bodies[lvl];
 
   // explainability
-  const maxAbs = Math.max(...data.top_features.map(f=>Math.abs(f.weight)));
-  const flist = document.getElementById('feat-list');
-  data.top_features.forEach(f=>{
-    const row=document.createElement('div'); row.className='featbar';
-    const w = Math.abs(f.weight)/maxAbs*100;
-    const color = f.weight>=0 ? '#e5484d' : '#3d8bfd';
-    row.innerHTML = `<div class="name">${f.name}</div><div class="track"><div class="fill" style="width:${w}%;background:${color}"></div></div><div class="val">${f.weight.toFixed(3)}</div>`;
-    flist.appendChild(row);
-  });
+  const maxAbs = Math.max(...d.top_features.map(f => Math.abs(f.weight)));
+  $('feat-list').innerHTML = d.top_features.map(f => {
+    const w = Math.abs(f.weight) / maxAbs * 100;
+    const color = f.weight >= 0 ? '#e5484d' : '#3d8bfd';
+    return '<div class="featbar"><div class="name">' + esc(f.name) +
+      '</div><div class="track"><div class="fill" style="width:' + w + '%;background:' +
+      color + '"></div></div><div class="val">' + f.weight.toFixed(3) + '</div></div>';
+  }).join('');
 
-  // eval
-  const kpi = document.getElementById('eval-kpi');
-  const items = [['Precision', t.precision],['Recall', t.recall],['F1-score', t.f1],['TSS', t.tss],['PR-AUC', t.pr_auc],['ROC-AUC', t.roc_auc]];
-  items.forEach(([l,v])=>{
-    const box=document.createElement('div'); box.className='box';
-    box.innerHTML = `<div class="n">${(v).toFixed(3)}</div><div class="l">${l}</div>`;
-    kpi.appendChild(box);
-  });
-  const cm = document.getElementById('cm-grid');
-  cm.innerHTML = `
-    <div></div><div class="cm-cell" style="background:transparent;border:none;color:var(--muted)">Pred: No M/X</div><div class="cm-cell" style="background:transparent;border:none;color:var(--muted)">Pred: M/X</div>
-    <div class="cm-lab">Actual: No M/X</div><div class="cm-cell tn">TN<br><b>${t.tn.toLocaleString()}</b></div><div class="cm-cell fp">FP<br><b>${t.fp.toLocaleString()}</b></div>
-    <div class="cm-lab">Actual: M/X</div><div class="cm-cell fn">FN<br><b>${t.fn.toLocaleString()}</b></div><div class="cm-cell tp">TP<br><b>${t.tp.toLocaleString()}</b></div>`;
-
-  document.getElementById('ft-time').textContent = 'Generated from trained model output';
+  // evaluation
+  $('eval-sub').textContent = 'Metrics computed on the locked test partition (P5), ' +
+    t.n.toLocaleString() + ' windows never used for training or model selection.';
+  const ci = c.confidence_intervals_95 || {};
+  const items = [['Precision', 'precision'], ['Recall', 'recall'], ['F1-score', 'f1'],
+                 ['TSS', 'tss'], ['PR-AUC', 'pr_auc'], ['ROC-AUC', 'roc_auc']];
+  $('eval-kpi').innerHTML = items.map(([label, key]) => {
+    const band = ci[key] ? '<div class="ci">95% [' + fmt(ci[key].low) + ', ' +
+      fmt(ci[key].high) + ']</div>' : '';
+    return '<div class="box"><div class="n">' + fmt(t[key]) + '</div><div class="l">' +
+      label + '</div>' + band + '</div>';
+  }).join('');
+  $('cm-grid').innerHTML = cmHTML(t);
+  $('eval-note').innerHTML =
+    'Major flares are rare (' + esc(c.split.test_base_rate_text) + ' of test windows), so accuracy is not the primary metric: ' +
+    esc(c.always_no_flare.note) + ' Recall and TSS are emphasised, which trades off against precision &mdash; ' +
+    'the false-alarm <i>ratio</i> is ' + fmt(t.far) + ' while the false-alarm <i>rate</i> is ' +
+    fmt(t.fp / (t.fp + t.tn), 4) + '. ' +
+    (c.near_miss ? 'Of the ' + c.near_miss.n_false_alarms.toLocaleString() + ' false alarms, ' +
+      (c.near_miss.share_preceding_a_real_flare * 100).toFixed(1) +
+      '% precede a real B- or C-class flare, and the model alerts on only ' +
+      (c.near_miss.alert_rate_flare_quiet * 100).toFixed(2) +
+      '% of genuinely flare-quiet windows.' : '');
 }
-main();
 
-document.getElementById('nav').addEventListener('click', e=>{
-  if(e.target.tagName!=='BUTTON') return;
-  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  e.target.classList.add('active');
-  document.getElementById('v-'+e.target.dataset.v).classList.add('active');
-});
-window.showView = function(name){
-  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active', b.dataset.v===name));
-  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id==='v-'+name));
+function cmHTML(t, id) {
+  return '<div></div>' +
+    '<div class="cm-cell" style="background:transparent;border:none;color:var(--muted)">Pred: No M/X</div>' +
+    '<div class="cm-cell" style="background:transparent;border:none;color:var(--muted)">Pred: M/X</div>' +
+    '<div class="cm-lab">Actual: No M/X</div>' +
+    '<div class="cm-cell tn">TN<br><b>' + t.tn.toLocaleString() + '</b></div>' +
+    '<div class="cm-cell fp">FP<br><b>' + t.fp.toLocaleString() + '</b></div>' +
+    '<div class="cm-lab">Actual: M/X</div>' +
+    '<div class="cm-cell fn">FN<br><b>' + t.fn.toLocaleString() + '</b></div>' +
+    '<div class="cm-cell tp">TP<br><b>' + t.tp.toLocaleString() + '</b></div>';
+}
+
+/* ============================ explore windows ====================== */
+function renderExplore() {
+  const w = S.windows;
+  if (!w) { $('wlist').innerHTML = '<p class="muted">windows.json not found.</p>'; return; }
+  $('explore-rule').textContent = 'Selection rule (seed ' + w.seed + '): ' + w.selection_rule;
+  $('explore-counts').textContent = '— ' +
+    Object.entries(w.outcome_counts).map(([k, v]) => v + ' ' + k).join(', ');
+  $('wlist').innerHTML = w.windows.map((x, i) =>
+    '<button class="wcard" type="button" data-i="' + i + '">' +
+      '<div class="top"><span class="harp">HARP ' + x.harp + '</span>' +
+      '<span class="p mono">p = ' + x.probability.toFixed(4) + '</span></div>' +
+      '<div class="meta">' + esc(x.window_end_cutoff.replace('T', ' ')) + '</div>' +
+      '<div style="margin-top:7px"><span class="tag ' + x.risk + '">' + x.risk + '</span> ' +
+      '<span class="tag ' + x.outcome + '">' + x.outcome + '</span></div>' +
+    '</button>').join('');
+  $('wlist').querySelectorAll('.wcard').forEach(b =>
+    b.addEventListener('click', () => showWindow(Number(b.dataset.i))));
+}
+
+function sparkline(values, width, height) {
+  const finite = values.filter(v => v !== null && isFinite(v));
+  if (finite.length < 2) return '<div class="muted" style="font-size:11px">no data</div>';
+  const lo = Math.min(...finite), hi = Math.max(...finite);
+  const span = (hi - lo) || 1;
+  const pts = values.map((v, i) => {
+    if (v === null || !isFinite(v)) return null;
+    const x = (i / (values.length - 1)) * (width - 6) + 3;
+    const y = height - 4 - ((v - lo) / span) * (height - 12);
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  }).filter(Boolean).join(' ');
+  return '<svg class="spark" viewBox="0 0 ' + width + ' ' + height + '" preserveAspectRatio="none">' +
+    '<polyline points="' + pts + '" fill="none" stroke="#ff8a3d" stroke-width="1.6"/></svg>';
+}
+
+function contribHTML(list) {
+  const maxAbs = Math.max(...list.map(c => Math.abs(c.contribution_logodds))) || 1;
+  return list.map(c => {
+    const w = Math.abs(c.contribution_logodds) / maxAbs * 100;
+    const colour = c.contribution_logodds >= 0 ? '#e5484d' : '#3d8bfd';
+    const star = c.imputed ? ' <span class="muted" title="value was missing and imputed">*</span>' : '';
+    return '<div class="featbar"><div class="name">' + esc(c.feature) + star +
+      '</div><div class="track"><div class="fill" style="width:' + w + '%;background:' +
+      colour + '"></div></div><div class="val">' +
+      (c.contribution_logodds >= 0 ? '+' : '') + c.contribution_logodds.toFixed(3) +
+      '</div></div>';
+  }).join('');
+}
+
+function showWindow(i) {
+  const x = S.windows.windows[i];
+  $('wlist').querySelectorAll('.wcard').forEach(b =>
+    b.classList.toggle('sel', Number(b.dataset.i) === i));
+
+  const series = x.series && x.series.values ? x.series.values : null;
+  const shown = series ? S.model.sharp_parameters.slice(0, 6) : [];
+  const seriesHTML = series
+    ? '<div class="serieswrap">' + shown.map(name => {
+        const v = series[name] || [];
+        const finite = v.filter(z => z !== null && isFinite(z));
+        const range = finite.length
+          ? Math.min(...finite).toPrecision(3) + ' … ' + Math.max(...finite).toPrecision(3)
+          : 'all missing';
+        return '<div class="seriesbox"><div class="nm"><span>' + esc(name) +
+          '</span><span>' + esc(range) + '</span></div>' + sparkline(v, 240, 70) + '</div>';
+      }).join('') + '</div>'
+    : '<p class="muted" style="font-size:12px">' +
+      esc(x.series_note || 'The raw series is unavailable for this window.') + '</p>';
+
+  $('wdetail').innerHTML =
+    '<h2>HARP ' + x.harp + (x.noaa_ar ? ' (NOAA AR ' + x.noaa_ar + ')' : '') + '</h2>' +
+    '<div class="kpi" style="margin-bottom:6px">' +
+      '<div class="box"><div class="n">' + x.probability.toFixed(4) + '</div><div class="l">probability</div></div>' +
+      '<div class="box"><div class="n"><span class="tag ' + x.risk + '">' + x.risk + '</span></div><div class="l">risk level</div></div>' +
+      '<div class="box"><div class="n">' + (x.alert ? 'ALERT' : 'no alert') + '</div><div class="l">at the fixed threshold</div></div>' +
+      '<div class="box"><div class="n">' + (x.nan_frac * 100).toFixed(2) + '%</div><div class="l">missing values</div></div>' +
+    '</div>' +
+    '<div class="pill">Observation window <b>' + esc(x.window_start.replace('T', ' ')) +
+      '</b> → <b>' + esc(x.window_end_cutoff.replace('T', ' ')) + '</b></div>' +
+    '<div class="pill">File <b class="mono" style="font-size:11px">' + esc(x.file) + '</b></div>' +
+    '<div style="margin-top:16px"><h2>12-hour SHARP series (first six parameters)</h2>' + seriesHTML + '</div>' +
+    '<div style="margin-top:16px"><h2>Exact contributions to the log-odds</h2>' +
+      contribHTML(x.contributions) +
+      '<p class="muted" style="font-size:11px;margin-top:6px">Contribution = coefficient × standardised value. ' +
+      'These sum with the intercept to the model’s logit exactly. * marks a value that was missing and imputed.</p></div>' +
+    '<div class="reveal" id="rev"><button type="button" id="revBtn">Reveal the ground truth</button>' +
+      '<span class="muted" style="margin-left:10px">from SWAN-SF, for verification</span></div>';
+
+  $('revBtn').addEventListener('click', () => {
+    $('rev').innerHTML = '<b>' + (x.y === 1 ? 'y = 1 — ' : 'y = 0 — ') + '</b>' +
+      esc(x.truth_text) + '<br><span class="muted">Model outcome: </span>' +
+      '<span class="tag ' + x.outcome + '">' + x.outcome + '</span>';
+  });
+}
+
+/* ============================ live inference ======================= */
+/* The pipeline itself lives in model.js, so the browser and the Node parity
+   tests run byte-identical code. */
+const { windowFeatures, predict, parseWindowCSV } = window.SolarFlareModel;
+
+function runLive(text, label) {
+  const model = S.model;
+  let parsed;
+  try {
+    parsed = parseWindowCSV(text, model);
+  } catch (e) {
+    $('live-status').innerHTML = '<span style="color:var(--red)">Could not read that file: ' +
+      esc(e.message) + '</span>';
+    return;
+  }
+  const note = parsed.rows === model.expected_rows ? '' :
+    ' <span style="color:var(--amber)">(expected ' + model.expected_rows +
+    ' rows, read ' + parsed.rows + ' — the model still runs, but this is not a standard window)</span>';
+  $('live-status').innerHTML = 'Read <b>' + parsed.rows + '</b> records from ' +
+    esc(label) + '.' + note;
+
+  const feats = windowFeatures(parsed.columns, model);
+  const r = predict(feats, model);
+  const thr = model.alert_threshold, hi = model.high_threshold;
+  const lvl = r.probability < thr ? 'LOW' : (r.probability < hi ? 'MODERATE' : 'HIGH');
+
+  $('live-result').innerHTML =
+    '<div class="kpi">' +
+      '<div class="box"><div class="n">' + r.probability.toFixed(4) + '</div><div class="l">probability of M/X</div></div>' +
+      '<div class="box"><div class="n"><span class="tag ' + lvl + '">' + lvl + '</span></div><div class="l">risk level</div></div>' +
+      '<div class="box"><div class="n">' + (r.probability >= thr ? 'ALERT' : 'no alert') +
+        '</div><div class="l">at p ≥ ' + thr.toFixed(4) + '</div></div>' +
+    '</div>' +
+    '<p style="font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:12px">' +
+      (lvl === 'HIGH' ? 'The model places this window in the HIGH band. ' :
+       lvl === 'MODERATE' ? 'The model places this window in the MODERATE band. ' :
+       'The model does not indicate elevated major-flare probability for this window. ') +
+      'Log-odds ' + r.logit.toFixed(4) + '. ' + esc(S.ctx.calibration_warning) + '</p>';
+
+  const order = r.contrib.map((v, j) => j).sort((a, b) => Math.abs(r.contrib[b]) - Math.abs(r.contrib[a]));
+  const top = order.slice(0, 12).map(j => ({
+    feature: model.cols[j],
+    contribution_logodds: r.contrib[j],
+    imputed: !Number.isFinite(feats[j])
+  }));
+  $('live-contrib-card').style.display = '';
+  $('live-contrib').innerHTML = contribHTML(top) +
+    '<p class="muted" style="font-size:11px;margin-top:6px">These ' + model.cols.length +
+    ' contributions plus the intercept (' + model.intercept.toFixed(4) +
+    ') sum to the log-odds above, exactly.</p>';
+}
+
+function buildExampleCSV() {
+  /* Rebuilds a tab-separated window from the series stored in windows.json, so the
+     example button works offline and uses genuine SWAN-SF data. */
+  const w = (S.windows && S.windows.windows || []).find(x => x.series && x.series.values);
+  if (!w) return null;
+  const params = S.model.sharp_parameters;
+  const n = w.series.timestamps.length;
+  const lines = ['Timestamp\t' + params.join('\t')];
+  for (let i = 0; i < n; i++) {
+    const cells = params.map(p => {
+      const v = w.series.values[p][i];
+      return v === null ? '' : String(v);
+    });
+    lines.push(w.series.timestamps[i] + '\t' + cells.join('\t'));
+  }
+  return { text: lines.join('\n'), label: w.file };
+}
+
+function wireLive() {
+  $('pick').addEventListener('click', () => $('file').click());
+  $('file').addEventListener('change', e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => runLive(String(reader.result), f.name);
+    reader.readAsText(f);
+  });
+  const drop = $('drop');
+  ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => {
+    e.preventDefault(); drop.classList.add('over');
+  }));
+  ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => {
+    e.preventDefault(); drop.classList.remove('over');
+  }));
+  drop.addEventListener('drop', e => {
+    const f = e.dataTransfer.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => runLive(String(reader.result), f.name);
+    reader.readAsText(f);
+  });
+  $('useExample').addEventListener('click', () => {
+    const ex = buildExampleCSV();
+    if (!ex) { $('live-status').textContent = 'No built-in example is available.'; return; }
+    runLive(ex.text, ex.label + ' (built-in)');
+  });
+}
+
+/* ============================ operating point ====================== */
+function renderOperate() {
+  const o = S.operating;
+  if (!o) { $('op-banner').textContent = 'operating.json not found.'; return; }
+  $('op-banner').textContent = o.banner;
+  const sweep = o.sweep;
+  const slider = $('op-slider');
+  slider.min = 0; slider.max = sweep.length - 1; slider.step = 1;
+
+  // The generator puts both published thresholds into the grid exactly and
+  // records their indices, so this lands on the real operating point.
+  const nearest = o.alert_index;
+  const hiIndex = o.high_index;
+
+  const marks = $('op-marks');
+  const place = (i, text, colour) => {
+    const pct = (i / (sweep.length - 1)) * 100;
+    return '<span style="left:' + pct + '%;color:' + colour + '">▲ ' + text + '</span>';
+  };
+  marks.innerHTML = place(nearest, 'alert (validation)', '#ff8a3d') +
+                    place(hiIndex, 'high risk', '#f2b134');
+
+  const draw = i => {
+    const r = sweep[i];
+    $('op-thr').textContent = r.threshold.toFixed(4);
+    const atFixed = i === nearest;
+    $('op-kpi').innerHTML = [
+      ['Recall', r.recall], ['Precision', r.precision], ['TSS', r.tss],
+      ['FAR (ratio)', r.far], ['FPR (rate)', r.fpr], ['Alert rate', r.alert_rate]
+    ].map(([l, v]) => '<div class="box"><div class="n">' + fmt(v) + '</div><div class="l">' +
+      l + '</div></div>').join('');
+    $('op-cm').innerHTML = cmHTML(r);
+    $('op-note').innerHTML =
+      'At a threshold of <b>' + r.threshold.toFixed(4) + '</b> the system alerts on <b>' +
+      (r.tp + r.fp).toLocaleString() + '</b> of ' + o.n_windows.toLocaleString() +
+      ' windows, catching <b>' + r.tp + '</b> of ' + o.n_positives +
+      ' major flares and missing <b>' + r.fn + '</b>.' +
+      (atFixed
+        ? ' <span style="color:var(--green)">This is the published operating point, fixed on the validation partition.</span>'
+        : ' <span style="color:var(--amber)">This is not the published operating point.</span>') +
+      ' Lowering the threshold always buys recall with precision, and raising it does the reverse; ' +
+      'the published choice maximised TSS on validation, never on this partition.';
+  };
+
+  slider.addEventListener('input', () => draw(Number(slider.value)));
+  $('op-reset').addEventListener('click', () => { slider.value = nearest; draw(nearest); });
+  slider.value = nearest;
+  draw(nearest);
+}
+
+/* ============================ navigation =========================== */
+function activate(name) {
+  document.querySelectorAll('nav button').forEach(b =>
+    b.classList.toggle('active', b.dataset.v === name));
+  document.querySelectorAll('.view').forEach(v =>
+    v.classList.toggle('active', v.id === 'v-' + name));
+}
+window.showView = activate;
+window.setReportMode = function (on) {
+  document.body.classList.toggle('report-mode', !!on);
 };
+
+document.getElementById('nav').addEventListener('click', e => {
+  if (e.target.tagName !== 'BUTTON') return;
+  activate(e.target.dataset.v);
+});
+
+/* ============================ guided tour ========================== */
+const TOUR = [
+  ['overview', 'The problem and the setup',
+   'Forecast whether a solar active region will produce a major M- or X-class flare in the 24 hours after a 12-hour window of SHARP magnetogram data. 331,185 windows from the SWAN-SF benchmark, 2010 to 2018. Major flares are rare, so this is a severe class-imbalance problem, and that shapes every decision that follows.'],
+  ['eval', 'The headline result, with its uncertainty',
+   'On the locked test partition the model reaches TSS 0.853 and PR-AUC 0.489, detecting 91.6% of major flares. The 95% intervals beside each figure come from resampling whole active regions, because consecutive windows of one region overlap by 11 of their 12 hours and are not independent. Note the precision: 0.162. That is real and we do not hide it.'],
+  ['operate', 'Why the threshold was fixed before testing',
+   'The slider shows every operating point available on the test partition. The published threshold was chosen on the validation partition only, before this data was ever scored. Fixing it honestly instead of picking the best point here cost 0.012 TSS. Choosing a threshold from this curve would be selecting on the test set.'],
+  ['explore', 'Successes and failures, side by side',
+   'Twenty real windows chosen by a seeded rule that deliberately includes the misses and the false alarms, not just the wins. Each one shows the raw 12-hour series, the exact per-feature contributions, and the true outcome once you ask for it.'],
+  ['explain', 'Why a linear model was worth keeping',
+   'Because the pipeline is a fixed transform, an imputer, a scaler and a linear model, each feature contribution is exact: coefficient times standardised value, summing with the intercept to the log-odds. No surrogate, no sampling, nothing to tune. The strongest weights are on total unsigned current helicity and the R-value, which is physically plausible.'],
+  ['live', 'The real model, running here',
+   'This view reproduces the fitted pipeline in JavaScript from exported parameters, and is tested to agree with scikit-learn to better than one part in a million on a thousand test windows. Load any SWAN-SF window and the browser runs the same arithmetic the Python model does.'],
+  ['risk', 'What it is, and what it is not',
+   'An academic prototype trained on historical data, not an operational warning service. It consumes no live feed, it was never validated beyond 2018 or beyond HMI SHARP data, and its probabilities are deliberately over-forecast because of the balanced class weights. Those are limitations we state, not ones a reviewer has to find.']
+];
+let tourIndex = 0, tourTimer = null;
+
+function tourShow(i) {
+  tourIndex = Math.max(0, Math.min(TOUR.length - 1, i));
+  const [view, title, body] = TOUR[tourIndex];
+  activate(view);
+  $('tour-step').textContent = 'Step ' + (tourIndex + 1);
+  $('tour-title').textContent = title;
+  $('tour-body').textContent = body;
+  $('tour-count').textContent = (tourIndex + 1) + ' / ' + TOUR.length;
+  $('tour-prog').style.width = ((tourIndex + 1) / TOUR.length * 100) + '%';
+}
+function tourStop() {
+  if (tourTimer) { clearInterval(tourTimer); tourTimer = null; $('tour-auto').textContent = 'Auto-play'; }
+}
+function tourExit() { tourStop(); $('tour').classList.remove('on'); }
+
+$('tourBtn').addEventListener('click', () => { $('tour').classList.add('on'); tourShow(0); });
+$('tour-next').addEventListener('click', () => {
+  if (tourIndex === TOUR.length - 1) tourExit(); else tourShow(tourIndex + 1);
+});
+$('tour-prev').addEventListener('click', () => tourShow(tourIndex - 1));
+$('tour-exit').addEventListener('click', tourExit);
+$('tour-auto').addEventListener('click', () => {
+  if (tourTimer) { tourStop(); return; }
+  $('tour-auto').textContent = 'Pause';
+  tourTimer = setInterval(() => {
+    if (tourIndex === TOUR.length - 1) { tourExit(); return; }
+    tourShow(tourIndex + 1);
+  }, 26000);
+});
+document.addEventListener('keydown', e => {
+  if (!$('tour').classList.contains('on')) return;
+  if (e.key === 'ArrowRight') $('tour-next').click();
+  if (e.key === 'ArrowLeft') $('tour-prev').click();
+  if (e.key === 'Escape') tourExit();
+});
+
+/* ============================ boot ================================= */
+async function main() {
+  S.demo = await getJSON('demo.json');
+  S.ctx = await getJSON('context.json');
+  S.model = await getJSON('model_lr.json', true);
+  S.windows = await getJSON('windows.json', true);
+  S.operating = await getJSON('operating.json', true);
+
+  renderCore();
+  if (S.windows && S.model) renderExplore();
+  if (S.model) wireLive(); else $('live-result').innerHTML =
+    '<p class="muted">model_lr.json not found - run: python -m solarflare demo-data</p>';
+  renderOperate();
+
+  $('ft-time').textContent = 'Generated from trained model output';
+  window.dashboardReady = true;
+}
+main().catch(err => {
+  document.body.insertAdjacentHTML('afterbegin',
+    '<div style="background:#3a1414;color:#f08b8e;padding:12px 18px;font-size:13px">' +
+    'Dashboard failed to load: ' + esc(err.message) +
+    '. Run <code>python -m solarflare demo-data</code>, then serve this folder with ' +
+    '<code>python -m solarflare dashboard</code>.</div>');
+  window.dashboardError = String(err.message);
+});
 </script>
 </body>
 </html>

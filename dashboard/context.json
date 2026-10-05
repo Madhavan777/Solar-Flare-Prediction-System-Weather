@@ -1,0 +1,117 @@
+{
+ "generated_from": "results/selection.json, results/test_results.json, results/data_audit.json, results/extra/*.json",
+ "disclaimer": "Academic prototype \u2014 not an operational space-weather warning service.",
+ "dataset": {
+  "name": "SWAN-SF v1.2",
+  "doi": "10.7910/DVN/EBCFKM",
+  "n_windows_total": 331185,
+  "n_features": 144,
+  "n_partitions": 5,
+  "year_span": "2010\u20132018",
+  "observation_hours": 12,
+  "prediction_hours": 24,
+  "records_per_window": 60,
+  "cadence_minutes": 12,
+  "n_sharp_parameters": 24
+ },
+ "split": {
+  "train": "P1\u2013P3",
+  "validation": "P4",
+  "test": "P5",
+  "test_windows": 75365,
+  "test_positives": 990,
+  "test_base_rate": 0.013136071120546673,
+  "test_base_rate_text": "1.31 %"
+ },
+ "thresholds": {
+  "alert": 0.544546643935129,
+  "high": 0.9672703856605697,
+  "alert_text": "0.5445",
+  "high_text": "0.9673",
+  "chosen_on": "validation partition P4 \u2014 alert maximises TSS, high-risk maximises F1"
+ },
+ "risk_bands": [
+  {
+   "level": "LOW",
+   "text": "p < 0.54"
+  },
+  {
+   "level": "MODERATE",
+   "text": "0.54 \u2013 0.97"
+  },
+  {
+   "level": "HIGH",
+   "text": "p \u2265 0.97"
+  }
+ ],
+ "alerts": {
+  "n": 5614,
+  "rate": 0.07449081138459497,
+  "rate_text": "7.45 %",
+  "times_base_rate": 5.7
+ },
+ "always_no_flare": {
+  "accuracy": 0.9868639288794533,
+  "accuracy_text": "98.69 %",
+  "note": "A model that always forecasts 'no major flare' scores 98.69 % accuracy on this partition and detects nothing. That is why accuracy is not the headline metric."
+ },
+ "verification_example": {
+  "harp": 7115,
+  "noaa_ar": 12673,
+  "noaa_source": "JSOC all_harps_with_noaa_ars.txt",
+  "flare_class": "X1.3",
+  "sentence": "This window precedes a X1.3 flare recorded in SWAN-SF for HARP 7115 (NOAA AR 12673), confirming the model assigns high probability to a genuine pre-flare window from the held-out test partition."
+ },
+ "harp_note": "SWAN-SF's region identifier is the SHARP/HARP number, which is not the NOAA active region number. Many HARPs have no NOAA counterpart.",
+ "confidence_intervals_95": {
+  "recall": {
+   "low": 0.8120928327299141,
+   "high": 0.9755200586942169
+  },
+  "precision": {
+   "low": 0.09393582986034792,
+   "high": 0.23671988354167392
+  },
+  "f1": {
+   "low": 0.1676252419203919,
+   "high": 0.378370507646762
+  },
+  "tss": {
+   "low": 0.7513378117145065,
+   "high": 0.9146431273678903
+  },
+  "pr_auc": {
+   "low": 0.2671276921206585,
+   "high": 0.656836604297969
+  },
+  "roc_auc": {
+   "low": 0.9642267146068826,
+   "high": 0.9885131241078882
+  },
+  "fpr": {
+   "low": 0.04617008232464055,
+   "high": 0.08238875583059865
+  },
+  "far": {
+   "low": 0.7632801164583262,
+   "high": 0.906064170139652
+  },
+  "alert_rate": {
+   "low": 0.05438498656011633,
+   "high": 0.09749390882937163
+  },
+  "hss2": {
+   "low": 0.1568541497439305,
+   "high": 0.3569443505939391
+  }
+ },
+ "ci_note": "95 % intervals from an active-region block bootstrap of the locked test partition, 1,000 resamples. Post-hoc; the point estimates are the published figures.",
+ "near_miss": {
+  "share_preceding_a_real_flare": 0.7782026768642447,
+  "n_preceding_a_real_flare": 3663,
+  "n_false_alarms": 4707,
+  "alert_rate_flare_quiet": 0.016653905053598775,
+  "alert_rate_c_class": 0.49817803227485685
+ },
+ "calibration_warning": "These probabilities are not calibrated. The model was trained with balanced class weights, which deliberately over-forecasts; read them as a ranking and against the fixed thresholds, not as literal chances."
+}
