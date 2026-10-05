@@ -435,6 +435,35 @@ def test_navigation_fits_one_row_on_a_laptop(page):
     page.set_viewport_size({"width": 1440, "height": 960})
 
 
+def test_report_mode_still_reproduces_the_reports_figures(page):
+    """Visible changes must not leak into the captures of Figures 5.1-5.6.
+
+    Report mode is a fidelity mode, so the two visible fixes in this round - the
+    caption beside Run Forecast and the disclaimer's new contrast - are held
+    back there while staying in force in the real interface.
+    """
+    page.evaluate("window.setReportMode(true)")
+    page.evaluate("window.showView('predict')")
+    page.wait_for_timeout(200)
+    assert page.evaluate(
+        "getComputedStyle(document.querySelector('#runForecast + span')).display"
+    ) == "none", "the Run Forecast caption shows in report mode"
+    # The button must still work, because that is behaviour, not appearance.
+    assert page.is_enabled("#runForecast")
+
+    page.evaluate("window.showView('risk')")
+    page.wait_for_timeout(150)
+    assert page.evaluate(
+        "getComputedStyle(document.querySelector('.alertbox .msg p.caveat')).color"
+    ) == "rgb(138, 119, 86)", "the disclaimer colour changed in report mode"
+
+    page.evaluate("window.setReportMode(false)")
+    page.wait_for_timeout(150)
+    assert page.evaluate(
+        "getComputedStyle(document.querySelector('.alertbox .msg p.caveat')).color"
+    ) == "rgb(181, 154, 114)", "the contrast fix is missing outside report mode"
+
+
 def test_disclaimer_contrast_meets_aa(page):
     """The prototype caveat was the least readable text on the page at 4.27:1."""
     page.evaluate("window.showView('risk')")

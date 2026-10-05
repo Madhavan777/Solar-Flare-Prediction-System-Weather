@@ -114,6 +114,14 @@
   /* ---------- additions: these do not affect the six original views ---------- */
   body.report-mode .nav-extra{display:none}
   body.report-mode .tour-launch{display:none}
+  /* Report mode is a fidelity mode: it exists so that re-running the screenshot
+     step reproduces the report's frozen Figures 5.1-5.6. Two of this round's
+     fixes are visible rather than behavioural, so they are held back here -
+     the helper line beside the Run Forecast button, and the disclaimer's new
+     contrast. Both remain in force in the interface everyone actually uses.
+     The button itself works in both modes; only its caption is hidden. */
+  body.report-mode #runForecast + span{display:none}
+  body.report-mode .alertbox .msg p.caveat{color:#8a7756;font-size:11px}
   .tour-launch{background:var(--navy2);border:1px solid var(--line);color:var(--accent2);
     padding:7px 13px;border-radius:8px;font-size:12px;cursor:pointer;margin-left:8px}
   .tour-launch:hover{border-color:var(--accent)}
