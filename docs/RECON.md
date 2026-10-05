@@ -106,13 +106,45 @@ F 274,242); `letter_by_partition`; `role_counts`; `n_rows_dist` (60 for all 331,
 
 ### 2c. Re-running `train_eval.py` from scratch
 
-Done, via `python -m solarflare train`, which trains all seven candidates into
-`build/retrain/` with the data directory linked in, so that `models/` and `results/` are never
-written to. The result is recorded in §5 below.
+Done, via `python -m solarflare train`, which trains all seven candidates into `build/retrain/`
+with the data directory linked in, so that `models/` and `results/` are never written to. It took
+919 s.
 
-Note that 2a already establishes a stronger property for the *shipped* artefacts than a retrain
-does: the saved pipelines, applied to the rebuilt feature matrix, reproduce every published number.
-A retrain additionally shows that the training procedure itself is deterministic under seed 42.
+**The decision reproduces; the coefficients do not match bit for bit.**
+
+```
+selection decision (must match exactly):
+  selected           OK    'I2_LR_temporal_C0.01'
+  rule               OK    'max validation TSS (tie-break: validation PR-AUC)'
+
+thresholds (tolerance 0.005):
+  alert_threshold    OK    0.5433279925082759  (delta 1.22e-03)
+  high_threshold     OK    0.9666874462726274  (delta 5.83e-04)
+
+headline test metrics for I2_LR_temporal_C0.01:
+  tss                OK    0.854639  (frozen 0.852874, delta 1.76e-03)
+  pr_auc             OK    0.489424  (frozen 0.489363, delta 6.12e-05)
+  roc_auc            OK    0.978985  (frozen 0.978978, delta 6.03e-06)
+  precision          OK    0.161313  (frozen 0.161560, delta 2.47e-04)
+  recall             OK    0.918182  (frozen 0.916162, delta 2.02e-03)
+  confusion          retrained 909/4726/81/69649  frozen 907/4707/83/69668
+```
+
+So a from-scratch retrain on this machine picks the same model by the same rule, and lands within
+0.002 on every headline metric, but moves two windows across the decision boundary.
+
+**Thread count was tested and ruled out as the cause.** Fitting the selected architecture on the
+same data with `OMP_NUM_THREADS=1` and with `=4` gives bit-identical coefficients, an identical
+intercept and the same iteration count (132). The remaining difference lies elsewhere in the
+numerical environment between the original run (Linux, Python 3.11) and this one (Windows,
+Python 3.12) — most plausibly the SciPy version, since `lbfgs` lives in `scipy.optimize` and SciPy
+was the one dependency the original specification did not pin. Unresolved; see
+[DECISIONS.md](DECISIONS.md) D-15 and [REPRODUCIBILITY.md](REPRODUCIBILITY.md) §3.
+
+Note that 2a establishes a stronger property for the *shipped* artefacts than any retrain could:
+the saved pipelines, applied to the rebuilt feature matrix, reproduce every published number to
+better than 1e-9, and the stored probabilities to 1.3e-15. That is the reproducibility claim this
+project actually rests on, and it is why `models/` is committed to the repository.
 
 ---
 

@@ -282,6 +282,14 @@ def legitimate_values(truth: dict) -> dict[str, set[float]]:
             for metric in pools:
                 pools[metric].add(float(match.group(1)))
 
+    # The clean-room retrain's observed figures, quoted in docs/RECON.md and
+    # docs/REPRODUCIBILITY.md. They are recorded in the fixture because
+    # build/retrain/ is scratch output and is not in version control, so without
+    # this the documents would fail to check on a fresh clone.
+    for metric, value in truth.get("retrain_observed", {}).items():
+        if metric in pools and isinstance(value, (int, float)):
+            pools[metric].add(float(value))
+
     return pools
 
 

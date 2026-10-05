@@ -96,6 +96,32 @@
     "flare_case": {"harp": 7115, "noaa_ar": 12673, "flare_class": "X1.3", "probability": 0.9999},
     "quiet_case": {"harp": 5413, "noaa_ar": null, "probability": 0.0010}
   },
+  "_retrain_comment": [
+    "Observed when src/train_eval.py was re-run from scratch on the verification",
+    "machine (Windows, Python 3.12) against the frozen result (Linux, Python 3.11).",
+    "The selection decision reproduced exactly; the coefficients did not match bit",
+    "for bit. Recorded so the figures quoted in docs/RECON.md and",
+    "docs/REPRODUCIBILITY.md are traceable without build/retrain/, which is scratch",
+    "output and is not in version control. These are NOT published results."
+  ],
+  "retrain_observed": {
+    "selected": "I2_LR_temporal_C0.01",
+    "alert_threshold": 0.5433279925082759,
+    "high_threshold": 0.9666874462726274,
+    "tss": 0.854639,
+    "pr_auc": 0.489424,
+    "roc_auc": 0.978985,
+    "precision": 0.161313,
+    "recall": 0.918182,
+    "f1": 0.274415,
+    "tp": 909,
+    "fp": 4726,
+    "fn": 81,
+    "tn": 69649,
+    "fit_seconds": 919,
+    "thread_test_coefficients_identical": true,
+    "thread_test_n_iter": 132
+  },
   "environment": {
     "scikit_learn": "1.8.0",
     "numpy": "2.4.4",

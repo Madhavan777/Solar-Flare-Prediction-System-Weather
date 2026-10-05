@@ -29,7 +29,7 @@ python -m solarflare evaluate
 | **scikit-learn** | **1.8.0** | **1.8.0** | **yes — hard failure** |
 | NumPy | 2.4.4 | 2.4.4 | no — warns |
 | pandas | 3.0.2 | 3.0.2 | no — warns |
-| SciPy | — | 1.18.1 | no — warns |
+| SciPy | **not pinned** | 1.18.1 | no — warns, but see §3 |
 | joblib | 1.5.3 | 1.5.3 | no — warns |
 | matplotlib | 3.10.9 | 3.10.9 | no — warns |
 | Playwright | 1.56.0 | 1.56.0 | only for the dashboard tests |
@@ -75,15 +75,49 @@ python -m playwright install chromium
 **top-level module**, which the pickles require — they embed `FunctionTransformer(common.slog)` and
 unpickling resolves it by that name.
 
-## 3. Determinism
+## 3. Determinism, and its limit
 
 - `SEED = 42` in `src/common.py`, used for every estimator and every resampling procedure.
 - The bootstrap, the explorer window selection and the explanation sample all take seed 42 and are
   reproducible run to run.
 - The feature merge is deterministic: `sorted(glob("P{1..5}_c*_X.npz"))` over fixed filenames, which
   is also the row order the `row` column of `results/test_predictions_selected.csv.gz` refers to.
-- Logistic regression with `lbfgs` and random forests with a fixed `random_state` are deterministic
-  for a given library version; this is one more reason the scikit-learn pin is hard.
+- Scoring the **shipped** pipelines is bit-reproducible: `evaluate` matches the stored probabilities
+  to 1.3e-15 and every published metric to better than 1e-9.
+
+### Retraining from scratch is *not* bit-reproducible across environments
+
+This is a real limit and it is stated rather than glossed. A from-scratch retrain on the
+verification machine (Windows, Python 3.12) converges to slightly different coefficients than the
+frozen model, which was trained on Linux under Python 3.11:
+
+| | Retrained | Frozen | Delta |
+|---|---|---|---|
+| Selected model | `I2_LR_temporal_C0.01` | `I2_LR_temporal_C0.01` | **same** |
+| Selection rule | max val TSS, tie-break PR-AUC | same | **same** |
+| Alert threshold | 0.5433280 | 0.5445466 | 1.2e-3 |
+| High threshold | 0.9666874 | 0.9672704 | 5.8e-4 |
+| Test TSS | 0.854639 | 0.852874 | 1.8e-3 |
+| Test PR-AUC | 0.489424 | 0.489363 | 6.1e-5 |
+| Test confusion | 909 / 4,726 / 81 / 69,649 | 907 / 4,707 / 83 / 69,668 | 2 windows |
+
+**The decision is robust; the coefficients are not bit-identical.**
+
+**The cause is not the BLAS thread count.** That was the obvious hypothesis and it was tested:
+fitting the selected architecture on the same data with `OMP_NUM_THREADS=1` and with `=4` gives
+bit-identical coefficients, an identical intercept and the same iteration count (132). Parallel
+accumulation order is therefore ruled out.
+
+What remains is some other difference in the numerical environment between the two runs. The most
+plausible candidate is the **SciPy version**: `lbfgs` is implemented in `scipy.optimize`, and SciPy
+is the one dependency the original specification did not pin — this project pins 1.18.1 by choice,
+but the original run's version is unknown. The platform's BLAS build is a second candidate. This
+cannot be settled without the original environment, so it is recorded as **unresolved**.
+
+**What this means in practice:** `python -m solarflare train` checks that the *decision* reproduces
+within a 5e-3 tolerance, not that the coefficients match. Pass `--strict` to demand exact equality,
+which is expected to fail on any machine other than the original. Bit-level reproducibility of the
+published numbers rests on the shipped artefacts, which is why `models/` is committed.
 
 ## 4. What must never change
 

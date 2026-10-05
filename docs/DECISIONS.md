@@ -180,7 +180,31 @@ disagrees with the frozen confusion matrix, and
 `test_operating_view_resets_to_the_published_operating_point` asserts the slider reproduces
 907 / 4,707 / 83 / 69,668.
 
-## D-14 — British spelling
+## D-15 — A retrain is judged on the decision, not on bit-identical coefficients
+
+**Date:** 2026-10-05
+**Decision:** `python -m solarflare train` passes when the retrained run selects the same model by
+the same rule and lands within 5e-3 on both thresholds and the headline test metrics. Exact
+equality is available behind `--strict` and is expected to fail off the original machine.
+**Why:** the first version demanded exact equality and failed. Investigating showed the retrain
+reproduces the *decision* perfectly — same model, same rule — while the fitted coefficients differ
+slightly, moving the alert threshold by 1.2e-3, the test TSS by 1.8e-3 and two windows across the
+decision boundary. Treating that as a failure would be misleading: it would imply something is
+broken when the published artefacts reproduce their numbers to 1e-9.
+**What was ruled out:** the obvious explanation — floating-point accumulation order under
+parallelism — is **wrong**. Fitting the selected architecture on the same data with
+`OMP_NUM_THREADS=1` and with `=4` gives bit-identical coefficients, an identical intercept and the
+same iteration count. Tested rather than assumed, and the earlier claim that thread count was the
+cause has been corrected everywhere it appeared.
+**What remains unresolved:** some other difference between the original environment (Linux,
+Python 3.11) and the verification one (Windows, Python 3.12). The most plausible candidate is the
+**SciPy version**, since `lbfgs` lives in `scipy.optimize` and SciPy was the one dependency the
+original specification did not pin. Not settleable without the original environment, so it is
+documented as open rather than guessed at.
+**Consequence:** `docs/REPRODUCIBILITY.md` §3 states the limit plainly, and the tolerance is a
+named constant with the measured drift recorded beside it.
+
+## D-16 — British spelling
 
 **Date:** 2026-10-05
 **Decision:** All new prose uses British spelling ("organisation", "generalisation", "standardised"
