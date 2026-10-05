@@ -705,9 +705,11 @@ def check_language(checker: Checker) -> None:
         lines = path.read_text(encoding="utf-8").splitlines()
         for number, line in enumerate(lines, 1):
             lowered = line.lower()
-            # A heading or table question is answered on the lines that follow,
-            # so judge the phrase against a small window the way a reader would.
-            context = " ".join(lines[max(0, number - 2) : number + 2])
+            # A heading or table question is answered on the lines around it, so
+            # judge the phrase against a small window the way a reader would.
+            # Three lines back, because a markdown table puts a separator row
+            # between its header and the first row of content.
+            context = " ".join(lines[max(0, number - 4) : number + 2])
             for phrase, why in FORBIDDEN_PHRASES.items():
                 if phrase in lowered and not is_denied(context, phrase):
                     checker.check(

@@ -194,6 +194,7 @@ before every write and raises. Additive output goes to `results/extra/`, `figure
 
 | Document | Read it for |
 |---|---|
+| [docs/FEATURES.md](docs/FEATURES.md) | what every view does, in plain English, and how to describe it |
 | [docs/JUDGE_DEMO_SCRIPT.md](docs/JUDGE_DEMO_SCRIPT.md) | the timed three-minute walkthrough |
 | [docs/JUDGES_QA.md](docs/JUDGES_QA.md) | fifteen hard questions, each answered with a file or a number |
 | [docs/MODEL_CARD.md](docs/MODEL_CARD.md) | intended use, out-of-scope use, metrics with intervals, calibration, failure modes |
