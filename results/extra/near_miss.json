@@ -1,0 +1,74 @@
+{
+ "posthoc": "Post-hoc analysis. Computed on the locked test partition P5 after model selection was complete and written to results/selection.json. It did not influence the choice of model, features or thresholds, and none of the frozen numbers in results/ depend on it.",
+ "analysis": "what actually followed each false alarm",
+ "question": "The published precision of 0.1616 counts every alerted negative window as an equal error. SWAN-SF labels each negative window with the largest flare that followed it - B, C, or none. This asks what that distribution looks like among the false alarms.",
+ "alert_threshold": 0.544546643935129,
+ "counts": {
+  "negative_windows": 74375,
+  "false_alarms": 4707,
+  "correct_quiet_forecasts": 69668
+ },
+ "headline": {
+  "false_alarms_preceding_a_real_b_or_c_flare": 3663,
+  "share_of_false_alarms_preceding_a_real_flare": 0.7782026768642447,
+  "false_alarms_preceding_a_c_class_flare": 2871,
+  "share_preceding_a_c_class_flare": 0.609942638623327,
+  "false_alarms_on_genuinely_flare_quiet_windows": 1044,
+  "share_on_genuinely_flare_quiet_windows": 0.22179732313575526
+ },
+ "by_negative_class": {
+  "F": {
+   "meaning": "flare-quiet: no B-, C-, M- or X-class flare in the next 24 h",
+   "n_negative_windows": 62688,
+   "share_of_all_negatives": 0.8428638655462185,
+   "n_false_alarms": 1044,
+   "share_of_false_alarms": 0.22179732313575526,
+   "enrichment_vs_base": 0.26314726755075607,
+   "alert_rate_within_class": 0.016653905053598775,
+   "mean_probability": 0.034989857855616556,
+   "median_probability": 0.00047485331541085,
+   "n_reaching_high_risk_band": 16
+  },
+  "B": {
+   "meaning": "a B-class flare followed, the weakest GOES category",
+   "n_negative_windows": 5924,
+   "share_of_all_negatives": 0.07965042016806723,
+   "n_false_alarms": 792,
+   "share_of_false_alarms": 0.1682600382409178,
+   "enrichment_vs_base": 2.112481489562502,
+   "alert_rate_within_class": 0.1336934503713707,
+   "mean_probability": 0.21420781612828224,
+   "median_probability": 0.11029745768466005,
+   "n_reaching_high_risk_band": 6
+  },
+  "C": {
+   "meaning": "a C-class flare followed, one order of magnitude below the M threshold",
+   "n_negative_windows": 5763,
+   "share_of_all_negatives": 0.07748571428571428,
+   "n_false_alarms": 2871,
+   "share_of_false_alarms": 0.609942638623327,
+   "enrichment_vs_base": 7.871678595802524,
+   "alert_rate_within_class": 0.49817803227485685,
+   "mean_probability": 0.5120939983881037,
+   "median_probability": 0.5415257019476006,
+   "n_reaching_high_risk_band": 208
+  }
+ },
+ "median_probability_ladder": {
+  "F": 0.00047485331541085,
+  "B": 0.11029745768466005,
+  "C": 0.5415257019476006,
+  "M": 0.9357789473166234,
+  "X": 0.9996751889556263
+ },
+ "probability_increases_monotonically_with_flare_class": true,
+ "relabelled_as_any_flare": {
+  "description": "Hypothetical only, and NOT the project's task: if the target were 'will any B, C, M or X flare follow?' rather than 'will an M or X flare follow?', the same alerts at the same threshold would score this precision. Reported to size the effect, not as a result - the model was never trained or selected for this target, and the frozen metrics stand.",
+  "true_positives": 4570,
+  "false_positives": 1044,
+  "precision": 0.8140363377271108,
+  "precision_on_the_real_mx_task": 0.1615603847524047
+ },
+ "interpretation": "3,663 of the 4,707 false alarms (77.8 %) precede a genuine B- or C-class flare, and only 1,044 (22.2 %) land on a window that was truly flare-quiet. Within the flare-quiet windows the model alerts only 1.67 % of the time, against 49.8 % within C-class windows. The model is therefore discriminating magnetic activity successfully and failing mainly to resolve the M-class boundary, which is a materially different weakness from alerting at random on quiet regions.",
+ "what_this_does_not_excuse": "A C-class flare is not an M-class flare, and an operator told 'major flare likely' when a C-class flare follows has still been misinformed. The published precision of 0.1616 for the M/X task is correct and is not revised by this analysis. What this shows is that the errors are concentrated near the decision boundary of flare magnitude rather than scattered over quiet Sun, which is the difference between a miscalibrated threshold and a model that has learnt nothing."
+}

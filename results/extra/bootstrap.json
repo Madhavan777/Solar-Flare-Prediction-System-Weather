@@ -1,0 +1,92 @@
+{
+ "posthoc": "Post-hoc analysis. Computed on the locked test partition P5 after model selection was complete and written to results/selection.json. It did not influence the choice of model, features or thresholds, and none of the frozen numbers in results/ depend on it.",
+ "analysis": "active-region block bootstrap on the locked test partition P5",
+ "method": "1000 resamples, seed 42. Each resample draws 758 HARP regions with replacement from the 758 regions in P5 and keeps all of each region's windows. Whole regions are the resampling unit because consecutive windows of one region overlap by 11 of their 12 hours, so windows are not independent. The frozen alert threshold is applied unchanged; nothing is re-tuned on P5.",
+ "threshold": 0.544546643935129,
+ "n_resamples_requested": 1000,
+ "n_resamples_used": 1000,
+ "n_resamples_skipped_degenerate": 0,
+ "n_regions": 758,
+ "resampled_window_count": {
+  "min": 69123,
+  "median": 75314,
+  "max": 81475
+ },
+ "resampled_positive_count": {
+  "min": 322,
+  "median": 989,
+  "max": 1864
+ },
+ "intervals": {
+  "recall": {
+   "point_estimate": 0.9161616161616162,
+   "ci95_low": 0.8120928327299141,
+   "ci95_high": 0.9755200586942169,
+   "bootstrap_mean": 0.9120306097790465,
+   "bootstrap_sd": 0.04086211975359012
+  },
+  "precision": {
+   "point_estimate": 0.1615603847524047,
+   "ci95_low": 0.09393582986034792,
+   "ci95_high": 0.23671988354167392,
+   "bootstrap_mean": 0.16215883959286134,
+   "bootstrap_sd": 0.03564652167701563
+  },
+  "f1": {
+   "point_estimate": 0.27468201090248334,
+   "ci95_low": 0.1676252419203919,
+   "ci95_high": 0.378370507646762,
+   "bootstrap_mean": 0.27389154811673483,
+   "bootstrap_sd": 0.05212422341974769
+  },
+  "tss": {
+   "point_estimate": 0.852874221203633,
+   "ci95_low": 0.7513378117145065,
+   "ci95_high": 0.9146431273678903,
+   "bootstrap_mean": 0.84858869050153,
+   "bootstrap_sd": 0.03988160040616401
+  },
+  "pr_auc": {
+   "point_estimate": 0.48936288684703266,
+   "ci95_low": 0.2671276921206585,
+   "ci95_high": 0.656836604297969,
+   "bootstrap_mean": 0.4809736836325835,
+   "bootstrap_sd": 0.1000524691761869
+  },
+  "roc_auc": {
+   "point_estimate": 0.9789784907902557,
+   "ci95_low": 0.9642267146068826,
+   "ci95_high": 0.9885131241078882,
+   "bootstrap_mean": 0.978232677558388,
+   "bootstrap_sd": 0.006014165040822462
+  },
+  "fpr": {
+   "point_estimate": 0.06328739495798319,
+   "ci95_low": 0.04617008232464055,
+   "ci95_high": 0.08238875583059865,
+   "bootstrap_mean": 0.06344191927751655,
+   "bootstrap_sd": 0.009400916552797893
+  },
+  "far": {
+   "point_estimate": 0.8384396152475952,
+   "ci95_low": 0.7632801164583262,
+   "ci95_high": 0.906064170139652,
+   "bootstrap_mean": 0.8378411604071386,
+   "bootstrap_sd": 0.03564652167701563
+  },
+  "alert_rate": {
+   "point_estimate": 0.07449081138459497,
+   "ci95_low": 0.05438498656011633,
+   "ci95_high": 0.09749390882937163,
+   "bootstrap_mean": 0.07478166760042068,
+   "bootstrap_sd": 0.011077180702184629
+  },
+  "hss2": {
+   "point_estimate": 0.25811292164810495,
+   "ci95_low": 0.1568541497439305,
+   "ci95_high": 0.3569443505939391,
+   "bootstrap_mean": 0.25740553292440677,
+   "bootstrap_sd": 0.05002383173389753
+  }
+ }
+}

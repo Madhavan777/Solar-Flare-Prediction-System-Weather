@@ -1,0 +1,33 @@
+{
+ "ran_at": "2026-10-05 16:01:28",
+ "environment": {
+  "python": "3.12.10",
+  "scikit-learn": "1.8.0",
+  "numpy": "2.4.4",
+  "pandas": "3.0.2",
+  "scipy": "1.18.1",
+  "joblib": "1.5.3",
+  "matplotlib": "3.10.9"
+ },
+ "checks": 375,
+ "passed": true,
+ "failures": [],
+ "output": [
+  "data audit reproduces results/data_audit.json exactly (every key; floats to 1e-12)",
+  "",
+  "X (331185, 144)  train=204559 val=51261 test=75365  positives=6234",
+  "I1_LR_last             val TSS=0.846255 PR=0.482254 | test TSS=0.866586 PR=0.462376 P=0.1262 R=0.9545",
+  "I2_LR_temporal_C0.01   val TSS=0.862224 PR=0.499852 | test TSS=0.852874 PR=0.489363 P=0.1616 R=0.9162",
+  "I2_LR_temporal_C0.1    val TSS=0.859669 PR=0.484054 | test TSS=0.860510 PR=0.479431 P=0.1490 R=0.9313",
+  "I2_LR_temporal_C1      val TSS=0.853441 PR=0.465238 | test TSS=0.863011 PR=0.472293 P=0.1536 R=0.9313",
+  "I2_RF_leaf5            val TSS=0.854220 PR=0.233277 | test TSS=0.862550 PR=0.352357 P=0.1224 R=0.9535",
+  "I2_RF_leaf20           val TSS=0.852084 PR=0.367854 | test TSS=0.860463 PR=0.385516 P=0.1141 R=0.9596",
+  "I2_RF_leaf50_d16       val TSS=0.847692 PR=0.470722 | test TSS=0.865379 PR=0.399260 P=0.1225 R=0.9566",
+  "\nselection rule re-picks : I2_LR_temporal_C0.01",
+  "alert threshold         : 0.5445466439351291  (stored 0.544546643935129)",
+  "high-risk threshold     : 0.9672703856605697  (stored 0.9672703856605697)",
+  "P5 confusion matrix     : {'tp': 907, 'fp': 4707, 'fn': 83, 'tn': 69668}  expected {'tp': 907, 'fp': 4707, 'fn': 83, 'tn': 69668}",
+  "stored vs recomputed P5 probabilities: max abs diff = 1.332e-15",
+  "top-6 coefficients      : [('R_VALUE__std', -1.5714), ('TOTUSJH__max', 1.1227), ('TOTUSJH__last', 1.01), ('SHRGT45__min', 1.0098), ('R_VALUE__max', 0.8373), ('SHRGT45__last', 0.7854)]"
+ ]
+}

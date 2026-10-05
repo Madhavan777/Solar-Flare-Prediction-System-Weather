@@ -1,0 +1,127 @@
+{
+ "posthoc": "Post-hoc analysis. Computed on the locked test partition P5 after model selection was complete and written to results/selection.json. It did not influence the choice of model, features or thresholds, and none of the frozen numbers in results/ depend on it.",
+ "analysis": "trivial baselines, for context",
+ "selection_discipline": "Both baselines were chosen using the training and validation partitions only - imputation medians from P1-P3, feature and threshold from P4 - and then scored once on P5, the same discipline the real model followed.",
+ "test_base_rate": 0.013136071120546673,
+ "train_base_rate": 0.01994045727638481,
+ "baselines": {
+  "climatology_constant": {
+   "threshold": 0.544546643935129,
+   "precision": 0.0,
+   "recall": 0.0,
+   "f1": 0.0,
+   "tss": 0.0,
+   "hss2": 0.0,
+   "far": 0.0,
+   "accuracy": 0.9868639288794533,
+   "pr_auc": 0.013136071120546673,
+   "roc_auc": 0.5,
+   "tp": 0,
+   "fp": 0,
+   "fn": 990,
+   "tn": 74375,
+   "n": 75365,
+   "positives": 990,
+   "fpr": 0.0,
+   "base_rate": 0.013136071120546673,
+   "alert_rate": 0.0,
+   "alert_rate_ratio": 0.0,
+   "brier": 0.013009814427020377,
+   "brier_undefined_reason": null,
+   "description": "Always forecast the training base rate, p = 0.019940, for every window. Never exceeds the alert threshold, so it raises no alerts and detects nothing.",
+   "fitted_on": "training partitions P1-P3 (the base rate only)"
+  },
+  "best_single_feature": {
+   "threshold": 1442.3712158203125,
+   "precision": 0.16672821270310192,
+   "recall": 0.9121212121212121,
+   "f1": 0.2819231970028099,
+   "tss": 0.8514422205245734,
+   "hss2": 0.26561096490816477,
+   "far": 0.8332717872968981,
+   "accuracy": 0.9389637099449346,
+   "pr_auc": 0.37195012934264216,
+   "roc_auc": 0.9758973873185639,
+   "tp": 903,
+   "fp": 4513,
+   "fn": 87,
+   "tn": 69862,
+   "n": 75365,
+   "positives": 990,
+   "fpr": 0.06067899159663866,
+   "base_rate": 0.013136071120546673,
+   "alert_rate": 0.07186359716048564,
+   "alert_rate_ratio": 5.470707070707071,
+   "brier": null,
+   "brier_undefined_reason": "scores span [0, 7797.95], which is outside [0, 1]; the Brier score is only defined for probabilities",
+   "description": "One feature, one threshold. Rule: alert if TOTUSJH__max >= 1442.37.",
+   "feature": "TOTUSJH__max",
+   "direction": "higher is more flare-like",
+   "rule": "alert if TOTUSJH__max >= 1442.37",
+   "validation_tss": 0.8615848986255403,
+   "fitted_on": "median imputation from P1-P3; feature and threshold chosen on P4",
+   "caveat": "pr_auc and roc_auc here are computed on a raw feature value, not a probability, so only their ranking interpretation is meaningful."
+  }
+ },
+ "selected_model": {
+  "key": "I2_LR_temporal_C0.01",
+  "tss": 0.852874221203633,
+  "pr_auc": 0.48936288684703266,
+  "roc_auc": 0.9789784907902557,
+  "precision": 0.1615603847524047,
+  "recall": 0.9161616161616162,
+  "f1": 0.27468201090248334,
+  "fpr": 0.06328739495798319,
+  "far": 0.8384396152475952,
+  "alert_rate": 0.07449081138459497,
+  "accuracy": 0.9364426457904863
+ },
+ "improvement_over_best_single_feature": {
+  "tss": 0.0014320006790595752,
+  "pr_auc": 0.11741275750439051,
+  "precision_at_similar_recall": "compare precision and recall directly in the table above; the single feature and the model do not sit at the same recall"
+ },
+ "single_feature_runners_up_by_validation_tss": [
+  {
+   "feature": "TOTUSJH__max",
+   "direction": "higher",
+   "validation_tss": 0.8615848986255403
+  },
+  {
+   "feature": "TOTUSJH__last",
+   "direction": "higher",
+   "validation_tss": 0.8605865579289481
+  },
+  {
+   "feature": "USFLUX__last",
+   "direction": "higher",
+   "validation_tss": 0.8579720413201503
+  },
+  {
+   "feature": "TOTUSJZ__last",
+   "direction": "higher",
+   "validation_tss": 0.8572135662617902
+  },
+  {
+   "feature": "USFLUX__max",
+   "direction": "higher",
+   "validation_tss": 0.8550179192431219
+  },
+  {
+   "feature": "TOTUSJZ__max",
+   "direction": "higher",
+   "validation_tss": 0.8545583038505983
+  },
+  {
+   "feature": "TOTUSJH__mean",
+   "direction": "higher",
+   "validation_tss": 0.8540592448764467
+  },
+  {
+   "feature": "TOTUSJH__min",
+   "direction": "higher",
+   "validation_tss": 0.8532608293364293
+  }
+ ],
+ "n_single_feature_rules_searched": 288
+}

@@ -1,0 +1,27 @@
+{
+ "posthoc": "Post-hoc analysis. Computed on the locked test partition P5 after model selection was complete and written to results/selection.json. It did not influence the choice of model, features or thresholds, and none of the frozen numbers in results/ depend on it.",
+ "analysis": "exactness of the per-window linear explanation",
+ "identity": "logit(p) = intercept + sum_j coef_j * standardised_x_j",
+ "why_it_is_exact": "The pipeline is a fixed signed-log transform, then median imputation with medians fitted on P1-P3, then standardisation with a centre and scale fitted on P1-P3, then a linear model. Every step before the classifier is an affine or fixed elementwise map, so the classifier's input is known exactly and its logit is a plain dot product. Nothing is approximated, unlike permutation importance or a surrogate explainer.",
+ "n_windows_checked": 2000,
+ "seed": 42,
+ "intercept": -5.6590242982479335,
+ "max_abs_logit_error": 1.9539925233402755e-14,
+ "max_abs_probability_error": 1.7763568394002505e-15,
+ "n_features": 144,
+ "mean_abs_contribution_by_rank": [
+  1.7244128077459395,
+  1.2250846259537036,
+  1.070459598269661,
+  0.9710575467325464,
+  0.8947448559145366,
+  0.8313873764426023,
+  0.7759348809379872,
+  0.7267263385757141,
+  0.6807598572876888,
+  0.6405468333409952,
+  0.6051622772771059,
+  0.5735238782124396
+ ],
+ "note": "The two error figures above are floating-point round-off, not approximation error. tests/test_contributions.py asserts the same identity to 1e-9."
+}

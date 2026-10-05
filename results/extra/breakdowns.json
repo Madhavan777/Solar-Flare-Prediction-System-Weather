@@ -1,0 +1,318 @@
+{
+ "posthoc": "Post-hoc analysis. Computed on the locked test partition P5 after model selection was complete and written to results/selection.json. It did not influence the choice of model, features or thresholds, and none of the frozen numbers in results/ depend on it.",
+ "analysis": "breakdowns of the frozen model on P5, at the frozen alert threshold",
+ "threshold": 0.544546643935129,
+ "overall": {
+  "n": 75365,
+  "positives": 990,
+  "tp": 907,
+  "fp": 4707,
+  "fn": 83,
+  "tn": 69668,
+  "precision": 0.1615603847524047,
+  "recall": 0.9161616161616162,
+  "f1": 0.27468201090248334,
+  "tss": 0.852874221203633,
+  "fpr": 0.06328739495798319,
+  "far": 0.8384396152475952,
+  "alert_rate": 0.07449081138459497,
+  "base_rate": 0.013136071120546673
+ },
+ "by_goes_class": {
+  "M": {
+   "n_positive_windows": 971,
+   "detected": 888,
+   "missed": 83,
+   "recall": 0.9145211122554068,
+   "recall_wilson_ci95": [
+    0.8952605797598711,
+    0.9305147221788067
+   ],
+   "small_sample_warning": null
+  },
+  "X": {
+   "n_positive_windows": 19,
+   "detected": 19,
+   "missed": 0,
+   "recall": 1.0,
+   "recall_wilson_ci95": [
+    0.8318207759473837,
+    1.0
+   ],
+   "small_sample_warning": "only 19 X-class windows in P5 - this recall is estimated from 19 cases and the interval is correspondingly wide"
+  }
+ },
+ "by_calendar_year": {
+  "2015": {
+   "n": 46147,
+   "positives": 732,
+   "tp": 664,
+   "fp": 3372,
+   "fn": 68,
+   "tn": 42043,
+   "precision": 0.1645193260654113,
+   "recall": 0.907103825136612,
+   "f1": 0.2785234899328859,
+   "tss": 0.8328552288578495,
+   "fpr": 0.07424859627876253,
+   "far": 0.8354806739345887,
+   "alert_rate": 0.08745963984657724,
+   "base_rate": 0.01586235291568249
+  },
+  "2016": {
+   "n": 11751,
+   "positives": 107,
+   "tp": 107,
+   "fp": 544,
+   "fn": 0,
+   "tn": 11100,
+   "precision": 0.16436251920122888,
+   "recall": 1.0,
+   "f1": 0.28232189973614774,
+   "tss": 0.953280659567159,
+   "fpr": 0.04671934043284095,
+   "far": 0.8356374807987711,
+   "alert_rate": 0.05539954046464131,
+   "base_rate": 0.009105608033358864
+  },
+  "2017": {
+   "n": 12862,
+   "positives": 151,
+   "tp": 136,
+   "fp": 690,
+   "fn": 15,
+   "tn": 12021,
+   "precision": 0.16464891041162227,
+   "recall": 0.9006622516556292,
+   "f1": 0.27840327533265097,
+   "tss": 0.8463785603646214,
+   "fpr": 0.05428369129100779,
+   "far": 0.8353510895883777,
+   "alert_rate": 0.06422018348623854,
+   "base_rate": 0.011740009329808739
+  },
+  "2018": {
+   "n": 4605,
+   "positives": 0,
+   "fp": 101,
+   "tn": 4504,
+   "alert_rate": 0.02193268186753529,
+   "note": "no positives in this group: recall, precision and the AUCs are undefined"
+  }
+ },
+ "by_harp_region": {
+  "n_regions_in_p5": 758,
+  "total_false_alarms": 4707,
+  "regions_producing_half_the_false_alarms": 15,
+  "share_of_regions_producing_half": 0.01978891820580475,
+  "regions_with_zero_false_alarms": 663,
+  "top_15_false_alarm_regions": [
+   {
+    "harp": 5541,
+    "n_windows": 211,
+    "n_positive_windows": 0,
+    "n_false_alarms": 211,
+    "n_hits": 0,
+    "max_probability": 0.996501266555396,
+    "mean_probability": 0.9213952836083297
+   },
+   {
+    "harp": 5848,
+    "n_windows": 219,
+    "n_positive_windows": 0,
+    "n_false_alarms": 184,
+    "n_hits": 0,
+    "max_probability": 0.874228675858941,
+    "mean_probability": 0.65478654769439
+   },
+   {
+    "harp": 5447,
+    "n_windows": 216,
+    "n_positive_windows": 24,
+    "n_false_alarms": 182,
+    "n_hits": 24,
+    "max_probability": 0.986480143637126,
+    "mean_probability": 0.9062038922872558
+   },
+   {
+    "harp": 5637,
+    "n_windows": 237,
+    "n_positive_windows": 12,
+    "n_false_alarms": 172,
+    "n_hits": 12,
+    "max_probability": 0.981211875863843,
+    "mean_probability": 0.6700641036010373
+   },
+   {
+    "harp": 6015,
+    "n_windows": 231,
+    "n_positive_windows": 16,
+    "n_false_alarms": 167,
+    "n_hits": 16,
+    "max_probability": 0.9592930164758184,
+    "mean_probability": 0.7076195697262492
+   },
+   {
+    "harp": 7075,
+    "n_windows": 216,
+    "n_positive_windows": 41,
+    "n_false_alarms": 165,
+    "n_hits": 41,
+    "max_probability": 0.9693706368833862,
+    "mean_probability": 0.8083056676383703
+   },
+   {
+    "harp": 6975,
+    "n_windows": 233,
+    "n_positive_windows": 0,
+    "n_false_alarms": 162,
+    "n_hits": 0,
+    "max_probability": 0.9917726915628052,
+    "mean_probability": 0.6704489099854717
+   },
+   {
+    "harp": 6027,
+    "n_windows": 220,
+    "n_positive_windows": 0,
+    "n_false_alarms": 158,
+    "n_hits": 0,
+    "max_probability": 0.944218698221492,
+    "mean_probability": 0.6485070389110293
+   },
+   {
+    "harp": 5718,
+    "n_windows": 193,
+    "n_positive_windows": 0,
+    "n_false_alarms": 154,
+    "n_hits": 0,
+    "max_probability": 0.9400810056294208,
+    "mean_probability": 0.6558492748234511
+   },
+   {
+    "harp": 6206,
+    "n_windows": 197,
+    "n_positive_windows": 44,
+    "n_false_alarms": 153,
+    "n_hits": 44,
+    "max_probability": 0.977320061931282,
+    "mean_probability": 0.8544397959574543
+   },
+   {
+    "harp": 6327,
+    "n_windows": 234,
+    "n_positive_windows": 87,
+    "n_false_alarms": 147,
+    "n_hits": 87,
+    "max_probability": 0.9987006880078166,
+    "mean_probability": 0.8965628553630022
+   },
+   {
+    "harp": 5673,
+    "n_windows": 230,
+    "n_positive_windows": 32,
+    "n_false_alarms": 144,
+    "n_hits": 32,
+    "max_probability": 0.951091204157985,
+    "mean_probability": 0.7004205583998975
+   },
+   {
+    "harp": 6178,
+    "n_windows": 223,
+    "n_positive_windows": 0,
+    "n_false_alarms": 141,
+    "n_hits": 0,
+    "max_probability": 0.8525275373433601,
+    "mean_probability": 0.593709379642251
+   },
+   {
+    "harp": 5692,
+    "n_windows": 233,
+    "n_positive_windows": 111,
+    "n_false_alarms": 122,
+    "n_hits": 111,
+    "max_probability": 0.9858359427825004,
+    "mean_probability": 0.9304022764938752
+   },
+   {
+    "harp": 5415,
+    "n_windows": 221,
+    "n_positive_windows": 21,
+    "n_false_alarms": 121,
+    "n_hits": 21,
+    "max_probability": 0.973730091695423,
+    "mean_probability": 0.6368206659933916
+   }
+  ]
+ },
+ "by_missingness": {
+  "none (0%)": {
+   "n": 66503,
+   "positives": 894,
+   "tp": 812,
+   "fp": 4289,
+   "fn": 82,
+   "tn": 61320,
+   "precision": 0.15918447363262106,
+   "recall": 0.9082774049217002,
+   "f1": 0.2708924103419516,
+   "tss": 0.8429052760979108,
+   "fpr": 0.06537212882378941,
+   "far": 0.840815526367379,
+   "alert_rate": 0.07670330661774656,
+   "base_rate": 0.013443002571312573
+  },
+  "0-1%": {
+   "n": 32,
+   "positives": 0,
+   "fp": 0,
+   "tn": 32,
+   "alert_rate": 0.0,
+   "note": "no positives in this group: recall, precision and the AUCs are undefined"
+  },
+  "1-5%": {
+   "n": 7981,
+   "positives": 93,
+   "tp": 93,
+   "fp": 402,
+   "fn": 0,
+   "tn": 7486,
+   "precision": 0.18787878787878787,
+   "recall": 1.0,
+   "f1": 0.3163265306122449,
+   "tss": 0.9490365111561866,
+   "fpr": 0.05096348884381339,
+   "far": 0.8121212121212121,
+   "alert_rate": 0.06202230296955269,
+   "base_rate": 0.011652675103370504
+  },
+  "5-25%": {
+   "n": 774,
+   "positives": 3,
+   "tp": 2,
+   "fp": 16,
+   "fn": 1,
+   "tn": 755,
+   "precision": 0.1111111111111111,
+   "recall": 0.6666666666666666,
+   "f1": 0.19047619047619047,
+   "tss": 0.6459143968871595,
+   "fpr": 0.020752269779507133,
+   "far": 0.8888888888888888,
+   "alert_rate": 0.023255813953488372,
+   "base_rate": 0.003875968992248062
+  },
+  ">25%": {
+   "n": 75,
+   "positives": 0,
+   "fp": 0,
+   "tn": 75,
+   "alert_rate": 0.0,
+   "note": "no positives in this group: recall, precision and the AUCs are undefined"
+  }
+ },
+ "notes": {
+  "x_class": "P5 has 19 X-class windows against 971 M-class. Any statement about X-class performance rests on 19 cases.",
+  "year": "P5 covers 2015-03-07 to 2018-08-17, the declining phase of solar cycle 24, so the positive base rate drops steeply across the partition. Precision falls with it, which is arithmetic rather than model degradation.",
+  "region": "False alarms are concentrated: a magnetically complex region that never produces an M or X flare yields a long run of consecutive alerted windows, because consecutive windows share 11 of their 12 hours of data."
+ }
+}

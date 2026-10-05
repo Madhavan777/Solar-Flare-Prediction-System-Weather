@@ -1,0 +1,282 @@
+{
+ "posthoc": "Post-hoc analysis. Computed on the locked test partition P5 after model selection was complete and written to results/selection.json. It did not influence the choice of model, features or thresholds, and none of the frozen numbers in results/ depend on it.",
+ "analysis": "feature ablation",
+ "protocol": "Every variant is a new logistic regression with the selected model's architecture (signed-log, median imputation, standardisation, C=0.01, class_weight='balanced', seed 42), fitted on P1-P3, with its threshold chosen on P4 by TSS and scored once on P5. The frozen model is unchanged and no ablation result was used to select anything.",
+ "representation_comparison": {
+  "I1_LR_last": {
+   "description": "24 last-value SHARP features, median imputation, standard scaling, C=1.0",
+   "n_features": 24,
+   "validation_tss": 0.8462546245971683,
+   "validation_pr_auc": 0.4822542479550198,
+   "test_tss": 0.8665857906799084,
+   "test_pr_auc": 0.4623757397169884,
+   "test_precision": 0.12621877921731,
+   "test_recall": 0.9545454545454546,
+   "source": "frozen results/, not recomputed here"
+  },
+  "I2_LR_temporal_C0.01": {
+   "description": "144 temporal features, signed-log, median imputation, scaling, C=0.01",
+   "n_features": 144,
+   "validation_tss": 0.8622237407182501,
+   "validation_pr_auc": 0.4998517914983255,
+   "test_tss": 0.852874221203633,
+   "test_pr_auc": 0.48936288684703266,
+   "test_precision": 0.1615603847524047,
+   "test_recall": 0.9161616161616162,
+   "source": "frozen results/, not recomputed here"
+  }
+ },
+ "statistic_family_variants": {
+  "drop_last": {
+   "description": "144 temporal features minus the 24 'last' features (120 features)",
+   "n_features": 120,
+   "fit_seconds": 21.7,
+   "threshold_chosen_on": "validation partition P4, maximising TSS",
+   "threshold": 0.47964076129920125,
+   "validation_tss": 0.8621640441768114,
+   "validation_pr_auc": 0.4955426106152588,
+   "test_tss": 0.8660914353620235,
+   "test_pr_auc": 0.485992575281491,
+   "test_precision": 0.14416227934345,
+   "test_recall": 0.9404040404040404,
+   "test_f1": 0.25
+  },
+  "drop_mean": {
+   "description": "144 temporal features minus the 24 'mean' features (120 features)",
+   "n_features": 120,
+   "fit_seconds": 20.7,
+   "threshold_chosen_on": "validation partition P4, maximising TSS",
+   "threshold": 0.4987955177429545,
+   "validation_tss": 0.8620841460790133,
+   "validation_pr_auc": 0.4965087854367228,
+   "test_tss": 0.8657098718275189,
+   "test_pr_auc": 0.48561886925318826,
+   "test_precision": 0.14829018855864493,
+   "test_recall": 0.9373737373737374,
+   "test_f1": 0.2560706401766004
+  },
+  "drop_std": {
+   "description": "144 temporal features minus the 24 'std' features (120 features)",
+   "n_features": 120,
+   "fit_seconds": 20.0,
+   "threshold_chosen_on": "validation partition P4, maximising TSS",
+   "threshold": 0.5244354458594096,
+   "validation_tss": 0.8697695103512844,
+   "validation_pr_auc": 0.5018031407889437,
+   "test_tss": 0.8565583906289789,
+   "test_pr_auc": 0.49893001081825067,
+   "test_precision": 0.15380736258194655,
+   "test_recall": 0.9242424242424242,
+   "test_f1": 0.2637267617812365
+  },
+  "drop_min": {
+   "description": "144 temporal features minus the 24 'min' features (120 features)",
+   "n_features": 120,
+   "fit_seconds": 20.7,
+   "threshold_chosen_on": "validation partition P4, maximising TSS",
+   "threshold": 0.5088952691875867,
+   "validation_tss": 0.861704857146382,
+   "validation_pr_auc": 0.5106043240152747,
+   "test_tss": 0.867054409642645,
+   "test_pr_auc": 0.4923048668657151,
+   "test_precision": 0.15069827866190322,
+   "test_recall": 0.9373737373737374,
+   "test_f1": 0.259653049804141
+  },
+  "drop_max": {
+   "description": "144 temporal features minus the 24 'max' features (120 features)",
+   "n_features": 120,
+   "fit_seconds": 19.9,
+   "threshold_chosen_on": "validation partition P4, maximising TSS",
+   "threshold": 0.5319068387915181,
+   "validation_tss": 0.8654376729726135,
+   "validation_pr_auc": 0.5478843777803375,
+   "test_tss": 0.8615651642475172,
+   "test_pr_auc": 0.4913938111179283,
+   "test_precision": 0.15813953488372093,
+   "test_recall": 0.9272727272727272,
+   "test_f1": 0.27019867549668874
+  },
+  "drop_slope": {
+   "description": "144 temporal features minus the 24 'slope' features (120 features)",
+   "n_features": 120,
+   "fit_seconds": 18.6,
+   "threshold_chosen_on": "validation partition P4, maximising TSS",
+   "threshold": 0.530018393564754,
+   "validation_tss": 0.8665156890187149,
+   "validation_pr_auc": 0.5035364273189099,
+   "test_tss": 0.8460254307783719,
+   "test_pr_auc": 0.4915547749088826,
+   "test_precision": 0.15335029686174725,
+   "test_recall": 0.9131313131313131,
+   "test_f1": 0.2625998547567175
+  },
+  "only_last": {
+   "description": "only the 24 'last' features",
+   "n_features": 24,
+   "fit_seconds": 4.7,
+   "threshold_chosen_on": "validation partition P4, maximising TSS",
+   "threshold": 0.5441495397357622,
+   "validation_tss": 0.8744206659694074,
+   "validation_pr_auc": 0.5961598391977686,
+   "test_tss": 0.8539634326457856,
+   "test_pr_auc": 0.4754936416211999,
+   "test_precision": 0.14897427548029957,
+   "test_recall": 0.9242424242424242,
+   "test_f1": 0.25659001682557486
+  },
+  "only_mean": {
+   "description": "only the 24 'mean' features",
+   "n_features": 24,
+   "fit_seconds": 3.8,
+   "threshold_chosen_on": "validation partition P4, maximising TSS",
+   "threshold": 0.47497481335371344,
+   "validation_tss": 0.8687118158029288,
+   "validation_pr_auc": 0.5918504718105192,
+   "test_tss": 0.8430256854256855,
+   "test_pr_auc": 0.47576108447604687,
+   "test_precision": 0.1265840220385675,
+   "test_recall": 0.9282828282828283,
+   "test_f1": 0.22278787878787878
+  },
+  "only_std": {
+   "description": "only the 24 'std' features",
+   "n_features": 24,
+   "fit_seconds": 3.2,
+   "threshold_chosen_on": "validation partition P4, maximising TSS",
+   "threshold": 0.5959280223557244,
+   "validation_tss": 0.8500071279452465,
+   "validation_pr_auc": 0.482975588614538,
+   "test_tss": 0.860087870299635,
+   "test_pr_auc": 0.4333966042729416,
+   "test_precision": 0.15339676180938075,
+   "test_recall": 0.9282828282828283,
+   "test_f1": 0.26328606216874373
+  },
+  "only_min": {
+   "description": "only the 24 'min' features",
+   "n_features": 24,
+   "fit_seconds": 3.8,
+   "threshold_chosen_on": "validation partition P4, maximising TSS",
+   "threshold": 0.5583440675992518,
+   "validation_tss": 0.863920825662796,
+   "validation_pr_auc": 0.5857339952081496,
+   "test_tss": 0.841422154316272,
+   "test_pr_auc": 0.4613024874044835,
+   "test_precision": 0.1373526745240254,
+   "test_recall": 0.9181818181818182,
+   "test_f1": 0.23895899053627762
+  },
+  "only_max": {
+   "description": "only the 24 'max' features",
+   "n_features": 24,
+   "fit_seconds": 3.5,
+   "threshold_chosen_on": "validation partition P4, maximising TSS",
+   "threshold": 0.49004064377570206,
+   "validation_tss": 0.8672145360735714,
+   "validation_pr_auc": 0.5184171090506665,
+   "test_tss": 0.8467735506323741,
+   "test_pr_auc": 0.48796147046712796,
+   "test_precision": 0.1342802752965295,
+   "test_recall": 0.9262626262626262,
+   "test_f1": 0.23455684870188004
+  },
+  "only_slope": {
+   "description": "only the 24 'slope' features",
+   "n_features": 24,
+   "fit_seconds": 3.4,
+   "threshold_chosen_on": "validation partition P4, maximising TSS",
+   "threshold": 0.5140726870631965,
+   "validation_tss": 0.20260252247016203,
+   "validation_pr_auc": 0.031952512956623116,
+   "test_tss": 0.27021400560224085,
+   "test_pr_auc": 0.028069268520665356,
+   "test_precision": 0.022689440544257075,
+   "test_recall": 0.6333333333333333,
+   "test_f1": 0.043809390721073226
+  }
+ },
+ "findings": {
+  "full_model_validation_tss": 0.8622237407182501,
+  "full_model_test_pr_auc": 0.48936288684703266,
+  "full_model_test_tss": 0.852874221203633,
+  "variants_beating_the_selected_model_on_validation": [
+   {
+    "variant": "only_last",
+    "n_features": 24,
+    "validation_tss": 0.8744206659694074,
+    "validation_tss_above_selected": 0.012196925251157231,
+    "test_tss": 0.8539634326457856,
+    "test_pr_auc": 0.4754936416211999,
+    "test_pr_auc_vs_selected": -0.013869245225832771
+   },
+   {
+    "variant": "drop_std",
+    "n_features": 120,
+    "validation_tss": 0.8697695103512844,
+    "validation_tss_above_selected": 0.007545769633034216,
+    "test_tss": 0.8565583906289789,
+    "test_pr_auc": 0.49893001081825067,
+    "test_pr_auc_vs_selected": 0.009567123971218006
+   },
+   {
+    "variant": "only_mean",
+    "n_features": 24,
+    "validation_tss": 0.8687118158029288,
+    "validation_tss_above_selected": 0.006488075084678635,
+    "test_tss": 0.8430256854256855,
+    "test_pr_auc": 0.47576108447604687,
+    "test_pr_auc_vs_selected": -0.013601802370985794
+   },
+   {
+    "variant": "only_max",
+    "n_features": 24,
+    "validation_tss": 0.8672145360735714,
+    "validation_tss_above_selected": 0.004990795355321209,
+    "test_tss": 0.8467735506323741,
+    "test_pr_auc": 0.48796147046712796,
+    "test_pr_auc_vs_selected": -0.0014014163799047075
+   },
+   {
+    "variant": "drop_slope",
+    "n_features": 120,
+    "validation_tss": 0.8665156890187149,
+    "validation_tss_above_selected": 0.004291948300464754,
+    "test_tss": 0.8460254307783719,
+    "test_pr_auc": 0.4915547749088826,
+    "test_pr_auc_vs_selected": 0.0021918880618499448
+   },
+   {
+    "variant": "drop_max",
+    "n_features": 120,
+    "validation_tss": 0.8654376729726135,
+    "validation_tss_above_selected": 0.003213932254363394,
+    "test_tss": 0.8615651642475172,
+    "test_pr_auc": 0.4913938111179283,
+    "test_pr_auc_vs_selected": 0.0020309242708956288
+   },
+   {
+    "variant": "only_min",
+    "n_features": 24,
+    "validation_tss": 0.863920825662796,
+    "validation_tss_above_selected": 0.0016970849445459013,
+    "test_tss": 0.841422154316272,
+    "test_pr_auc": 0.4613024874044835,
+    "test_pr_auc_vs_selected": -0.028060399442549178
+   }
+  ],
+  "limitation_this_exposes": "7 of the 12 ablation variants reach a higher validation TSS than the selected model. They were never candidates - the seven-candidate set was fixed before any of this was computed, and the selection rule was applied to that set honestly - but it shows the candidate search was narrow. A wider search over feature subsets, run under the same protocol, would very likely have selected a smaller model. Stated as a limitation rather than as a correction: the frozen result stands, and this is what an examiner should be told about it.",
+  "most_damaging_family_to_drop": {
+   "variant": "drop_min",
+   "validation_tss": 0.861704857146382,
+   "validation_tss_loss_vs_full": 0.0005188835718681339
+  },
+  "best_single_family": {
+   "variant": "only_last",
+   "validation_tss": 0.8744206659694074,
+   "test_pr_auc": 0.4754936416211999
+  },
+  "max_validation_tss_loss_from_dropping_one_family": 0.0005188835718681339
+ },
+ "n_variants_trained": 12
+}
