@@ -1,0 +1,17 @@
+# Large inputs that are not ours to redistribute, and local scratch.
+raw_data/
+data/
+reference/
+.venv/
+venv/
+build/
+.git/
+.github/
+.pytest_cache/
+.ruff_cache/
+__pycache__/
+*.py[cod]
+*.docx
+~$*
+docs/screenshots/
+.claude/

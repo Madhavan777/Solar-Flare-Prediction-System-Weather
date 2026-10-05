@@ -1,0 +1,58 @@
+# Install once:  pre-commit install
+# Run over everything:  pre-commit run --all-files
+#
+# The original pipeline scripts in src/ (common.py, extract_features.py,
+# merge_audit.py, train_eval.py, make_figures.py, build_demo_data.py, shoot.py)
+# and the report builders are excluded. They reproduce frozen published
+# artefacts and are deliberately not reformatted.
+exclude: |
+  (?x)^(
+      src/common\.py
+    | src/extract_features\.py
+    | src/merge_audit\.py
+    | src/train_eval\.py
+    | src/make_figures\.py
+    | src/build_demo_data\.py
+    | src/shoot\.py
+    | src/build_docx\.py
+    | src/docx_helpers\.py
+    | src/update_fields\.py
+    | src/make_architecture\.py
+    | results/.*
+    | figures/.*
+    | models/.*
+  )$
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: \.md$
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-added-large-files
+        # The seven committed pipelines are up to 14 MB; nothing larger should
+        # ever enter the repository.
+        args: [--maxkb=25000]
+      - id: detect-private-key
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+        # black is the formatter of record; ruff-format is not enabled.
+        stages: [manual]
+
+  - repo: https://github.com/psf/black
+    rev: 25.9.0
+    hooks:
+      - id: black

@@ -1,0 +1,136 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "solarflare"
+version = "1.0.0"
+description = "Solar Flare Prediction & Space Weather Alert System Using Machine Learning (academic PBL prototype)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "Madhavan G" },
+    { name = "Sriram Sivakumar" },
+]
+keywords = ["solar flare", "space weather", "SWAN-SF", "SHARP", "machine learning", "time series"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Astronomy",
+]
+
+# Versions are pinned exactly: the saved pipelines are scikit-learn pickles and
+# will not load across a scikit-learn minor version. See docs/REPRODUCIBILITY.md.
+dependencies = [
+    "numpy==2.4.4",
+    "pandas==3.0.2",
+    "scikit-learn==1.8.0",
+    "scipy==1.18.1",
+    "joblib==1.5.3",
+    "matplotlib==3.10.9",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.4.2",
+    "ruff==0.14.0",
+    "black==25.9.0",
+    "pre-commit==4.3.0",
+]
+dashboard = [
+    "playwright==1.56.0",
+]
+
+[project.scripts]
+solarflare = "solarflare.cli:main"
+
+[project.urls]
+Repository = "https://github.com/Madhavan777/Solar-Flare-Prediction-System-Weather"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+# `common` must stay importable as a TOP-LEVEL module: the saved pipelines embed
+# FunctionTransformer(common.slog) and unpickling resolves it by that name.
+py-modules = ["common"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["solarflare*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311", "py312"]
+# The original pipeline scripts and the report builders are left exactly as they
+# were when the published results were produced, so that they can be read
+# side by side with the verification code. Everything else is formatted.
+force-exclude = '''
+(
+    /\.venv/
+  | /build/
+  | ^/?src/common\.py$
+  | ^/?src/extract_features\.py$
+  | ^/?src/merge_audit\.py$
+  | ^/?src/train_eval\.py$
+  | ^/?src/make_figures\.py$
+  | ^/?src/build_demo_data\.py$
+  | ^/?src/shoot\.py$
+  | ^/?src/build_docx\.py$
+  | ^/?src/docx_helpers\.py$
+  | ^/?src/update_fields\.py$
+  | ^/?src/make_architecture\.py$
+)
+'''
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+# The report-building scripts and the original pipeline scripts are frozen: they
+# reproduce published artefacts and are deliberately not restyled.
+extend-exclude = [
+    "src/build_docx.py",
+    "src/docx_helpers.py",
+    "src/update_fields.py",
+    "src/make_architecture.py",
+    ".venv",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "PTH", "RUF"]
+ignore = [
+    "E501",    # line length is handled by black
+    "RUF005",  # explicit list concatenation reads better in the pipeline code
+    # The prose uses real typography on purpose: en dashes, the multiplication
+    # sign and the minus sign. Mangling it to ASCII would make the documentation
+    # and figure captions worse, and none of it is an identifier.
+    "RUF001", "RUF002", "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# The original pipeline scripts are kept byte-for-byte reproducible.
+"src/common.py" = ["ALL"]
+"src/extract_features.py" = ["ALL"]
+"src/merge_audit.py" = ["ALL"]
+"src/train_eval.py" = ["ALL"]
+"src/make_figures.py" = ["ALL"]
+"src/build_demo_data.py" = ["ALL"]
+"src/shoot.py" = ["ALL"]
+# metrics.metrics() and metrics.best_threshold() are deliberate line-by-line
+# copies of src/train_eval.py so that the published numbers can be re-derived by
+# reading the two side by side. Restyling them would break that correspondence.
+"src/solarflare/metrics.py" = ["C408", "SIM108"]
+"tests/*" = ["B011"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "largedata: needs data/all_X.npz and data/all_meta.csv.gz (skipped when absent)",
+    "models: needs the trained pipelines in models/ (skipped when absent)",
+    "slow: takes more than about ten seconds",
+    "playwright: drives the dashboard in a headless browser",
+]

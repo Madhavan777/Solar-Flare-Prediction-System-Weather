@@ -1,0 +1,95 @@
+cff-version: 1.2.0
+title: >-
+  Solar Flare Prediction & Space Weather Alert System Using Machine Learning
+message: >-
+  If you refer to this project, please cite it as below. If you use the
+  underlying data, cite the SWAN-SF dataset separately (see references).
+type: software
+authors:
+  - given-names: Madhavan
+    family-names: G
+    affiliation: >-
+      Department of Computer Science and Engineering, Chennai Institute of
+      Technology (Autonomous), Chennai, India
+  - given-names: Sriram
+    family-names: Sivakumar
+    affiliation: >-
+      Department of Computer Science and Engineering, Chennai Institute of
+      Technology (Autonomous), Chennai, India
+abstract: >-
+  A leakage-safe machine learning pipeline that forecasts whether a solar active
+  region will produce a major (GOES M- or X-class) flare in the 24 hours
+  following a 12-hour observation window, using the 24 SHARP magnetic-field
+  parameters of the SWAN-SF benchmark. Seven candidates (logistic regression and
+  random forest, point-in-time and temporal feature sets) are compared under a
+  chronological partition split in which no active region is shared between
+  train, validation and test. The model and its decision threshold are fixed on
+  the validation partition before the test partition is scored once. The
+  selected model, L2-regularised logistic regression on 144 temporal features
+  with C=0.01, reaches a true skill statistic of 0.853 and a precision-recall
+  AUC of 0.489 on the locked test partition, at 91.6 percent recall and 16.2
+  percent precision. Delivered as an academic prototype with a static offline
+  dashboard, not as an operational space-weather warning service.
+keywords:
+  - solar flare prediction
+  - space weather
+  - SWAN-SF
+  - SHARP parameters
+  - multivariate time series
+  - class imbalance
+  - true skill statistic
+  - data leakage
+  - logistic regression
+  - random forest
+license: MIT
+version: 1.0.0
+date-released: "2026-10-05"
+repository-code: >-
+  https://github.com/Madhavan777/Solar-Flare-Prediction-System-Weather
+references:
+  - type: article
+    title: >-
+      Multivariate time series dataset for space weather data analytics
+    authors:
+      - family-names: Angryk
+        given-names: Rafal
+      - family-names: Martens
+        given-names: Petrus
+      - family-names: Aydin
+        given-names: Berkay
+      - family-names: Kempton
+        given-names: Dustin
+      - family-names: Mahajan
+        given-names: Sushant
+      - family-names: Basodi
+        given-names: Sunitha
+      - family-names: Ahmadzadeh
+        given-names: Azim
+      - family-names: Cai
+        given-names: Xumin
+      - family-names: Filali Boubrahimi
+        given-names: Soukaina
+      - family-names: Hamdi
+        given-names: Shah Muhammad
+      - family-names: Schuh
+        given-names: Michael
+      - family-names: Georgoulis
+        given-names: Manolis
+    journal: Scientific Data
+    volume: "7"
+    start: "227"
+    year: 2020
+    doi: 10.1038/s41597-020-0548-x
+  - type: dataset
+    title: SWAN-SF (Space Weather ANalytics for Solar Flares), version 1.2
+    authors:
+      - family-names: Angryk
+        given-names: Rafal
+      - family-names: Martens
+        given-names: Petrus
+      - family-names: Aydin
+        given-names: Berkay
+    year: 2020
+    publisher:
+      name: Harvard Dataverse
+    doi: 10.7910/DVN/EBCFKM

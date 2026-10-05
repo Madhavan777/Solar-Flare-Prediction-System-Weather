@@ -1,0 +1,95 @@
+# ---------------------------------------------------------------------------
+# Large inputs and intermediates. None of these belong in the repository; the
+# README and docs/REPRODUCIBILITY.md explain how to obtain or rebuild each one.
+# ---------------------------------------------------------------------------
+
+# SWAN-SF v1.2 tarballs, 5.74 GB. Download from the Harvard Dataverse
+# (DOI 10.7910/DVN/EBCFKM) into raw_data/.
+raw_data/
+
+# Extracted features: data/features/ is 241 MB of chunks and the two merged
+# files are another 190 MB. Rebuild with:
+#   python -m solarflare features   (needs raw_data/, hours)
+#   python -m solarflare audit      (merges the chunks, about four minutes)
+data/
+
+# Superseded report draft kept only for local reference.
+reference/
+
+# Microsoft Word lock files.
+~$*
+
+# ---------------------------------------------------------------------------
+# Committed deliberately, recorded here so the choice is visible:
+#   models/            all seven pipelines, 28 MB, largest file 14 MB. Keeping
+#                      them means a fresh clone reproduces the full
+#                      seven-candidate table without retraining.
+#   results/           every frozen metric, prediction file and log, 4.8 MB.
+#   figures/           the report's figures, 1.9 MB.
+#   dashboard/         the static demo and its generated JSON.
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+eggs/
+.eggs/
+sdist/
+wheels/
+*.egg-info/
+*.egg
+MANIFEST
+
+# Environments
+.venv/
+venv/
+env/
+ENV/
+.conda/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.tox/
+.nox/
+
+# Playwright
+/test-results/
+/playwright-report/
+
+# ---------------------------------------------------------------------------
+# Secrets — nothing in this project needs any, so anything matching is a mistake
+# ---------------------------------------------------------------------------
+.env
+.env.*
+*.pem
+*.key
+*secret*
+*credential*
+*apikey*
+*_key
+*_key.*
+
+# ---------------------------------------------------------------------------
+# OS and editor cruft
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+.idea/
+.vscode/

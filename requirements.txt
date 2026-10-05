@@ -1,0 +1,22 @@
+# Runtime dependencies, pinned exactly.
+#
+# scikit-learn MUST be 1.8.0. The seven pipelines in models/ are scikit-learn
+# pickles; a different minor version either refuses to unpickle them or loads
+# them with changed internals, and the published metrics would no longer be
+# reproducible. solarflare.env checks this at import time.
+#
+# Install (Windows PowerShell, from the project root):
+#   py -3.12 -m venv .venv
+#   .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+#   .\.venv\Scripts\python.exe -m pip install -e .
+#
+# Install (Linux / macOS):
+#   python3.12 -m venv .venv && . .venv/bin/activate
+#   pip install -r requirements.txt && pip install -e .
+
+numpy==2.4.4
+pandas==3.0.2
+scikit-learn==1.8.0
+scipy==1.18.1
+joblib==1.5.3
+matplotlib==3.10.9
