@@ -1,0 +1,7 @@
+{
+ "selected": "I2_LR_temporal_C0.01",
+ "rule": "max validation TSS (tie-break: validation PR-AUC)",
+ "alert_threshold": 0.544546643935129,
+ "high_threshold": 0.9672703856605697,
+ "decided_at": "2026-09-27 07:23:39"
+}

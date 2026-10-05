@@ -1,0 +1,65 @@
+{
+ "model_key": "I2_LR_temporal_C0.01",
+ "model_name": "Logistic Regression (temporal features, C=0.01)",
+ "alert_threshold": 0.5445,
+ "high_threshold": 0.9673,
+ "test": {
+  "threshold": 0.544546643935129,
+  "precision": 0.1615603847524047,
+  "recall": 0.9161616161616162,
+  "f1": 0.27468201090248334,
+  "tss": 0.852874221203633,
+  "hss2": 0.25811292164810495,
+  "far": 0.8384396152475952,
+  "accuracy": 0.9364426457904863,
+  "pr_auc": 0.48936288684703266,
+  "roc_auc": 0.9789784907902557,
+  "tp": 907,
+  "fp": 4707,
+  "fn": 83,
+  "tn": 69668,
+  "n": 75365,
+  "positives": 990
+ },
+ "examples": {
+  "flare_case": {
+   "ar": 7115,
+   "start": "2017-09-06T10:00:00",
+   "end": "2017-09-06T21:48:00",
+   "flare_class": "X1.3",
+   "probability": 0.9999
+  },
+  "quiet_case": {
+   "ar": 5413,
+   "start": "2015-04-02T09:24:00",
+   "end": "2015-04-02T21:12:00",
+   "probability": 0.001
+  }
+ },
+ "top_features": [
+  {
+   "name": "R_VALUE__std",
+   "weight": -1.5714
+  },
+  {
+   "name": "TOTUSJH__max",
+   "weight": 1.1227
+  },
+  {
+   "name": "TOTUSJH__last",
+   "weight": 1.01
+  },
+  {
+   "name": "SHRGT45__min",
+   "weight": 1.0098
+  },
+  {
+   "name": "R_VALUE__max",
+   "weight": 0.8373
+  },
+  {
+   "name": "SHRGT45__last",
+   "weight": 0.7854
+  }
+ ]
+}

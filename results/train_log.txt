@@ -1,0 +1,26 @@
+I1_LR_last               fit=   2.5s  val TSS=0.846 PR-AUC=0.482 ROC-AUC=0.971 P=0.153 R=0.972 thr=0.3879
+I2_LR_temporal_C0.01     fit=  15.1s  val TSS=0.862 PR-AUC=0.500 ROC-AUC=0.975 P=0.185 R=0.961 thr=0.5445
+I2_LR_temporal_C0.1      fit=  18.3s  val TSS=0.860 PR-AUC=0.484 ROC-AUC=0.974 P=0.174 R=0.967 thr=0.4701
+I2_LR_temporal_C1        fit=  31.3s  val TSS=0.853 PR-AUC=0.465 ROC-AUC=0.973 P=0.176 R=0.958 thr=0.4675
+I2_RF_leaf5              fit= 255.5s  val TSS=0.854 PR-AUC=0.233 ROC-AUC=0.951 P=0.145 R=0.990 thr=0.0182
+I2_RF_leaf20             fit= 247.1s  val TSS=0.852 PR-AUC=0.368 ROC-AUC=0.966 P=0.141 R=0.993 thr=0.0391
+I2_RF_leaf50_d16         fit= 237.2s  val TSS=0.848 PR-AUC=0.471 ROC-AUC=0.969 P=0.145 R=0.983 thr=0.0891
+SELECTED: {'selected': 'I2_LR_temporal_C0.01', 'rule': 'max validation TSS (tie-break: validation PR-AUC)', 'alert_threshold': 0.544546643935129, 'high_threshold': 0.9672703856605697, 'decided_at': '2026-09-27 07:23:39'}
+TEST (selected): {
+ "threshold": 0.544546643935129,
+ "precision": 0.1615603847524047,
+ "recall": 0.9161616161616162,
+ "f1": 0.27468201090248334,
+ "tss": 0.852874221203633,
+ "hss2": 0.25811292164810495,
+ "far": 0.8384396152475952,
+ "accuracy": 0.9364426457904863,
+ "pr_auc": 0.48936288684703266,
+ "roc_auc": 0.9789784907902557,
+ "tp": 907,
+ "fp": 4707,
+ "fn": 83,
+ "tn": 69668,
+ "n": 75365,
+ "positives": 990
+}
