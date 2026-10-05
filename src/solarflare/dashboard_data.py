@@ -1,4 +1,4 @@
-﻿"""Generate every JSON file the dashboard reads.
+"""Generate every JSON file the dashboard reads.
 
 Nothing in ``dashboard/index.html`` may contain a typed-in number. Each file
 below is derived from ``results/`` or from the saved pipeline, so the page and
@@ -8,7 +8,7 @@ Files written:
 
 ``demo.json``
     The original six views' data. Regenerated to be **identical** to the frozen
-    ``results/dashboard_demo.json`` â€” the report's Figures 5.1-5.6 were captured
+    ``results/dashboard_demo.json`` — the report's Figures 5.1-5.6 were captured
     through it, so its keys and values are a fixed interface.
 ``context.json``
     Everything that used to be hard-coded in the page: the risk-band text, the
@@ -262,7 +262,7 @@ def build_context() -> Path:
         {
             "generated_from": "results/selection.json, results/test_results.json, "
             "results/data_audit.json, results/extra/*.json",
-            "disclaimer": "Academic prototype â€” not an operational space-weather warning "
+            "disclaimer": "Academic prototype — not an operational space-weather warning "
             "service.",
             "dataset": {
                 "name": "SWAN-SF v1.2",
@@ -270,7 +270,7 @@ def build_context() -> Path:
                 "n_windows_total": audit["n_total"],
                 "n_features": audit["n_features"],
                 "n_partitions": 5,
-                "year_span": "2010â€“2018",
+                "year_span": "2010–2018",
                 "observation_hours": 12,
                 "prediction_hours": 24,
                 "records_per_window": 60,
@@ -278,7 +278,7 @@ def build_context() -> Path:
                 "n_sharp_parameters": 24,
             },
             "split": {
-                "train": "P1â€“P3",
+                "train": "P1–P3",
                 "validation": "P4",
                 "test": "P5",
                 "test_windows": test["n"],
@@ -291,13 +291,13 @@ def build_context() -> Path:
                 "high": high_threshold,
                 "alert_text": f"{alert_threshold:.4f}",
                 "high_text": f"{high_threshold:.4f}",
-                "chosen_on": "validation partition P4 â€” alert maximises TSS, high-risk "
+                "chosen_on": "validation partition P4 — alert maximises TSS, high-risk "
                 "maximises F1",
             },
             "risk_bands": [
                 {"level": "LOW", "text": f"p < {alert_threshold:.2f}"},
-                {"level": "MODERATE", "text": f"{alert_threshold:.2f} â€“ {high_threshold:.2f}"},
-                {"level": "HIGH", "text": f"p â‰¥ {high_threshold:.2f}"},
+                {"level": "MODERATE", "text": f"{alert_threshold:.2f} – {high_threshold:.2f}"},
+                {"level": "HIGH", "text": f"p ≥ {high_threshold:.2f}"},
             ],
             "alerts": {
                 "n": alerts,
@@ -379,7 +379,7 @@ def build_operating() -> Path:
             "high_index": high_index,
             "n_windows": len(stored),
             "n_positives": int(stored["y"].sum()),
-            "banner": "Exploratory â€” headline results use the validation-fixed threshold. "
+            "banner": "Exploratory — headline results use the validation-fixed threshold. "
             "Moving this slider shows what other operating points would have given "
             "on the test partition; choosing one on this basis would be selecting "
             "on the test set.",

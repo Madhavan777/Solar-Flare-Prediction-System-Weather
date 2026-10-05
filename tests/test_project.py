@@ -246,6 +246,61 @@ def test_no_committed_file_exceeds_25_mb():
     assert not offenders, "files over 25 MB: " + ", ".join(offenders)
 
 
+def test_no_file_is_double_encoded():
+    """Catch UTF-8 text that has been round-tripped through a single-byte code page.
+
+    A tool that reads a UTF-8 file as cp1252 and writes it back as UTF-8 turns
+    every non-ASCII character into a mojibake sequence: an em dash becomes
+    "a-circumflex, euro, right-double-quote". It is easy to do by accident on
+    Windows, it does not raise, and the damage only surfaces later in generated
+    output - so it is worth a test rather than an eye.
+    """
+    markers = ("â€", "â\u0080", "Ã©", "Â ")
+    skip_dirs = {
+        ".venv",
+        ".git",
+        "raw_data",
+        "data",
+        "reference",
+        "build",
+        "__pycache__",
+        ".pytest_cache",
+        ".ruff_cache",
+    }
+    suffixes = {
+        ".py",
+        ".md",
+        ".html",
+        ".js",
+        ".json",
+        ".toml",
+        ".cff",
+        ".txt",
+        ".yml",
+        ".yaml",
+        ".cfg",
+        ".ini",
+    }
+    offenders = []
+    for path in paths.ROOT.rglob("*"):
+        if not path.is_file() or path.suffix.lower() not in suffixes:
+            continue
+        if any(part in skip_dirs for part in path.relative_to(paths.ROOT).parts):
+            continue
+        if path.name == "test_project.py":
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            offenders.append(f"{paths.relative(path)} is not valid UTF-8")
+            continue
+        for marker in markers:
+            if marker in text:
+                offenders.append(f"{paths.relative(path)} contains mojibake {marker!r}")
+                break
+    assert not offenders, "; ".join(offenders)
+
+
 def test_requirements_pin_scikit_learn_exactly():
     text = (paths.ROOT / "requirements.txt").read_text(encoding="utf-8")
     assert "scikit-learn==1.8.0" in text
