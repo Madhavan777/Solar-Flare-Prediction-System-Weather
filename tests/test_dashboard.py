@@ -287,3 +287,170 @@ def test_guided_tour_walks_every_step(page):
 
 def test_no_console_errors_after_the_whole_walkthrough(page):
     assert not page.errors, "console errors: " + "; ".join(page.errors)
+
+
+# --------------------------------------------------------------------------- #
+# regressions found by auditing the live page
+# --------------------------------------------------------------------------- #
+def test_run_forecast_button_actually_does_something(page):
+    """It used to be a primary-styled button with no handler at all."""
+    page.evaluate("window.showView('predict')")
+    page.wait_for_timeout(150)
+    assert page.is_visible("#runForecast")
+    page.click("#runForecast")
+    page.wait_for_timeout(300)
+    assert page.is_visible("#v-result"), "Run Forecast did not open the Prediction view"
+    gauge = page.inner_text("#g-pct")
+    assert gauge.endswith("%") and gauge != "—", f"the gauge still reads {gauge!r}"
+    assert page.inner_text("#r-class").strip() in ("M/X flare likely", "No major flare expected")
+
+
+def test_live_contribution_card_is_hidden_until_an_inference_runs(page):
+    """A duplicate style attribute meant the hide never applied.
+
+    HTML keeps the first `style` and drops the second, so an empty
+    "Why - exact contributions" card was visible from page load.
+    """
+    page.reload(wait_until="networkidle")
+    page.wait_for_function("window.dashboardReady === true", timeout=30_000)
+    page.evaluate("window.showView('live')")
+    page.wait_for_timeout(150)
+    assert (
+        page.evaluate("getComputedStyle(document.getElementById('live-contrib-card')).display")
+        == "none"
+    )
+
+    page.click("#useExample")
+    page.wait_for_timeout(400)
+    assert (
+        page.evaluate("getComputedStyle(document.getElementById('live-contrib-card')).display")
+        != "none"
+    )
+    assert page.inner_text("#live-contrib").strip()
+
+
+def test_choosing_a_window_brings_the_detail_into_view(page):
+    """Clicking a card used to leave the detail panel below the fold."""
+    page.evaluate("window.showView('explore')")
+    page.wait_for_timeout(150)
+    page.evaluate("window.scrollTo(0, 0)")
+    page.wait_for_timeout(100)
+    page.evaluate("document.querySelectorAll('.wcard')[2].click()")
+    page.wait_for_timeout(900)
+    top = page.evaluate(
+        "Math.round(document.getElementById('wdetail').getBoundingClientRect().top)"
+    )
+    assert top < 200, f"the detail panel sits {top}px down after selecting a window"
+
+
+def test_the_view_is_reflected_in_the_url(page):
+    """So a reload mid-demonstration does not lose the operator's place."""
+    page.evaluate("window.showView('operate')")
+    page.wait_for_timeout(150)
+    assert page.evaluate("location.hash") == "#operate"
+
+    page.goto(page.url.split("#")[0] + "#explain", wait_until="networkidle")
+    page.wait_for_function("window.dashboardReady === true", timeout=30_000)
+    assert page.is_visible("#v-explain"), "a deep link did not open its view"
+
+
+def test_tab_semantics_and_landmarks(page):
+    page.evaluate("window.showView('eval')")
+    page.wait_for_timeout(150)
+    assert page.evaluate("document.querySelectorAll('main').length") == 1
+    assert page.get_attribute("#nav", "role") == "tablist"
+    assert page.evaluate("document.querySelectorAll('nav button[role=tab]').length") == 9
+    assert page.evaluate("document.querySelectorAll('[role=tabpanel]').length") == 9
+    assert (
+        page.evaluate("document.querySelectorAll('nav button[aria-selected=\"true\"]').length") == 1
+    )
+    assert page.evaluate("document.querySelectorAll('[aria-live]').length") >= 3
+    assert page.get_attribute("#op-slider", "aria-label")
+
+
+def test_every_interactive_control_has_a_visible_focus_style(page):
+    rule = page.evaluate(
+        "[...document.styleSheets].flatMap(s=>{try{return [...s.cssRules].map(r=>r.cssText)}"
+        "catch(e){return []}}).find(c=>c.includes(':focus-visible')) || ''"
+    )
+    for selector in (
+        ".wcard",
+        ".btn",
+        "nav button",
+        ".tour-launch",
+        'input[type="range"]',
+        ".tourbox button",
+    ):
+        assert selector in rule, f"{selector} has no focus-visible style"
+
+
+def test_print_and_reduced_motion_styles_exist(page):
+    rules = page.evaluate(
+        "[...document.styleSheets].flatMap(s=>{try{return [...s.cssRules].map(r=>r.cssText)}"
+        "catch(e){return []}})"
+    )
+    assert any(r.startswith("@media print") for r in rules), "no print stylesheet"
+    assert any("prefers-reduced-motion" in r for r in rules), "motion preference ignored"
+
+
+def test_gauge_circumference_is_derived_not_hard_coded(page):
+    page.evaluate("window.showView('result')")
+    page.wait_for_timeout(150)
+    dasharray = float(page.get_attribute("#gauge-arc", "stroke-dasharray"))
+    radius = float(page.get_attribute("#gauge-arc", "r"))
+    assert abs(dasharray - 2 * 3.141592653589793 * radius) < 0.01
+
+
+def test_head_metadata_is_present(page):
+    assert page.evaluate("!!document.querySelector('meta[name=description]')")
+    assert page.evaluate("!!document.querySelector('meta[name=\"theme-color\"]')")
+    assert page.get_attribute("link[rel='icon']", "href") == "favicon.svg"
+    assert (paths.DASHBOARD / "favicon.svg").is_file()
+
+
+def test_navigation_fits_one_row_on_a_laptop(page):
+    """Nine tabs plus the title and tour launcher used to wrap to two rows."""
+    page.set_viewport_size({"width": 1440, "height": 900})
+    page.wait_for_timeout(200)
+    rows = page.evaluate(
+        "new Set([...document.querySelectorAll('nav button')]"
+        ".filter(b=>b.offsetParent!==null)"
+        ".map(b=>Math.round(b.getBoundingClientRect().top))).size"
+    )
+    assert rows == 1, f"the navigation wraps to {rows} rows at 1440px"
+
+    # Report mode must keep the original 1200px layout and button metrics, or
+    # the report's Figures 5.1-5.6 would no longer match the page.
+    page.evaluate("window.setReportMode(true)")
+    page.wait_for_timeout(150)
+    assert (
+        page.evaluate("Math.round(document.querySelector('.app').getBoundingClientRect().width)")
+        == 1200
+    )
+    assert (
+        page.evaluate("getComputedStyle(document.querySelector('nav button')).padding")
+        == "8px 14px"
+    )
+    page.evaluate("window.setReportMode(false)")
+    page.set_viewport_size({"width": 1440, "height": 960})
+
+
+def test_disclaimer_contrast_meets_aa(page):
+    """The prototype caveat was the least readable text on the page at 4.27:1."""
+    page.evaluate("window.showView('risk')")
+    page.wait_for_timeout(150)
+    ratio = page.evaluate(
+        """(() => {
+             const el = document.querySelector('.alertbox .msg p.caveat');
+             const parse = c => c.match(/\\d+/g).slice(0,3).map(Number);
+             const lum = ([r,g,b]) => {
+               const v = [r,g,b].map(x => x/255)
+                 .map(x => x <= 0.03928 ? x/12.92 : Math.pow((x+0.055)/1.055, 2.4));
+               return 0.2126*v[0] + 0.7152*v[1] + 0.0722*v[2];
+             };
+             const fg = lum(parse(getComputedStyle(el).color));
+             const bg = lum([28, 18, 4]);
+             return (Math.max(fg,bg)+0.05) / (Math.min(fg,bg)+0.05);
+           })()"""
+    )
+    assert ratio >= 4.5, f"disclaimer contrast is {ratio:.2f}:1, below the 4.5:1 minimum"

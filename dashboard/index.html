@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Academic prototype forecasting major solar flares from SDO/HMI SHARP data using the SWAN-SF benchmark. Not an operational space-weather warning service.">
+<meta name="theme-color" content="#0b1626">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <title>Solar Flare Prediction &amp; Space Weather Alert System</title>
 <style>
   :root{
@@ -21,7 +25,33 @@
   nav{display:flex;gap:4px;background:var(--panel);padding:5px;border-radius:10px;border:1px solid var(--line);flex-wrap:wrap}
   nav button{background:transparent;border:none;color:var(--muted);padding:8px 14px;border-radius:7px;font-size:13px;cursor:pointer}
   nav button.active{background:var(--accent);color:#1a0d00;font-weight:600}
-  nav button:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+  /* One visible focus treatment for everything interactive. Previously only the
+     nav had one, which left keyboard navigation invisible on every other
+     control. */
+  nav button:focus-visible,
+  .tour-launch:focus-visible,
+  .btn:focus-visible,
+  .wcard:focus-visible,
+  .tourbox button:focus-visible,
+  input[type=range]:focus-visible,
+  input[type=file]:focus-visible,
+  #revBtn:focus-visible{outline:2px solid var(--accent2);outline-offset:2px;border-radius:7px}
+  /* The nine-button nav wraps to two rows on a laptop. Compact it only when the
+     three added views are showing: report mode keeps the original six buttons
+     at their original size, so the report's Figures 5.1-5.6 stay pixel-equal. */
+  @media (min-width:1100px){
+    body:not(.report-mode) nav button{padding:7px 10px;font-size:12.5px}
+    body:not(.report-mode) .tour-launch{padding:6px 11px}
+    /* Nine tabs, the title and the tour launcher do not fit on one line inside
+       1200px, so the nav wrapped to two rows. Give the page a little more width
+       and drop the tour launcher onto its own line beneath the tabs. Both rules
+       are scoped away from report mode, where only six tabs show and the
+       original 1200px layout must be preserved for the report's figures. */
+    body:not(.report-mode) .app{max-width:1280px}
+    body:not(.report-mode) header.top > div:last-child{
+      flex-direction:column;align-items:flex-end;gap:8px}
+    body:not(.report-mode) .tour-launch{margin-left:0}
+  }
   .view{display:none;animation:fade .25s ease}
   .view.active{display:block}
   @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
@@ -58,6 +88,10 @@
   .alertbox .ic{font-size:22px}
   .alertbox .msg b{color:var(--amber)}
   .alertbox .msg p{margin:4px 0 0;font-size:13px;color:#d9c9ad;line-height:1.5}
+  /* The prototype disclaimer. The old #8a7756 gave 4.27:1 on this background,
+     under the 4.5:1 minimum - the one line that must be readable was the least
+     readable text on the page. #b59a72 gives 6.4:1. */
+  .alertbox .msg p.caveat{color:#b59a72;font-size:11.5px;margin-top:8px}
   .featbar{display:flex;align-items:center;gap:10px;margin:9px 0}
   .featbar .name{width:150px;font-size:11.5px;color:var(--muted);font-family:Consolas,monospace}
   .featbar .track{flex:1;height:16px;background:#0c1a2e;border-radius:5px;overflow:hidden;display:flex}
@@ -142,6 +176,31 @@
     .grid.cols-3,.grid.cols-2{grid-template-columns:1fr}
     header.top{flex-direction:column;align-items:flex-start;gap:12px}
   }
+  /* Honour a reduced-motion preference: the view fade and the card lift are
+     decoration, so drop them rather than animate regardless. */
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;
+      transition-duration:.001ms !important;scroll-behavior:auto !important}
+    .view{animation:none}
+    .wcard:hover{transform:none}
+  }
+  /* Printing a dark page wastes ink and is unreadable. Invert to black on white,
+     show every view at once so a printout is complete, and drop the controls. */
+  @media print{
+    body{background:#fff;color:#000}
+    .app{max-width:none;padding:0}
+    nav,.tour-launch,.tour,#op-slider,.marks,.dropzone,.reveal,.btn{display:none !important}
+    .view{display:block !important;page-break-before:always;animation:none}
+    .view:first-of-type{page-break-before:avoid}
+    .card,.kpi .box,.pill,.seriesbox,.wcard,.alertbox,.posthoc,.warnbar{
+      background:#fff !important;border:1px solid #999 !important;color:#000 !important}
+    .card h2,.section-sub,.muted,.featbar .name,.featbar .val,footer{color:#333 !important}
+    .big,.kpi .box .n,.gauge .pct{color:#000 !important}
+    .cm-cell{background:#f2f2f2 !important;border-color:#999 !important;color:#000 !important}
+    .cm-lab{color:#333 !important}
+    footer{border-top:1px solid #999}
+    a[href]::after{content:""}
+  }
 </style>
 </head>
 <body>
@@ -155,23 +214,24 @@
       </div>
     </div>
     <div style="display:flex;align-items:center;flex-wrap:wrap">
-      <nav id="nav">
-        <button data-v="overview" class="active">Overview</button>
-        <button data-v="predict">Forecast</button>
-        <button data-v="result">Prediction</button>
-        <button data-v="risk">Risk &amp; Alert</button>
-        <button data-v="explain">Explainability</button>
-        <button data-v="eval">Model Evaluation</button>
-        <button data-v="explore" class="nav-extra">Explore Windows</button>
-        <button data-v="live" class="nav-extra">Live Inference</button>
-        <button data-v="operate" class="nav-extra">Operating Point</button>
+      <nav id="nav" role="tablist" aria-label="Dashboard views">
+        <button data-v="overview" class="active" role="tab" aria-selected="true" aria-controls="v-overview">Overview</button>
+        <button data-v="predict" role="tab" aria-selected="false" aria-controls="v-predict">Forecast</button>
+        <button data-v="result" role="tab" aria-selected="false" aria-controls="v-result">Prediction</button>
+        <button data-v="risk" role="tab" aria-selected="false" aria-controls="v-risk">Risk &amp; Alert</button>
+        <button data-v="explain" role="tab" aria-selected="false" aria-controls="v-explain">Explainability</button>
+        <button data-v="eval" role="tab" aria-selected="false" aria-controls="v-eval">Model Evaluation</button>
+        <button data-v="explore" class="nav-extra" role="tab" aria-selected="false" aria-controls="v-explore">Explore</button>
+        <button data-v="live" class="nav-extra" role="tab" aria-selected="false" aria-controls="v-live">Live</button>
+        <button data-v="operate" class="nav-extra" role="tab" aria-selected="false" aria-controls="v-operate">Operating</button>
       </nav>
       <button class="tour-launch" id="tourBtn" type="button">&#9654; 3-minute tour</button>
     </div>
   </header>
 
+  <main id="main">
   <!-- OVERVIEW -->
-  <section class="view active" id="v-overview">
+  <section class="view active" id="v-overview" role="tabpanel" aria-labelledby="nav">
     <div class="grid cols-3" style="margin-top:18px">
       <div class="card"><h2>Dataset</h2><div class="big">SWAN-SF</div><div style="color:var(--muted);font-size:12.5px;margin-top:4px" id="ov-dataset">&mdash;</div></div>
       <div class="card"><h2>Forecast Setup</h2><div class="big" id="ov-setup">&mdash;</div><div style="color:var(--muted);font-size:12.5px;margin-top:4px">Observation window &rarr; prediction window</div></div>
@@ -197,7 +257,7 @@
   </section>
 
   <!-- FORECAST CONFIG -->
-  <section class="view" id="v-predict">
+  <section class="view" id="v-predict" role="tabpanel" aria-labelledby="nav">
     <div class="section-title">Forecast Configuration</div>
     <div class="section-sub">Observation window used for this forecast (real SWAN-SF active-region window, test partition P5 &mdash; not used in training).</div>
     <div class="card">
@@ -210,12 +270,17 @@
         <div class="seg"><div class="lbl">Prediction window (24h)</div><b id="p-pred">&mdash;</b></div>
       </div>
       <div class="kpi" id="p-kpi"></div>
-      <div style="margin-top:16px"><button class="btn" type="button">Run Forecast &rarr;</button></div>
+      <div style="margin-top:16px">
+        <button class="btn" type="button" id="runForecast">Run Forecast &rarr;</button>
+        <span class="muted" style="font-size:11.5px;margin-left:10px">
+          Scores this window with the selected model and opens the result.
+        </span>
+      </div>
     </div>
   </section>
 
   <!-- RESULT -->
-  <section class="view" id="v-result">
+  <section class="view" id="v-result" role="tabpanel" aria-labelledby="nav">
     <div class="section-title">Prediction Result</div>
     <div class="section-sub">Output of the trained model on the observation window above.</div>
     <div class="grid cols-2">
@@ -250,7 +315,7 @@
   </section>
 
   <!-- RISK & ALERT -->
-  <section class="view" id="v-risk">
+  <section class="view" id="v-risk" role="tabpanel" aria-labelledby="nav">
     <div class="section-title">Risk Assessment &amp; Alert</div>
     <div class="section-sub">The probability is converted into a user-facing risk level using thresholds fixed on the validation partition, kept separate from the underlying model probability.</div>
     <div class="card">
@@ -261,14 +326,14 @@
         <div class="msg">
           <b id="al-title">&mdash;</b>
           <p id="al-body">&mdash;</p>
-          <p style="color:#8a7756;font-size:11px;margin-top:8px">Prototype output for academic demonstration only &mdash; not an operational space-weather warning.</p>
+          <p class="caveat">Prototype output for academic demonstration only &mdash; not an operational space-weather warning.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- EXPLAINABILITY -->
-  <section class="view" id="v-explain">
+  <section class="view" id="v-explain" role="tabpanel" aria-labelledby="nav">
     <div class="section-title">Model Explainability</div>
     <div class="section-sub">Standardized Logistic Regression coefficients &mdash; the magnitude and sign show each engineered feature's contribution to the predicted log-odds of a future M/X flare.</div>
     <div class="card" id="feat-card">
@@ -278,7 +343,7 @@
   </section>
 
   <!-- EVAL -->
-  <section class="view" id="v-eval">
+  <section class="view" id="v-eval" role="tabpanel" aria-labelledby="nav">
     <div class="section-title">Model Evaluation Summary</div>
     <div class="section-sub" id="eval-sub">&mdash;</div>
     <div class="kpi" id="eval-kpi"></div>
@@ -295,7 +360,7 @@
   </section>
 
   <!-- NEW: EXPLORE WINDOWS -->
-  <section class="view" id="v-explore">
+  <section class="view" id="v-explore" role="tabpanel" aria-labelledby="nav">
     <div class="section-title">Explore Windows</div>
     <div class="section-sub">Real observation windows from the locked test partition &mdash; hits, misses, false alarms and correct quiet forecasts together. The ground truth stays hidden until you ask for it.</div>
     <div class="posthoc" id="explore-rule">&mdash;</div>
@@ -310,7 +375,7 @@
   </section>
 
   <!-- NEW: LIVE INFERENCE -->
-  <section class="view" id="v-live">
+  <section class="view" id="v-live" role="tabpanel" aria-labelledby="nav">
     <div class="section-title">Live Inference</div>
     <div class="section-sub">Run the real selected model entirely in your browser on a SWAN-SF window file. Nothing is uploaded anywhere &mdash; the fitted parameters are loaded from <code class="k">model_lr.json</code> and the same pipeline is reproduced in JavaScript.</div>
     <div class="grid cols-2">
@@ -330,21 +395,21 @@
           standard deviation, minimum, maximum and least-squares slope per hour over the
           finite points of each parameter.
         </p>
-        <div id="live-status" style="margin-top:10px;font-size:12.5px"></div>
+        <div id="live-status" style="margin-top:10px;font-size:12.5px" role="status" aria-live="polite"></div>
       </div>
       <div class="card">
         <h2>Result</h2>
-        <div id="live-result"><p class="muted" style="font-size:12.5px">No window loaded yet.</p></div>
+        <div id="live-result" role="region" aria-live="polite" aria-label="Inference result"><p class="muted" style="font-size:12.5px">No window loaded yet.</p></div>
       </div>
     </div>
-    <div class="card" style="margin-top:16px" id="live-contrib-card" style="display:none">
+    <div class="card" id="live-contrib-card" style="margin-top:16px;display:none">
       <h2>Why &mdash; exact contributions to the log-odds</h2>
       <div id="live-contrib"></div>
     </div>
   </section>
 
   <!-- NEW: OPERATING POINT -->
-  <section class="view" id="v-operate">
+  <section class="view" id="v-operate" role="tabpanel" aria-labelledby="nav">
     <div class="section-title">Operating Point</div>
     <div class="section-sub">Move the decision threshold and watch the trade-off on the real locked-test predictions.</div>
     <div class="warnbar" id="op-banner">&mdash;</div>
@@ -352,12 +417,14 @@
       <div class="slider-head">
         <span>Decision threshold</span><b id="op-thr">&mdash;</b>
       </div>
-      <input type="range" id="op-slider" min="0" max="100" value="50" step="1">
+      <input type="range" id="op-slider" min="0" max="100" value="50" step="1"
+             aria-label="Decision threshold" aria-describedby="op-thr">
       <div class="marks" id="op-marks"></div>
       <div style="margin-top:8px">
         <button class="btn ghost" type="button" id="op-reset">Reset to the validation-fixed threshold</button>
       </div>
-      <div class="kpi" id="op-kpi" style="margin-top:16px"></div>
+      <div class="kpi" id="op-kpi" style="margin-top:16px" role="region" aria-live="polite"
+           aria-label="Metrics at the selected threshold"></div>
     </div>
     <div class="grid cols-2" style="margin-top:16px">
       <div class="card">
@@ -370,6 +437,8 @@
       </div>
     </div>
   </section>
+
+  </main>
 
   <footer>
     <span>Solar Flare Prediction &amp; Space Weather Alert System &middot; <b>Academic prototype &mdash; not an operational space-weather warning service.</b></span>
@@ -446,10 +515,14 @@ function renderCore() {
   ].map(([n, l]) => '<div class="box"><div class="n">' + n + '</div><div class="l">' +
      esc(l) + '</div></div>').join('');
 
-  // result view
+  // result view. The gauge circumference is derived from the circle's own
+  // radius rather than a hard-coded 502, which left a visible gap at p = 1.
   const p = ex.flare_case.probability;
+  const arc = $('gauge-arc');
+  const circumference = 2 * Math.PI * Number(arc.getAttribute('r'));
+  arc.setAttribute('stroke-dasharray', circumference.toFixed(3));
   $('g-pct').textContent = (p * 100).toFixed(1) + '%';
-  $('gauge-arc').style.strokeDashoffset = String(502 * (1 - p));
+  arc.style.strokeDashoffset = String(circumference * (1 - p));
   $('r-class').textContent = p >= thr ? 'M/X flare likely' : 'No major flare expected';
   $('r-class').style.color = p >= thr ? '#e5484d' : '#2fbf71';
   $('r-truth').textContent = 'Actual: ' + ex.flare_case.flare_class + ' flare occurred (y=1)';
@@ -515,6 +588,35 @@ function renderCore() {
       '% of genuinely flare-quiet windows.' : '');
 }
 
+/* The Forecast view's primary button used to do nothing at all. It now scores
+   the configured window with the real browser-side pipeline when the window's
+   raw series is available, and opens the Prediction view with the result. */
+function wireForecastButton() {
+  const button = $('runForecast');
+  if (!button) return;
+  button.addEventListener('click', () => {
+    const ex = S.demo.examples.flare_case;
+    const match = (S.windows && S.windows.windows || []).find(
+      w => w.harp === ex.ar && w.window_start === ex.start && w.series_available);
+
+    if (match && S.model) {
+      const { windowFeatures, predict } = window.SolarFlareModel;
+      const columns = {};
+      for (const name of S.model.sharp_parameters) columns[name] = match.series.values[name];
+      const r = predict(windowFeatures(columns, S.model), S.model);
+      const arc = $('gauge-arc');
+      const circumference = 2 * Math.PI * Number(arc.getAttribute('r'));
+      $('g-pct').textContent = (r.probability * 100).toFixed(1) + '%';
+      arc.style.strokeDashoffset = String(circumference * (1 - r.probability));
+      $('r-thr').textContent = S.model.alert_threshold.toFixed(4);
+      $('r-class').textContent = r.probability >= S.model.alert_threshold
+        ? 'M/X flare likely' : 'No major flare expected';
+      $('r-class').style.color = r.probability >= S.model.alert_threshold ? '#e5484d' : '#2fbf71';
+    }
+    activate('result');
+  });
+}
+
 function cmHTML(t, id) {
   return '<div></div>' +
     '<div class="cm-cell" style="background:transparent;border:none;color:var(--muted)">Pred: No M/X</div>' +
@@ -543,7 +645,7 @@ function renderExplore() {
       '<span class="tag ' + x.outcome + '">' + x.outcome + '</span></div>' +
     '</button>').join('');
   $('wlist').querySelectorAll('.wcard').forEach(b =>
-    b.addEventListener('click', () => showWindow(Number(b.dataset.i))));
+    b.addEventListener('click', () => showWindow(Number(b.dataset.i), true)));
 }
 
 function sparkline(values, width, height) {
@@ -575,10 +677,13 @@ function contribHTML(list) {
   }).join('');
 }
 
-function showWindow(i) {
+function showWindow(i, scroll) {
   const x = S.windows.windows[i];
-  $('wlist').querySelectorAll('.wcard').forEach(b =>
-    b.classList.toggle('sel', Number(b.dataset.i) === i));
+  $('wlist').querySelectorAll('.wcard').forEach(b => {
+    const on = Number(b.dataset.i) === i;
+    b.classList.toggle('sel', on);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
 
   const series = x.series && x.series.values ? x.series.values : null;
   const shown = series ? S.model.sharp_parameters.slice(0, 6) : [];
@@ -619,6 +724,15 @@ function showWindow(i) {
       esc(x.truth_text) + '<br><span class="muted">Model outcome: </span>' +
       '<span class="tag ' + x.outcome + '">' + x.outcome + '</span>';
   });
+
+  // Without this the detail panel opens below the fold and clicking a window
+  // looks like it did nothing at all.
+  if (scroll) {
+    $('wdetail').scrollIntoView({
+      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'start'
+    });
+  }
 }
 
 /* ============================ live inference ======================= */
@@ -772,13 +886,31 @@ function renderOperate() {
 }
 
 /* ============================ navigation =========================== */
-function activate(name) {
-  document.querySelectorAll('nav button').forEach(b =>
-    b.classList.toggle('active', b.dataset.v === name));
+const VIEWS = ['overview', 'predict', 'result', 'risk', 'explain', 'eval',
+               'explore', 'live', 'operate'];
+
+function activate(name, pushHash) {
+  if (!VIEWS.includes(name)) return;
+  document.querySelectorAll('nav button').forEach(b => {
+    const on = b.dataset.v === name;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
   document.querySelectorAll('.view').forEach(v =>
     v.classList.toggle('active', v.id === 'v-' + name));
+  // Keep the address bar in step so a view can be linked to and survives a
+  // reload - losing your place to an accidental refresh mid-demonstration is
+  // worse than a slightly longer URL.
+  if (pushHash !== false && location.hash.slice(1) !== name) {
+    history.replaceState(null, '', '#' + name);
+  }
 }
 window.showView = activate;
+
+window.addEventListener('hashchange', () => {
+  const name = location.hash.slice(1);
+  if (VIEWS.includes(name)) activate(name, false);
+});
 window.setReportMode = function (on) {
   document.body.classList.toggle('report-mode', !!on);
 };
@@ -852,10 +984,16 @@ async function main() {
   S.operating = await getJSON('operating.json', true);
 
   renderCore();
+  wireForecastButton();
   if (S.windows && S.model) renderExplore();
   if (S.model) wireLive(); else $('live-result').innerHTML =
     '<p class="muted">model_lr.json not found - run: python -m solarflare demo-data</p>';
   renderOperate();
+
+  // Open whatever view the address bar asks for, so a reload or a shared link
+  // lands where it should.
+  const requested = location.hash.slice(1);
+  if (VIEWS.includes(requested)) activate(requested, false);
 
   $('ft-time').textContent = 'Generated from trained model output';
   window.dashboardReady = true;

@@ -115,6 +115,10 @@ SPELLING_EXEMPT = (
     "sklearn",
     "scikit-learn",
     "Standardized Logistic",
+    # CSS properties and DOM API keys are spelled the way the platform spells
+    # them. These are identifiers, not prose.
+    "scroll-behavior",
+    "behavior:",
 )
 
 

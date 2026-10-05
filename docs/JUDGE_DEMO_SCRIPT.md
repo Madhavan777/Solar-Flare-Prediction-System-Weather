@@ -8,8 +8,20 @@ not navigate manually, and press **Auto-play** to advance hands-free.
 
 ## Before the panel arrives
 
+**Press Ctrl + Alt + S.** That starts the server and opens the dashboard in one keystroke, from
+anywhere in Windows — no terminal in front of the examiners. (Equivalently, double-click
+`Open Dashboard.bat` in the project folder.)
+
+If the hotkey is not registered on the machine you are presenting from:
+
 ```powershell
 cd "C:\Users\MG-Laptop\Claude\Projects\Solar Flare Detection System"
+powershell -ExecutionPolicy Bypass -File scripts\install_shortcut.ps1
+```
+
+Or start it by hand:
+
+```powershell
 .\.venv\Scripts\python.exe -m solarflare dashboard
 ```
 
@@ -139,4 +151,6 @@ Point at: the footer disclaimer, visible on every view.
 | Page shows a red error bar | `python -m solarflare demo-data`, then reload |
 | Port 8791 already in use | `python -m solarflare dashboard --port 8795` |
 | A view looks empty | Re-run `python -m solarflare demo-data`; `windows.json` or `operating.json` is missing |
+| Ctrl + Alt + S does nothing | The shortcut must be on the Desktop. Re-run `scripts\install_shortcut.ps1` |
+| You lose your place after a refresh | You will not — the view is in the URL. `#explore`, `#live`, `#operate` all deep-link |
 | Asked to prove reproduction on the spot | `python -m solarflare evaluate` — 375 checks, about two minutes |

@@ -114,12 +114,26 @@ and will not reproduce under another minor version. The runtime check fails loud
 
 ### See the demo
 
+Fastest route — press **Ctrl + Alt + S** anywhere in Windows. That hotkey is attached to a desktop
+shortcut which starts the server and opens the browser. Install or change it with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\install_shortcut.ps1
+```
+
+`-Hotkey "CTRL+ALT+F"` picks a different combination and `-Remove` deletes the shortcut. Windows
+only honours a shortcut's hotkey while the `.lnk` stays on the Desktop. Double-clicking
+**`Open Dashboard.bat`** does the same thing without a hotkey.
+
+Or start it by hand:
+
 ```powershell
 python -m solarflare dashboard
 ```
 
 Then open **http://localhost:8791/index.html**. It runs entirely offline — no network, no CDN. Press
-**▶ 3-minute tour** for the guided walkthrough.
+**▶ 3-minute tour** for the guided walkthrough, and use the address bar's `#explore`, `#live` or
+`#operate` to link straight to a view.
 
 ## Commands
 
@@ -171,7 +185,7 @@ before every write and raises. Additive output goes to `results/extra/`, `figure
 | `figures/` | the report's figures — **frozen** |
 | `figures/extra/` | the eight additive figures |
 | `dashboard/` | the static single-page demo, its generated JSON, and `model.js` |
-| `tests/` | 160 tests across nine files |
+| `tests/` | 171 tests across nine files |
 | `docs/` | the documents listed below |
 | `scripts/` | the consistency checker and the parity-fixture builder |
 | `data/`, `raw_data/` | not in git; see [docs/DATA_CARD.md](docs/DATA_CARD.md) |
