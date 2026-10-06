@@ -607,6 +607,27 @@ def check_quoted_claims(checker: Checker) -> None:
                 "number of single-feature rules searched",
             )
         )
+    calibration = load("calibration")
+    if calibration and "class_weights" in calibration:
+        w = calibration["class_weights"]
+        claims += [
+            (
+                r"about \*{0,2}(\d+)[x×]\*{0,2} more heavily",
+                round(w["positive_relative_to_negative"]),
+                "class weight of a positive relative to a negative",
+            ),
+            (
+                r"positives are \*{0,2}(\d\.\d\d) %",
+                round(w["training_base_rate"] * 100, 2),
+                "training-partition base rate",
+            ),
+            # Markdown wraps prose, so the phrase can straddle a line break.
+            (
+                r"weight of \*{0,2}(\d+\.\d\d)\*{0,2}\s+per\s+positive",
+                round(w["weight_positive"], 2),
+                "balanced weight applied to a positive",
+            ),
+        ]
     if operating:
         claims.append(
             (

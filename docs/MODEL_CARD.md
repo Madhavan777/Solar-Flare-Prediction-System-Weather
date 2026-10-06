@@ -66,7 +66,9 @@ signed-log  ->  median imputation  ->  standardisation  ->  logistic regression
 - Median imputation and standardisation are fitted inside the pipeline on P1–P3 only. Tests assert
   that the imputer's `statistics_` and the scaler's `mean_`/`scale_` equal those recomputed from
   the training partitions, and that they differ from an all-data fit.
-- `class_weight="balanced"` up-weights the 1.3 % positive class by roughly 33×. This is what buys
+- `class_weight="balanced"` weights each class by `n_samples / (n_classes · n_class)`. On the
+  training partitions, where positives are **1.99 %** of windows, that is a weight of **25.07** per
+  positive against **0.51** per negative — positives count about **49×** more heavily. This is what buys
   the recall, and it is also why the probabilities are not calibrated.
 - `random_state=42`, `max_iter=5000`.
 

@@ -17,9 +17,9 @@ distribution. Flares are graded by X-ray brightness on a letter scale — B, C, 
 letter is ten times stronger than the last. **M and X are the ones that cause trouble.**
 
 Flares come from **active regions**: patches of intensely twisted magnetic field on the Sun's
-surface, visible as sunspot groups. A satellite called SDO continuously measures the magnetic field
-of every active region, and those measurements change in characteristic ways before a region
-erupts.
+surface, visible as sunspot groups. NASA's Solar Dynamics Observatory carries an instrument, HMI,
+that measures the magnetic field across the Sun's visible surface, and the measurements for each
+active region change in characteristic ways before it erupts.
 
 So the question this project answers is:
 
@@ -158,10 +158,11 @@ classical threshold.
 validation partition than the selected model. They were not candidates, so the selection was
 honest, but the project should not claim that all 144 numbers were necessary.
 
-**The probabilities are not literal chances.** The model was trained with the rare class weighted up
-roughly 33-fold, which is what buys the 92 % recall. The side effect is that it over-forecasts by
-about 7.3 times. Read the number as a ranking and against the fixed cut-offs, never as a percentage
-chance.
+**The probabilities are not literal chances.** During training, each recording that preceded a major
+flare was counted about 49 times more heavily than one that did not, to stop the model simply
+learning to always say "no". That is what buys the 92 % recall, and the side effect is that the
+model over-forecasts by about 7.3 times. Read the number as a ranking and against the fixed
+cut-offs, never as a percentage chance.
 
 **It is not operational.** No live feed, no connection to any observatory, no validation beyond 2018
 or beyond this one instrument. It is a prototype demonstrating a method.

@@ -1,7 +1,15 @@
 {
  "posthoc": "Post-hoc analysis. Computed on the locked test partition P5 after model selection was complete and written to results/selection.json. It did not influence the choice of model, features or thresholds, and none of the frozen numbers in results/ depend on it.",
  "analysis": "calibration of the selected model's probabilities on P5",
- "why_uncalibrated": "The model was fitted with class_weight='balanced', which up-weights the 1.3 % positive class by about 33x. That is what buys 91.6 % recall, and it necessarily inflates the predicted probabilities: the model is trained as if major flares were far commoner than they are. The outputs are therefore useful as a ranking and against the fixed thresholds, but must not be read as literal chances of a flare.",
+ "class_weights": {
+  "n_training_windows": 204559,
+  "n_training_positives": 4079,
+  "training_base_rate": 0.01994045727638481,
+  "weight_negative": 0.5101730845969673,
+  "weight_positive": 25.074650649669035,
+  "positive_relative_to_negative": 49.14930129933807
+ },
+ "why_uncalibrated": "The model was fitted with class_weight='balanced'. On the training partitions, where positives are 1.99 % of windows, that gives each positive a weight of 25.07 against 0.51 for each negative - positives count 49 times more heavily. That is what buys 91.6 % recall, and it necessarily inflates the predicted probabilities: the model is trained as if major flares were far commoner than they are. The outputs are therefore useful as a ranking and against the fixed thresholds, but must not be read as literal chances of a flare.",
  "what_is_unaffected": "TSS, precision, recall, F1, HSS and the confusion matrix depend only on which side of the threshold each probability falls; PR-AUC and ROC-AUC depend only on the ranking. A STRICTLY monotone recalibration therefore changes none of them: Platt scaling here moves the ROC-AUC by exactly 0. Isotonic regression is monotone non-decreasing rather than strictly increasing, so it creates ties that destroy ordering information and does move both AUCs - see roc_auc_shift_under_recalibration below. That is a property of isotonic regression, not evidence against the general point.",
  "test_base_rate": 0.013136071120546673,
  "train_base_rate": 0.01994045727638481,

@@ -477,12 +477,26 @@ def test_landing_page_numbers_come_from_the_results(page):
 
 
 def test_landing_page_numbers_use_a_fixed_locale(page):
-    """toLocaleString() without a locale renders 331,185 as 3,31,185 in some."""
+    """toLocaleString() without a locale groups 204,559 as 2,04,559 in some locales."""
     page.evaluate("window.showView('start')")
     page.wait_for_timeout(200)
     text = page.inner_text("#v-start")
-    assert "331,185" in text, "the dataset size is not grouped as expected"
-    assert "3,31,185" not in text
+    assert "204,559" in text, "the training-set size is not grouped as expected"
+    assert "75,365" in text
+    for indian in ("2,04,559", "3,31,185"):
+        assert indian not in text, f"{indian} indicates an unpinned locale"
+
+
+def test_landing_page_does_not_claim_to_have_learned_from_the_test_data(page):
+    """It learned from 204,559 windows, not from all 331,185."""
+    page.evaluate("window.showView('start')")
+    page.wait_for_timeout(200)
+    hero = page.inner_text("#st-lede")
+    assert "204,559" in hero
+    assert "331,185" not in hero, (
+        "the hero implies the model learned from the whole dataset, including the "
+        "partitions held back for validation and testing"
+    )
 
 
 def test_landing_cards_navigate(page):
@@ -539,6 +553,21 @@ def test_replay_play_button_advances_then_stops(page):
     moved = page.evaluate("Number(document.getElementById('rp-scrub').value)")
     page.click("#rp-play")
     assert moved > start, "pressing Play did not advance the replay"
+
+
+def test_replay_stops_when_you_navigate_away(page):
+    """A replay left running would tick against a hidden panel."""
+    page.evaluate("window.showView('replay')")
+    page.wait_for_timeout(200)
+    page.click("#rp-restart")
+    page.click("#rp-play")
+    page.wait_for_timeout(350)
+    page.evaluate("window.showView('eval')")
+    page.wait_for_timeout(100)
+    assert page.evaluate("RP.timer === null"), "the replay kept playing after leaving the view"
+    frozen = page.evaluate("Number(document.getElementById('rp-scrub').value)")
+    page.wait_for_timeout(500)
+    assert page.evaluate("Number(document.getElementById('rp-scrub').value)") == frozen
 
 
 def test_replay_includes_a_miss_and_a_false_alarm_track(page):

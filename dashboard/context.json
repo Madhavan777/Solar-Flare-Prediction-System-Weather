@@ -18,6 +18,8 @@
   "train": "P1\u2013P3",
   "validation": "P4",
   "test": "P5",
+  "n_train": 204559,
+  "n_validation": 51261,
   "test_windows": 75365,
   "test_positives": 990,
   "test_base_rate": 0.013136071120546673,

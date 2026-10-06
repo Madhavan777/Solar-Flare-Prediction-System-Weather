@@ -1,11 +1,16 @@
 """Calibration of the selected model's probabilities.
 
 The selected logistic regression was fitted with ``class_weight="balanced"``,
-which multiplies the minority class's contribution to the loss by roughly
-``N/(2·N_pos)`` — about 33× here. That deliberately shifts the decision boundary
-towards recall, and the side effect is that **the output probabilities are not
-calibrated**: they systematically over-forecast. A window the model scores at
-0.60 does not flare 60 % of the time.
+which weights each class by ``n_samples / (n_classes · n_class)``. The exact
+weights are computed from the training labels by :func:`class_weights` rather
+than quoted from memory, because the figure is easy to get wrong: the relevant
+base rate is the **training** partitions' 1.99 %, not the test partition's
+1.31 %.
+
+That deliberately shifts the decision boundary towards recall, and the side
+effect is that **the output probabilities are not calibrated**: they
+systematically over-forecast. A window the model scores at 0.60 does not flare
+60 % of the time.
 
 This matters for how the number is read, not for the published skill scores: TSS,
 precision, recall, F1 and the confusion matrix depend only on the ordering of
@@ -78,6 +83,31 @@ def reliability(
     return bins
 
 
+def class_weights() -> dict[str, float]:
+    """The weights ``class_weight="balanced"`` actually applied, from the data.
+
+    scikit-learn computes ``n_samples / (n_classes * n_class)`` over the labels
+    it was fitted on, which here are the training partitions only. Returned
+    rather than hard-coded so that no document can quote a stale figure.
+    """
+    from sklearn.utils.class_weight import compute_class_weight
+
+    from .. import data
+
+    _, meta = data.load()
+    train, _, _ = data.split_masks(meta)
+    y_train = meta["y"].to_numpy()[train]
+    weights = compute_class_weight("balanced", classes=np.array([0, 1]), y=y_train)
+    return {
+        "n_training_windows": len(y_train),
+        "n_training_positives": int(y_train.sum()),
+        "training_base_rate": float(y_train.mean()),
+        "weight_negative": float(weights[0]),
+        "weight_positive": float(weights[1]),
+        "positive_relative_to_negative": float(weights[1] / weights[0]),
+    }
+
+
 def _ranking_metrics(y: np.ndarray, p: np.ndarray) -> dict[str, float]:
     return {
         "pr_auc": float(average_precision_score(y, p)),
@@ -100,6 +130,7 @@ def run() -> dict:
 
     base_rate = float(y_test.mean())
     frozen = _ranking_metrics(y_test, p_test)
+    weights = class_weights()
 
     # --- the no-skill reference: always forecast the training base rate -------
     train_base = 0.0
@@ -160,9 +191,15 @@ def run() -> dict:
 
     payload = {
         "analysis": "calibration of the selected model's probabilities on P5",
+        "class_weights": weights,
         "why_uncalibrated": (
-            "The model was fitted with class_weight='balanced', which up-weights the "
-            "1.3 % positive class by about 33x. That is what buys 91.6 % recall, and it "
+            f"The model was fitted with class_weight='balanced'. On the training "
+            f"partitions, where positives are {weights['training_base_rate'] * 100:.2f} % "
+            f"of windows, that gives each positive a weight of "
+            f"{weights['weight_positive']:.2f} against {weights['weight_negative']:.2f} "
+            f"for each negative - positives count "
+            f"{weights['positive_relative_to_negative']:.0f} times more heavily. "
+            f"That is what buys 91.6 % recall, and it "
             "necessarily inflates the predicted probabilities: the model is trained as if "
             "major flares were far commoner than they are. The outputs are therefore "
             "useful as a ranking and against the fixed thresholds, but must not be read "

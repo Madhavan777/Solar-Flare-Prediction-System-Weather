@@ -165,8 +165,9 @@
   .slider-head{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;
     color:var(--muted);margin-bottom:4px}
   .slider-head b{color:#fff;font-size:16px;font-family:Consolas,monospace}
-  .marks{position:relative;height:16px;margin-top:2px;font-size:10px;color:var(--muted)}
-  .marks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+  .marks{position:relative;height:16px;margin-top:2px;font-size:10px;color:var(--muted);
+    overflow:hidden}
+  .marks span{position:absolute;white-space:nowrap}
   .tour{position:fixed;inset:0;background:#040a14cc;z-index:50;display:none;
     align-items:flex-end;justify-content:center;padding:26px}
   .tour.on{display:flex}
@@ -308,7 +309,10 @@
     .statstrip{grid-template-columns:1fr}
     .hero h2{font-size:23px}
     .hero .cta .btn{width:100%;text-align:center}
+    /* The dials carry a fixed-size SVG, so the box and its contents have to be
+       scaled together or the circle spills out of its container. */
     .gauge,.rp-dial{width:168px;height:168px}
+    .gauge svg,.rp-dial svg{width:100%;height:100%}
     .featbar .name{width:112px}
     .cm-grid{font-size:11.5px}
     nav{width:100%}
@@ -1098,7 +1102,11 @@ function renderOperate() {
   const marks = $('op-marks');
   const place = (i, text, colour) => {
     const pct = (i / (sweep.length - 1)) * 100;
-    return '<span style="left:' + pct + '%;color:' + colour + '">▲ ' + text + '</span>';
+    // Centring every label on its mark pushes the end ones outside the track,
+    // where they are clipped by the card. Anchor the extremes inwards instead.
+    const shift = pct < 8 ? '0' : pct > 92 ? '-100%' : '-50%';
+    return '<span style="left:' + pct.toFixed(2) + '%;transform:translateX(' + shift +
+      ');color:' + colour + '">▲ ' + text + '</span>';
   };
   marks.innerHTML = place(nearest, 'alert (validation)', '#ff8a3d') +
                     place(hiIndex, 'high risk', '#f2b134');
@@ -1144,6 +1152,9 @@ function activate(name, pushHash) {
   });
   document.querySelectorAll('.view').forEach(v =>
     v.classList.toggle('active', v.id === 'v-' + name));
+  // A replay left playing would keep ticking against a hidden panel, and would
+  // be somewhere unexpected when the view is opened again.
+  if (name !== 'replay' && typeof stopPlay === 'function') stopPlay();
   // Keep the address bar in step so a view can be linked to and survives a
   // reload - losing your place to an accidental refresh mid-demonstration is
   // worse than a slightly longer URL.
@@ -1175,12 +1186,14 @@ function renderLanding() {
 
   $('st-lede').innerHTML =
     'Big solar flares disrupt satellites, radio, GPS and power grids. Before one happens, the ' +
-    'magnetic field above that part of the Sun behaves in a measurable way. This system reads ' +
+    'magnetic field across that patch of the Sun’s surface behaves in a measurable way. ' +
+    'This system reads ' +
     '<b>' + d.observation_hours + ' hours</b> of those measurements for a single active region ' +
     'and estimates how likely it is to produce a <b>major flare</b> &mdash; GOES class M or X ' +
     '&mdash; in the following <b>' + d.prediction_hours + ' hours</b>. It learned the pattern ' +
-    'from <b>' + d.n_windows_total.toLocaleString('en-GB') + '</b> recorded observations spanning ' +
-    esc(d.year_span) + '.';
+    'from <b>' + sp.n_train.toLocaleString('en-GB') + '</b> recorded observations, and was then ' +
+    'tested once on <b>' + sp.test_windows.toLocaleString('en-GB') + '</b> more that it had ' +
+    'never seen. All of it is historical, spanning ' + esc(d.year_span) + '.';
 
   $('st-chain').innerHTML = [
     ['Step 1', 'Observe', d.records_per_window + ' readings taken every ' + d.cadence_minutes +
@@ -1276,7 +1289,10 @@ function loadTrack(index) {
 function drawTrack() {
   const steps = RP.track.steps, n = steps.length;
   const W = 1000, H = 150, pad = 6;
-  const x = i => (i / (n - 1)) * (W - 2 * pad) + pad;
+  // A one-frame track would divide by zero here. No track is that short today,
+  // but the guard costs nothing and the data is regenerated from the partition.
+  const span = Math.max(1, n - 1);
+  const x = i => (i / span) * (W - 2 * pad) + pad;
   const y = p => H - pad - p * (H - 2 * pad);
   const line = steps.map((s, i) => x(i).toFixed(1) + ',' + y(s.p).toFixed(1)).join(' ');
   const thr = y(S.replay.alert_threshold);
@@ -1307,7 +1323,7 @@ function seek(i) {
   RP.i = Math.max(0, Math.min(steps.length - 1, i));
   const s = steps[RP.i];
   const n = steps.length, W = 1000, H = 150, pad = 6;
-  const px = (RP.i / (n - 1)) * (W - 2 * pad) + pad;
+  const px = (RP.i / Math.max(1, n - 1)) * (W - 2 * pad) + pad;
   const py = H - pad - s.p * (H - 2 * pad);
   const cursor = document.getElementById('rp-cursor');
   const dot = document.getElementById('rp-dot');

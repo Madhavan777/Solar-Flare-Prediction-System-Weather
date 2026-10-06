@@ -232,7 +232,9 @@ that every decision which *could* have been contaminated demonstrably was not.
 0.0964 against a base rate of 0.0131. Brier score 0.0500, worse than the 0.0130 of a constant
 forecast that detects nothing.
 
-The cause is `class_weight="balanced"`, which up-weights the 1.3 % positive class by roughly 33×.
+The cause is `class_weight="balanced"`. On the training partitions, where positives are 1.99 % of
+windows, it gives each positive a weight of 25.07 against 0.51 for each negative — positives count
+about 49× more heavily.
 That is exactly what buys 91.6 % recall.
 
 It does not affect any published metric: TSS, precision, recall, F1, HSS and the confusion matrix

@@ -286,6 +286,10 @@ def build_context() -> Path:
                 "train": "P1–P3",
                 "validation": "P4",
                 "test": "P5",
+                "n_train": int(audit["per_partition"]["1"]["n"])
+                + int(audit["per_partition"]["2"]["n"])
+                + int(audit["per_partition"]["3"]["n"]),
+                "n_validation": int(audit["per_partition"]["4"]["n"]),
                 "test_windows": test["n"],
                 "test_positives": test["positives"],
                 "test_base_rate": base_rate,
