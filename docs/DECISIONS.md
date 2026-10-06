@@ -204,7 +204,46 @@ documented as open rather than guessed at.
 **Consequence:** `docs/REPRODUCIBILITY.md` §3 states the limit plainly, and the tolerance is a
 named constant with the measured drift recorded beside it.
 
-## D-16 — British spelling
+## D-17 — Serving refuses an occupied port rather than binding alongside
+
+**Date:** 2026-10-06
+**Decision:** `python -m solarflare dashboard` probes the port before binding and exits 1 with an
+actionable message if something is already serving there.
+**Why:** on Windows, `SO_REUSEADDR` permits a second process to bind a port that is already being
+served. Tested: two `dashboard --port 8810` invocations both started, two processes ran, and
+**no error was shown**. The result is two servers contending for one port and an orphan process left
+behind — a silent failure, and exactly the kind that surfaces during a live demonstration.
+**Evidence:** reproduced before the fix (two PIDs, one listener, no error) and after (clean message,
+exit 1, no orphan). `tests/test_project.py::test_dashboard_refuses_a_port_that_is_already_serving`
+binds a socket and asserts the command refuses.
+**Affects:** engineering and presentation only. No published number depends on it.
+
+## D-18 — A corrupt feature matrix reports itself as corrupt
+
+**Date:** 2026-10-06
+**Decision:** `data.load()` wraps the `np.load` of `data/all_X.npz` and re-raises a
+`FileNotFoundError` naming the file, saying it is probably truncated, and giving the rebuild command.
+**Why:** a damaged `.npz` raises numpy's "This file contains pickled (object) data…" message, which
+reads as a security problem and sends the reader in entirely the wrong direction. The file existing
+but being unreadable is a plausible state — the project already documents two corrupt source
+archives on this machine.
+**Evidence:** reproduced with a deliberately malformed file;
+`tests/test_project.py::test_a_corrupt_feature_matrix_reports_itself_clearly` asserts the message.
+**Affects:** engineering only.
+
+## D-19 — The explorer view explains its own absence
+
+**Date:** 2026-10-06
+**Decision:** `renderExplore()` is called unconditionally and, when `windows.json` is missing or
+unreadable, replaces the grid with a message naming the file and the command that regenerates it.
+**Why:** every other view already names the file it is missing. The explorer alone degraded
+silently, leaving an empty grid and a placeholder dash — which during a demonstration reads as a
+broken page rather than a missing input. Verified by corrupting the file: the page still loaded with
+no console errors, but the view was simply blank.
+**Evidence:** `tests/test_dashboard.py::test_explore_explains_itself_when_its_data_is_unreadable`.
+**Affects:** presentation only.
+
+## D-20 — British spelling
 
 **Date:** 2026-10-05
 **Decision:** All new prose uses British spelling ("organisation", "generalisation", "standardised"

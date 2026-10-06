@@ -882,7 +882,19 @@ function cmHTML(t, id) {
 /* ============================ explore windows ====================== */
 function renderExplore() {
   const w = S.windows;
-  if (!w) { $('wlist').innerHTML = '<p class="muted">windows.json not found.</p>'; return; }
+  if (!w || !Array.isArray(w.windows) || !w.windows.length) {
+    // Degrade with an explanation rather than an empty grid and a stray dash.
+    $('explore-rule').textContent =
+      'This view needs dashboard/windows.json, which is generated from the results.';
+    $('wlist').innerHTML =
+      '<p class="muted" style="font-size:12.5px;line-height:1.6">windows.json is missing or ' +
+      'unreadable, so there is nothing to explore. Regenerate it with ' +
+      '<code class="k">python -m solarflare demo-data</code> and reload. Every other view is ' +
+      'unaffected.</p>';
+    $('wdetail').innerHTML = '<h2>Window detail</h2><p class="muted" style="font-size:12.5px">' +
+      'Unavailable until windows.json is regenerated.</p>';
+    return;
+  }
   $('explore-rule').textContent = 'Selection rule (seed ' + w.seed + '): ' + w.selection_rule;
   $('explore-counts').textContent = '— ' +
     Object.entries(w.outcome_counts).map(([k, v]) => v + ' ' + k).join(', ');
@@ -1447,7 +1459,9 @@ async function main() {
   renderLanding();
   renderReplay();
   wireForecastButton();
-  if (S.windows && S.model) renderExplore();
+  // Called unconditionally: it explains its own absence rather than leaving an
+  // empty grid behind if windows.json could not be read.
+  renderExplore();
   if (S.model) wireLive(); else $('live-result').innerHTML =
     '<p class="muted">model_lr.json not found - run: python -m solarflare demo-data</p>';
   renderOperate();

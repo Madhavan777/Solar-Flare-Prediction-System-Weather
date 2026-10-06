@@ -160,15 +160,28 @@ def load() -> tuple[pd.DataFrame, pd.DataFrame]:
         ``common.ALL_COLS``, and the matching one-row-per-window metadata.
 
     Raises:
-        FileNotFoundError: if the merged files are absent.
+        FileNotFoundError: if the merged files are absent, **or** if either is
+            present but unreadable. A truncated or corrupted ``.npz`` otherwise
+            surfaces as a numpy message about pickled data, which sends the
+            reader looking for a security problem rather than a damaged file.
     """
     if not paths.ALL_X.exists() or not paths.ALL_META.exists():
         raise FileNotFoundError(
             f"{paths.relative(paths.ALL_X)} / {paths.relative(paths.ALL_META)} not found. "
             f"Rebuild them with 'python -m solarflare audit'."
         )
-    loaded = np.load(paths.ALL_X)
-    X = pd.DataFrame(loaded["X"].astype(np.float64), columns=list(loaded["cols"]))
+    try:
+        loaded = np.load(paths.ALL_X)
+        features = loaded["X"]
+        columns = list(loaded["cols"])
+    except Exception as exc:
+        raise FileNotFoundError(
+            f"{paths.relative(paths.ALL_X)} exists but could not be read "
+            f"({type(exc).__name__}: {exc}). It is most likely truncated or corrupt. "
+            f"Delete it and rebuild with 'python -m solarflare audit --force'."
+        ) from exc
+
+    X = pd.DataFrame(features.astype(np.float64), columns=columns)
     if list(X.columns) != ALL_COLS:
         raise ValueError("stored feature columns do not match common.ALL_COLS")
     X = X.replace([np.inf, -np.inf], np.nan)

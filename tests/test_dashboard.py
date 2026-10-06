@@ -555,6 +555,25 @@ def test_replay_play_button_advances_then_stops(page):
     assert moved > start, "pressing Play did not advance the replay"
 
 
+def test_explore_explains_itself_when_its_data_is_unreadable(page):
+    """It used to leave an empty grid and a stray placeholder dash.
+
+    Every other view names the file it is missing; this one degraded silently,
+    which during a demonstration reads as a broken page rather than a missing
+    input.
+    """
+    page.evaluate("window.__savedWindows = S.windows; S.windows = null; renderExplore();")
+    page.wait_for_timeout(200)
+    text = page.inner_text("#wlist")
+    assert "windows.json" in text, "the explore view does not name the missing file"
+    assert "demo-data" in text, "it does not say how to regenerate it"
+    assert page.inner_text("#explore-rule").strip() != "—"
+
+    page.evaluate("S.windows = window.__savedWindows; renderExplore();")
+    page.wait_for_timeout(250)
+    assert page.evaluate("document.querySelectorAll('.wcard').length") >= 15
+
+
 def test_replay_stops_when_you_navigate_away(page):
     """A replay left running would tick against a hidden panel."""
     page.evaluate("window.showView('replay')")

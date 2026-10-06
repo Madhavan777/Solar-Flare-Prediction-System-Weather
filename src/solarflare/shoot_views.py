@@ -93,7 +93,13 @@ def capture(port: int = 8791, out_dir: Path | None = None) -> int:
 
     with _server(port), sync_playwright() as play:
         browser = play.chromium.launch()
-        page = browser.new_page(viewport=VIEWPORT)
+        # Capture with reduced motion. The landing page's staggered entrance
+        # animation runs for up to 0.62 s, so a fixed wait caught it at a
+        # different phase on every run and the screenshot was never twice the
+        # same - 10 % of its pixels changed between identical builds. The
+        # stylesheet already collapses every animation under this preference,
+        # which makes the captures deterministic and exercises that path.
+        page = browser.new_page(viewport=VIEWPORT, reduced_motion="reduce")
         page.on(
             "console",
             lambda m: errors.append(f"console.{m.type}: {m.text}") if m.type == "error" else None,

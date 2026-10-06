@@ -410,6 +410,15 @@ def cmd_demo_data(args: argparse.Namespace) -> int:
     return 0
 
 
+def port_in_use(port: int, host: str = "127.0.0.1") -> bool:
+    """True if something is already accepting connections on ``port``."""
+    import socket
+
+    with contextlib.closing(socket.socket()) as probe:
+        probe.settimeout(0.4)
+        return probe.connect_ex((host, port)) == 0
+
+
 def cmd_dashboard(args: argparse.Namespace) -> int:
     """Serve dashboard/ over HTTP on localhost."""
     import http.server
@@ -417,7 +426,20 @@ def cmd_dashboard(args: argparse.Namespace) -> int:
     _heading(f"serving the dashboard on http://localhost:{args.port}/index.html")
     missing = [p for p in (paths.DASHBOARD / "index.html", paths.DASHBOARD_DEMO) if not p.exists()]
     if missing:
-        print("FAIL — missing: " + ", ".join(paths.relative(m) for m in missing))
+        print("FAIL - missing: " + ", ".join(paths.relative(m) for m in missing))
+        return 1
+
+    # On Windows, SO_REUSEADDR lets a second process bind a port that is already
+    # being served, so running this command twice silently leaves two servers
+    # fighting over one port with no error at all. Refuse up front instead.
+    if port_in_use(args.port):
+        print(
+            f"FAIL - something is already serving on port {args.port}.\n"
+            f"  If it is this dashboard, just open "
+            f"http://localhost:{args.port}/index.html - there is nothing to start.\n"
+            f"  To run a second copy alongside it, choose another port:\n"
+            f"      python -m solarflare dashboard --port {args.port + 1}"
+        )
         return 1
 
     directory = str(paths.DASHBOARD)
@@ -437,7 +459,16 @@ def cmd_dashboard(args: argparse.Namespace) -> int:
         allow_reuse_address = True
         daemon_threads = True
 
-    with Server(("127.0.0.1", args.port), Handler) as httpd:
+    try:
+        server = Server(("127.0.0.1", args.port), Handler)
+    except OSError as exc:
+        print(
+            f"FAIL - could not bind port {args.port}: {exc}\n"
+            f"  Try another port:  python -m solarflare dashboard --port {args.port + 1}"
+        )
+        return 1
+
+    with server as httpd:
         print("press Ctrl+C to stop")
         try:
             httpd.serve_forever()

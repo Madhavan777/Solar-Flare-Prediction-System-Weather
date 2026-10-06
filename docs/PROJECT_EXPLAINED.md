@@ -125,6 +125,17 @@ On the 75,365 test recordings, scored once:
 Of 990 recordings that preceded a major flare, it caught **907** and missed **83**. It raised
 **4,707** alerts that were not followed by one.
 
+**Two different "false alarm" numbers, which are easy to confuse.** They differ by more than a
+factor of thirteen, so saying the wrong one is a visible error:
+
+| | Formula | Value | In words |
+|---|---|---|---|
+| False-alarm **ratio** (FAR) | FP / (TP + FP) | **0.8384** | Of the alerts raised, 84 % were not followed by a major flare. This is 1 − precision. |
+| False-alarm **rate** (FPR) | FP / (FP + TN) | **0.0633** | Of the quiet recordings, 6 % wrongly triggered an alert. |
+
+The high number describes the alerts; the low number describes the quiet Sun. Both are true and they
+answer different questions. The project never uses "FAR" for the rate.
+
 **Why accuracy is the wrong measure.** A system that always says "no flare" scores **98.69 %**
 accuracy on this data and detects nothing at all. Our model scores *lower* on accuracy than that
 useless system, while catching 92 % of the flares. Quote the two numbers together or not at all.
@@ -167,7 +178,46 @@ cut-offs, never as a percentage chance.
 **It is not operational.** No live feed, no connection to any observatory, no validation beyond 2018
 or beyond this one instrument. It is a prototype demonstrating a method.
 
-## 8. How to see it for yourself
+## 8. The engineering behind it, and what each part buys
+
+The modelling was finished before this work began. What follows is the engineering that makes the
+result *checkable* — which, for a project being examined, is most of what separates a believable
+claim from an assertion.
+
+| # | What was built | What it achieves |
+|---|---|---|
+| 1 | **One command-line entry point.** `python -m solarflare <cmd>` covers every operation: `env`, `audit`, `evaluate`, `train`, `analysis`, `figures`, `demo-data`, `dashboard`, `screenshots`, `test`, `check`, `all`. | Anyone can reproduce any part of the project without reading the source. There is one supported path, so instructions cannot rot. |
+| 2 | **A frozen-artefact guard.** `assert_not_frozen()` runs before every file write and raises on anything under `models/`, `results/` or the report's figures. | The published evidence cannot be destroyed by accident. Two of the original scripts would have overwritten it; now the attempt fails loudly instead of succeeding quietly. |
+| 3 | **Full reproduction verification.** `solarflare evaluate` reloads each trained model, re-scores validation and test, re-applies the selection rule from scratch and re-derives both thresholds — 375 checks. | Turns "the results are correct" from a claim into something an examiner can run in two minutes. Every published figure matches to better than one part in a billion; the stored probabilities to 1.3 × 10⁻¹⁵. |
+| 4 | **Nine post-hoc analyses**, each stamped "not used for selection" inside its own output file. | Supplies the confidence intervals, calibration evidence, baselines and error analysis the headline numbers need — while making it impossible to mistake them for selection evidence, even if a table is lifted out of the repository. |
+| 5 | **186 automated tests**, including leakage tests that fail if an excluded column reaches the model, if a region crosses the split, or if preprocessing is fitted on anything but the training partitions. | The protocol is enforced by machinery rather than by memory. One test deliberately proves the preprocessing statistics *differ* from an all-data fit, so the check cannot pass vacuously. |
+| 6 | **An automated consistency checker**, 392 checks in seven passes, comparing every number in the documentation and the dashboard against the stored results. | Documentation cannot drift away from the evidence. It has already caught real errors, including a class-weight figure that was wrong in six places. |
+| 7 | **A pinned, reproducible environment.** scikit-learn 1.8.0 is a hard requirement with a runtime check; Docker, CI, pre-commit, ruff and black are configured. | The saved models are scikit-learn pickles and will not reproduce under another minor version. The check fails immediately with an actionable message instead of producing subtly wrong numbers. |
+| 8 | **A dashboard generated entirely from the results.** Not one metric is typed into the page; the browser-side model is parity-tested against scikit-learn to better than 10⁻⁶. | The demonstration cannot contradict the report, because it holds no independent copy of the numbers. |
+| 9 | **Report mode.** The views added after the report was frozen are hidden on demand. | Re-running the screenshot step still reproduces the report's Figures 5.1–5.6 byte-identically, so the document and the live system stay in agreement. |
+| 10 | **Examiner-facing documentation** — model card, data card, reproducibility notes, decision log, this explainer, a timed demo script and fifteen answered questions. | Every hard question has an answer that points at a file or a number, prepared in advance rather than improvised. |
+
+Each of these is verifiable: run `python -m solarflare test` and `python scripts/check_consistency.py`.
+
+## 9. What the dashboard may and may not claim
+
+The dashboard is a demonstration of a trained model on recorded data. It is held to the same honesty
+standard as the written report, and a test fails the build if the page drifts from it.
+
+**It may say:** that it scores recorded observations from 2010–2018; that the model runs in the
+browser on a window you supply; that the Replay view steps through real stored predictions in the
+order the observations were taken; that it caught 907 of 990 major flares and raised 4,707 false
+alarms.
+
+**It may not say, and does not:** that it watches the Sun; that anything is real-time, live or
+current; that it is an operational or production warning service; that it uses NOAA or GOES
+monitoring; that its probabilities are literal chances; or that any finding is causal.
+
+The word "live" appears in one place — the **Live Inference** view — where it means the model
+computes in your browser as you watch. It is live *computation*, not live *data*. If anyone reads it
+the other way, correct them immediately; `docs/FEATURES.md` gives the wording.
+
+## 10. How to see it for yourself
 
 Press **Ctrl + Alt + S**, or run `python -m solarflare dashboard` and open
 `http://localhost:8791/index.html`.
@@ -178,7 +228,7 @@ from near zero as the magnetic field grows more complex, and holds in the high-r
 X9.3 and X1.3 flares — with two frames marked MISSED, where a genuine pre-flare recording scored
 below the cut-off. Those are left in on purpose.
 
-## 9. Can the numbers be trusted?
+## 11. Can the numbers be trusted?
 
 Everything in this document can be recomputed:
 
@@ -196,7 +246,7 @@ The consistency checker goes further: it compares every number printed in these 
 in the dashboard against the stored results, and fails if any disagrees. It also checks for
 overclaiming language. So the documentation cannot quietly drift away from the evidence.
 
-## 10. Credits
+## 12. Credits
 
 **Madhavan G** (2104251040518) — data acquisition, feature extraction, the leakage audit, the split
 design, the model experiments, selection and test evaluation, and the result figures.

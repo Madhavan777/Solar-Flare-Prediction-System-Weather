@@ -225,6 +225,56 @@ def test_cli_env_command_returns_zero():
 # --------------------------------------------------------------------------- #
 # repository hygiene
 # --------------------------------------------------------------------------- #
+def test_a_corrupt_feature_matrix_reports_itself_clearly(tmp_path, monkeypatch):
+    """A damaged .npz otherwise surfaces as a numpy warning about pickled data.
+
+    That sends the reader hunting for a security problem instead of telling them
+    the file is truncated and how to rebuild it.
+    """
+    from solarflare import data
+
+    bad_x = tmp_path / "all_X.npz"
+    bad_meta = tmp_path / "all_meta.csv.gz"
+    bad_x.write_text("this is not an npz archive", encoding="utf-8")
+    bad_meta.write_text("y\n1\n", encoding="utf-8")
+
+    monkeypatch.setattr(paths, "ALL_X", bad_x)
+    monkeypatch.setattr(paths, "ALL_META", bad_meta)
+
+    with pytest.raises(FileNotFoundError, match="truncated or corrupt"):
+        data.load()
+
+
+def test_dashboard_refuses_a_port_that_is_already_serving():
+    """Two servers on one port is a silent failure on Windows.
+
+    SO_REUSEADDR there lets a second process bind a port that is already being
+    served, so running the command twice left two servers fighting over it with
+    no error at all - exactly the sort of thing that goes wrong during a live
+    demonstration. The command now checks before binding.
+    """
+    import argparse
+    import contextlib
+    import socket
+
+    from solarflare import cli
+
+    with contextlib.closing(socket.socket()) as holder:
+        holder.bind(("127.0.0.1", 0))
+        holder.listen(1)
+        port = holder.getsockname()[1]
+
+        assert cli.port_in_use(port) is True
+        code = cli.cmd_dashboard(argparse.Namespace(port=port, verbose=False))
+        assert code == 1, "serving on an occupied port should fail, not bind alongside"
+
+    # And the probe must not report a free port as busy.
+    with contextlib.closing(socket.socket()) as finder:
+        finder.bind(("127.0.0.1", 0))
+        free_port = finder.getsockname()[1]
+    assert cli.port_in_use(free_port) is False
+
+
 def test_gitignore_excludes_the_large_inputs():
     text = (paths.ROOT / ".gitignore").read_text(encoding="utf-8")
     for pattern in ("raw_data/", "data/", ".venv/", "reference/"):
