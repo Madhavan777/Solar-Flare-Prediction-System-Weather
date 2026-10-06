@@ -278,6 +278,65 @@ def test_most_explorer_windows_carry_their_raw_series():
     assert payload["n_with_raw_series"] == with_series
 
 
+def test_replay_json_contract():
+    """The replay view's recorded active-region histories."""
+    payload = load(paths.DASHBOARD / "replay.json")
+    assert {"what_this_is", "what_this_is_not", "alert_threshold", "tracks"} <= set(payload)
+    assert "Not a feed" in payload["what_this_is_not"]
+
+    alert, high = models.thresholds()
+    assert payload["alert_threshold"] == pytest.approx(alert, abs=1e-12)
+    assert payload["high_threshold"] == pytest.approx(high, abs=1e-12)
+
+    assert len(payload["tracks"]) >= 3
+    for track in payload["tracks"]:
+        assert {"harp", "title", "verdict", "story", "steps", "counts"} <= set(track)
+        assert track["n_steps"] == len(track["steps"])
+        assert track["steps"], "a replay track has no frames"
+        cutoffs = [s["cutoff"] for s in track["steps"]]
+        assert cutoffs == sorted(
+            cutoffs
+        ), f"HARP {track['harp']} frames are not in chronological order"
+        for step in track["steps"]:
+            assert 0.0 <= step["p"] <= 1.0
+            assert step["risk"] in ("LOW", "MODERATE", "HIGH")
+            assert step["outcome"] in ("TP", "FP", "FN", "TN")
+            # The risk band must follow from the probability and the thresholds.
+            expected = models.risk_level(step["p"], alert, high)
+            assert step["risk"] == expected, (
+                f"frame at {step['cutoff']} is labelled {step['risk']} but p={step['p']} "
+                f"gives {expected}"
+            )
+            # A flare class is present exactly when the window is positive.
+            assert (step["flare_class"] is not None) == (step["y"] == 1)
+
+
+def test_replay_outcomes_match_the_frozen_predictions():
+    """Every replay frame must be a real stored prediction, not a re-run."""
+    import pandas as pd
+
+    payload = load(paths.DASHBOARD / "replay.json")
+    meta = pd.read_csv(paths.ALL_META) if paths.ALL_META.exists() else None
+    if meta is None:
+        pytest.skip("needs data/all_meta.csv.gz")
+
+    stored = pd.read_csv(paths.TEST_PREDICTIONS)
+    joined = meta.iloc[stored["row"].to_numpy()].reset_index(drop=True)
+    joined["p"] = stored["p"].to_numpy()
+
+    for track in payload["tracks"]:
+        subset = joined[joined["ar"] == track["harp"]]
+        lookup = dict(zip(subset["end"], subset["p"], strict=True))
+        assert (
+            len(subset) == track["n_steps"]
+        ), f"HARP {track['harp']}: {track['n_steps']} frames but {len(subset)} windows"
+        for step in track["steps"]:
+            assert step["cutoff"] in lookup, f"{step['cutoff']} is not a real window"
+            assert step["p"] == pytest.approx(
+                lookup[step["cutoff"]], abs=5e-7
+            ), f"frame at {step['cutoff']} does not match the stored prediction"
+
+
 def test_operating_json_contract():
     """The threshold slider's precomputed grid."""
     payload = load(paths.DASHBOARD_OPERATING)

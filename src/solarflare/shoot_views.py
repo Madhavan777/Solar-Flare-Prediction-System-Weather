@@ -23,9 +23,11 @@ __all__ = ["ALL_VIEWS", "LEGACY_FILENAMES", "LEGACY_VIEWS", "capture"]
 
 #: The six views the report's figures were captured from.
 LEGACY_VIEWS = ("overview", "predict", "result", "risk", "explain", "eval")
-#: The three added in the Phase 3 upgrade.
-NEW_VIEWS = ("explore", "live", "operate")
-ALL_VIEWS = LEGACY_VIEWS + NEW_VIEWS
+#: Added after the report was frozen. ``start`` is the landing page and the
+#: default view; ``replay`` walks a recorded active-region history.
+NEW_VIEWS = ("start", "explore", "live", "operate", "replay")
+#: Capture order: the landing page first, then the report's six, then the rest.
+ALL_VIEWS = ("start",) + LEGACY_VIEWS + ("explore", "live", "operate", "replay")
 
 #: Report figure names, kept so a reviewer can diff against figures/fig5_*.png.
 LEGACY_FILENAMES = {

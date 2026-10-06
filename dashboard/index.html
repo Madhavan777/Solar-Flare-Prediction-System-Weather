@@ -180,9 +180,139 @@
   .tourbar i{display:block;height:100%;background:var(--accent);width:0}
   .muted{color:var(--muted)}
   .mono{font-family:Consolas,monospace}
+  /* ===================== landing page ===================== */
+  .hero{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:18px;
+    background:radial-gradient(900px 380px at 82% -10%,#2a1a08 0%,transparent 62%),
+               linear-gradient(180deg,var(--panel2),var(--panel));
+    padding:40px 38px 34px;margin-top:20px}
+  .hero .sun{position:absolute;right:-70px;top:-70px;width:280px;height:280px;border-radius:50%;
+    background:radial-gradient(circle at 36% 34%,#ffd9a1,#ff8a3d 44%,#a13d00 70%,transparent 72%);
+    filter:blur(2px);opacity:.5;animation:pulse 7s ease-in-out infinite}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:.45}50%{transform:scale(1.07);opacity:.62}}
+  .hero .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--accent2);
+    border:1px solid #6b4d12;background:#2a1a08;border-radius:20px;padding:5px 13px}
+  .hero h2{font-size:34px;line-height:1.22;margin:16px 0 0;max-width:19ch;font-weight:800}
+  .hero h2 em{font-style:normal;color:var(--accent)}
+  .hero .lede{font-size:15px;line-height:1.65;color:#cfdcee;max-width:60ch;margin:14px 0 0}
+  .hero .cta{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
+  .hero .cta .btn{font-size:13.5px;padding:11px 20px}
+  .chain{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:12px;align-items:stretch;
+    margin-top:18px}
+  .chain .step{background:var(--navy2);border:1px solid var(--line);border-radius:12px;
+    padding:15px 16px}
+  .chain .step .n{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--accent2)}
+  .chain .step b{display:block;font-size:15px;margin:6px 0 5px}
+  .chain .step span{font-size:12.5px;color:var(--muted);line-height:1.55}
+  .chain .to{display:flex;align-items:center;color:var(--accent);font-size:20px}
+  .statstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+  .statstrip .s{background:var(--navy2);border:1px solid var(--line);border-radius:12px;
+    padding:15px 16px;text-align:center}
+  .statstrip .s .v{font-size:25px;font-weight:800;line-height:1.1}
+  .statstrip .s .k{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.45}
+  .featgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:14px;
+    margin-top:16px}
+  .feat{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);
+    border-radius:14px;padding:18px 19px;text-align:left;color:var(--text);cursor:pointer;
+    transition:transform .18s cubic-bezier(.2,.7,.3,1),border-color .18s,box-shadow .18s;
+    display:flex;flex-direction:column;gap:7px}
+  .feat:hover{transform:translateY(-3px);border-color:var(--accent);
+    box-shadow:0 10px 26px #0006}
+  .feat .ic{font-size:21px;line-height:1}
+  .feat b{font-size:14.5px}
+  .feat span{font-size:12.5px;color:var(--muted);line-height:1.55}
+  .feat .go{font-size:11.5px;color:var(--accent2);margin-top:auto;padding-top:4px}
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+  .isnot{border-radius:14px;padding:17px 19px;border:1px solid var(--line)}
+  .isnot.is{background:#0d2a1e;border-color:#1c6b46}
+  .isnot.isnt{background:#2a1208;border-color:#7a4d12}
+  .isnot h3{margin:0 0 9px;font-size:13px;text-transform:uppercase;letter-spacing:.06em}
+  .isnot.is h3{color:#5fd99b}
+  .isnot.isnt h3{color:var(--amber)}
+  .isnot ul{margin:0;padding-left:18px;font-size:12.5px;line-height:1.75;color:#cfdcee}
+
+  /* ===================== replay ===================== */
+  .rp-pick{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+  .rp-pick button{background:var(--navy2);border:1px solid var(--line);border-radius:12px;
+    padding:13px 15px;text-align:left;color:var(--text);cursor:pointer;transition:border-color .15s,
+    transform .15s}
+  .rp-pick button:hover{transform:translateY(-2px);border-color:var(--accent)}
+  .rp-pick button.on{border-color:var(--accent);background:#22324f}
+  .rp-pick .t{font-weight:700;font-size:13px}
+  .rp-pick .v{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.5}
+  .rp-stage{display:grid;grid-template-columns:260px 1fr;gap:18px;margin-top:4px}
+  .rp-dial{position:relative;width:200px;height:200px;margin:0 auto}
+  .rp-dial svg{transform:rotate(-90deg)}
+  .rp-dial .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+    justify-content:center}
+  .rp-dial .pv{font-size:33px;font-weight:800;font-variant-numeric:tabular-nums}
+  .rp-dial .pl{font-size:10.5px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase}
+  .rp-band{margin-top:10px;text-align:center;font-size:12px}
+  .rp-clock{font-family:Consolas,monospace;font-size:14px;color:#fff;text-align:center;
+    background:#0c1a2e;border:1px solid var(--line);border-radius:8px;padding:7px 10px;
+    margin-top:10px}
+  .rp-track{position:relative;height:150px;background:#0c1a2e;border:1px solid var(--line);
+    border-radius:10px;overflow:hidden}
+  .rp-track svg{display:block;width:100%;height:100%}
+  .rp-ax{position:absolute;left:9px;font-size:10px;color:var(--muted);
+    background:#0c1a2ecc;padding:1px 5px;border-radius:4px;pointer-events:none;
+    transform:translateY(-50%)}
+  .rp-ax[style*="top:4px"],.rp-ax[style*="bottom:4px"]{transform:none}
+  .rp-ax-r{left:auto;right:9px}
+  .rp-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:8px}
+  .rp-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;
+    vertical-align:-1px}
+  .rp-controls{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:12px}
+  .rp-controls input[type=range]{flex:1;min-width:150px}
+  .rp-event{margin-top:12px;border-radius:10px;padding:12px 15px;font-size:12.5px;line-height:1.6;
+    border:1px solid var(--line);background:var(--navy2);transition:background .3s,border-color .3s}
+  .rp-event.hit{background:#0d3324;border-color:#1c6b46}
+  .rp-event.miss{background:#3a2208;border-color:#7a4d12}
+  .rp-event.false{background:#3a1414;border-color:#7a2222}
+  .ticker{display:inline-block;animation:blink 1.6s steps(2,start) infinite;color:var(--accent)}
+  @keyframes blink{50%{opacity:.25}}
+
+  /* ===================== motion and polish ===================== */
+  .reveal-up{opacity:0;transform:translateY(10px);animation:rise .45s cubic-bezier(.2,.7,.3,1) forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .view.active .reveal-up:nth-child(1){animation-delay:.02s}
+  .view.active .reveal-up:nth-child(2){animation-delay:.07s}
+  .view.active .reveal-up:nth-child(3){animation-delay:.12s}
+  .view.active .reveal-up:nth-child(4){animation-delay:.17s}
+  .card{transition:border-color .18s,box-shadow .18s}
+  .kpi .box{transition:transform .18s,border-color .18s}
+  .kpi .box:hover{transform:translateY(-2px);border-color:#2f5a8f}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* ===================== responsive ===================== */
+  @media (max-width:1100px){
+    .chain{grid-template-columns:1fr}
+    .chain .to{display:none}
+    .rp-stage{grid-template-columns:1fr}
+  }
+  @media (max-width:900px){
+    .statstrip{grid-template-columns:repeat(2,1fr)}
+    .twocol{grid-template-columns:1fr}
+  }
   @media (max-width:860px){
     .grid.cols-3,.grid.cols-2{grid-template-columns:1fr}
     header.top{flex-direction:column;align-items:flex-start;gap:12px}
+    .hero{padding:28px 22px 26px}
+    .hero h2{font-size:27px;max-width:none}
+    .hero .sun{width:190px;height:190px;right:-60px;top:-60px;opacity:.32}
+    .app{padding:14px 16px 32px}
+    .section-title{font-size:18px}
+  }
+  @media (max-width:560px){
+    .statstrip{grid-template-columns:1fr}
+    .hero h2{font-size:23px}
+    .hero .cta .btn{width:100%;text-align:center}
+    .gauge,.rp-dial{width:168px;height:168px}
+    .featbar .name{width:112px}
+    .cm-grid{font-size:11.5px}
+    nav{width:100%}
+    nav button{flex:1 1 auto}
   }
   /* Honour a reduced-motion preference: the view fade and the card lift are
      decoration, so drop them rather than animate regardless. */
@@ -223,7 +353,8 @@
     </div>
     <div style="display:flex;align-items:center;flex-wrap:wrap">
       <nav id="nav" role="tablist" aria-label="Dashboard views">
-        <button data-v="overview" class="active" role="tab" aria-selected="true" aria-controls="v-overview">Overview</button>
+        <button data-v="start" class="nav-extra active" role="tab" aria-selected="true" aria-controls="v-start">Start</button>
+        <button data-v="overview" role="tab" aria-selected="false" aria-controls="v-overview">Overview</button>
         <button data-v="predict" role="tab" aria-selected="false" aria-controls="v-predict">Forecast</button>
         <button data-v="result" role="tab" aria-selected="false" aria-controls="v-result">Prediction</button>
         <button data-v="risk" role="tab" aria-selected="false" aria-controls="v-risk">Risk &amp; Alert</button>
@@ -232,14 +363,64 @@
         <button data-v="explore" class="nav-extra" role="tab" aria-selected="false" aria-controls="v-explore">Explore</button>
         <button data-v="live" class="nav-extra" role="tab" aria-selected="false" aria-controls="v-live">Live</button>
         <button data-v="operate" class="nav-extra" role="tab" aria-selected="false" aria-controls="v-operate">Operating</button>
+        <button data-v="replay" class="nav-extra" role="tab" aria-selected="false" aria-controls="v-replay">Replay</button>
       </nav>
       <button class="tour-launch" id="tourBtn" type="button">&#9654; 3-minute tour</button>
     </div>
   </header>
 
   <main id="main">
+  <!-- START: the landing page, written for someone who has never heard of this -->
+  <section class="view active" id="v-start" role="tabpanel" aria-labelledby="nav">
+    <div class="hero reveal-up">
+      <div class="sun" aria-hidden="true"></div>
+      <span class="eyebrow">Machine learning &middot; Space weather &middot; Academic prototype</span>
+      <h2>Will this patch of the Sun <em>erupt</em> in the next 24 hours?</h2>
+      <p class="lede" id="st-lede">&mdash;</p>
+      <div class="cta">
+        <button class="btn" type="button" id="st-tour">&#9654;&nbsp; Take the 3-minute tour</button>
+        <button class="btn ghost" type="button" data-goto="replay">Watch it run on a real flare</button>
+        <button class="btn ghost" type="button" data-goto="eval">Jump to the results</button>
+      </div>
+    </div>
+
+    <div class="section-title">How it works, in three steps</div>
+    <div class="chain" id="st-chain"></div>
+
+    <div class="section-title">What it achieves</div>
+    <div class="section-sub">Measured on <span id="st-testn">&mdash;</span> recordings the model had
+      never seen. Both the strength and the weakness are shown.</div>
+    <div class="statstrip" id="st-stats"></div>
+
+    <div class="section-title">Where to go</div>
+    <div class="section-sub">Every panel is read-only &mdash; nothing you click can change a result.</div>
+    <div class="featgrid" id="st-feats"></div>
+
+    <div class="section-title">Being straight about it</div>
+    <div class="twocol">
+      <div class="isnot is">
+        <h3>What this is</h3>
+        <ul>
+          <li>A trained model scoring <b>recorded</b> observations from 2010&ndash;2018</li>
+          <li>Checked once on data held back from training, and reproducible from this repository</li>
+          <li>Honest about its mistakes &mdash; the failures are on display, not hidden</li>
+          <li>Entirely offline; it works with the network switched off</li>
+        </ul>
+      </div>
+      <div class="isnot isnt">
+        <h3>What this is not</h3>
+        <ul>
+          <li><b>Not</b> connected to the Sun, to NASA, or to any feed</li>
+          <li><b>Not</b> an operational space-weather warning service</li>
+          <li><b>Not</b> tested beyond 2018 or beyond this one instrument</li>
+          <li><b>Not</b> a calibrated chance &mdash; read it as a ranking, not a percentage</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
   <!-- OVERVIEW -->
-  <section class="view active" id="v-overview" role="tabpanel" aria-labelledby="nav">
+  <section class="view" id="v-overview" role="tabpanel" aria-labelledby="nav">
     <div class="grid cols-3" style="margin-top:18px">
       <div class="card"><h2>Dataset</h2><div class="big">SWAN-SF</div><div style="color:var(--muted);font-size:12.5px;margin-top:4px" id="ov-dataset">&mdash;</div></div>
       <div class="card"><h2>Forecast Setup</h2><div class="big" id="ov-setup">&mdash;</div><div style="color:var(--muted);font-size:12.5px;margin-top:4px">Observation window &rarr; prediction window</div></div>
@@ -446,6 +627,63 @@
     </div>
   </section>
 
+  <!-- NEW: REPLAY -->
+  <section class="view" id="v-replay" role="tabpanel" aria-labelledby="nav">
+    <div class="section-title">Replay</div>
+    <div class="section-sub">Watch the model work through a real active region hour by hour, as the
+      observations were actually recorded.</div>
+    <div class="warnbar" id="rp-banner">&mdash;</div>
+
+    <div class="card">
+      <h2>Choose a region to replay</h2>
+      <div class="rp-pick" id="rp-pick"></div>
+      <p class="muted" style="font-size:12.5px;line-height:1.6;margin:13px 0 0" id="rp-story">&mdash;</p>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="rp-stage">
+        <div>
+          <div class="rp-dial">
+            <svg width="200" height="200" viewBox="0 0 200 200" aria-hidden="true">
+              <circle cx="100" cy="100" r="84" stroke="#0c1a2e" stroke-width="15" fill="none"/>
+              <circle id="rp-arc" cx="100" cy="100" r="84" stroke="#2fbf71" stroke-width="15"
+                      fill="none" stroke-linecap="round"/>
+            </svg>
+            <div class="mid">
+              <div class="pv num" id="rp-pct">&mdash;</div>
+              <div class="pl">forecast probability</div>
+            </div>
+          </div>
+          <div class="rp-band" id="rp-band">&mdash;</div>
+          <div class="rp-clock" id="rp-clock">&mdash;</div>
+        </div>
+
+        <div>
+          <div class="rp-track" id="rp-track"></div>
+          <div class="rp-legend">
+            <span><i style="background:#2fbf71"></i>caught a flare</span>
+            <span><i style="background:#f2b134"></i>missed a flare</span>
+            <span><i style="background:#e5484d"></i>false alarm</span>
+            <span><i style="background:#3d8bfd"></i>correctly quiet</span>
+            <span><i style="background:#9fb3cc"></i>alert threshold</span>
+          </div>
+          <div class="rp-controls">
+            <button class="btn" type="button" id="rp-play">&#9654;&nbsp; Play</button>
+            <button class="btn ghost" type="button" id="rp-restart">Restart</button>
+            <input type="range" id="rp-scrub" min="0" max="100" value="0" step="1"
+                   aria-label="Replay position">
+            <span class="muted mono" id="rp-pos" style="font-size:11.5px">&mdash;</span>
+          </div>
+          <div class="rp-event" id="rp-event" role="status" aria-live="polite">&mdash;</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>What you are watching</h2>
+      <p style="font-size:12.5px;color:var(--muted);line-height:1.7" id="rp-explain">&mdash;</p>
+    </div>
+  </section>
   </main>
 
   <footer>
@@ -504,7 +742,7 @@ function renderCore() {
   $('r-model').textContent = d.model_name;
   $('r-thr').textContent = thr.toFixed(4);
   $('ov-dataset').textContent =
-    c.dataset.n_windows_total.toLocaleString() + ' observation windows · ' +
+    c.dataset.n_windows_total.toLocaleString('en-GB') + ' observation windows · ' +
     c.dataset.n_partitions + ' partitions (' + c.dataset.year_span + ')';
   $('ov-setup').textContent = c.dataset.observation_hours + 'h → ' +
     c.dataset.prediction_hours + 'h';
@@ -573,7 +811,7 @@ function renderCore() {
 
   // evaluation
   $('eval-sub').textContent = 'Metrics computed on the locked test partition (P5), ' +
-    t.n.toLocaleString() + ' windows never used for training or model selection.';
+    t.n.toLocaleString('en-GB') + ' windows never used for training or model selection.';
   const ci = c.confidence_intervals_95 || {};
   const items = [['Precision', 'precision'], ['Recall', 'recall'], ['F1-score', 'f1'],
                  ['TSS', 'tss'], ['PR-AUC', 'pr_auc'], ['ROC-AUC', 'roc_auc']];
@@ -589,7 +827,7 @@ function renderCore() {
     esc(c.always_no_flare.note) + ' Recall and TSS are emphasised, which trades off against precision &mdash; ' +
     'the false-alarm <i>ratio</i> is ' + fmt(t.far) + ' while the false-alarm <i>rate</i> is ' +
     fmt(t.fp / (t.fp + t.tn), 4) + '. ' +
-    (c.near_miss ? 'Of the ' + c.near_miss.n_false_alarms.toLocaleString() + ' false alarms, ' +
+    (c.near_miss ? 'Of the ' + c.near_miss.n_false_alarms.toLocaleString('en-GB') + ' false alarms, ' +
       (c.near_miss.share_preceding_a_real_flare * 100).toFixed(1) +
       '% precede a real B- or C-class flare, and the model alerts on only ' +
       (c.near_miss.alert_rate_flare_quiet * 100).toFixed(2) +
@@ -630,11 +868,11 @@ function cmHTML(t, id) {
     '<div class="cm-cell" style="background:transparent;border:none;color:var(--muted)">Pred: No M/X</div>' +
     '<div class="cm-cell" style="background:transparent;border:none;color:var(--muted)">Pred: M/X</div>' +
     '<div class="cm-lab">Actual: No M/X</div>' +
-    '<div class="cm-cell tn">TN<br><b>' + t.tn.toLocaleString() + '</b></div>' +
-    '<div class="cm-cell fp">FP<br><b>' + t.fp.toLocaleString() + '</b></div>' +
+    '<div class="cm-cell tn">TN<br><b>' + t.tn.toLocaleString('en-GB') + '</b></div>' +
+    '<div class="cm-cell fp">FP<br><b>' + t.fp.toLocaleString('en-GB') + '</b></div>' +
     '<div class="cm-lab">Actual: M/X</div>' +
-    '<div class="cm-cell fn">FN<br><b>' + t.fn.toLocaleString() + '</b></div>' +
-    '<div class="cm-cell tp">TP<br><b>' + t.tp.toLocaleString() + '</b></div>';
+    '<div class="cm-cell fn">FN<br><b>' + t.fn.toLocaleString('en-GB') + '</b></div>' +
+    '<div class="cm-cell tp">TP<br><b>' + t.tp.toLocaleString('en-GB') + '</b></div>';
 }
 
 /* ============================ explore windows ====================== */
@@ -877,7 +1115,7 @@ function renderOperate() {
     $('op-cm').innerHTML = cmHTML(r);
     $('op-note').innerHTML =
       'At a threshold of <b>' + r.threshold.toFixed(4) + '</b> the system alerts on <b>' +
-      (r.tp + r.fp).toLocaleString() + '</b> of ' + o.n_windows.toLocaleString() +
+      (r.tp + r.fp).toLocaleString('en-GB') + '</b> of ' + o.n_windows.toLocaleString('en-GB') +
       ' windows, catching <b>' + r.tp + '</b> of ' + o.n_positives +
       ' major flares and missing <b>' + r.fn + '</b>.' +
       (atFixed
@@ -894,8 +1132,8 @@ function renderOperate() {
 }
 
 /* ============================ navigation =========================== */
-const VIEWS = ['overview', 'predict', 'result', 'risk', 'explain', 'eval',
-               'explore', 'live', 'operate'];
+const VIEWS = ['start', 'overview', 'predict', 'result', 'risk', 'explain', 'eval',
+               'explore', 'live', 'operate', 'replay'];
 
 function activate(name, pushHash) {
   if (!VIEWS.includes(name)) return;
@@ -928,8 +1166,205 @@ document.getElementById('nav').addEventListener('click', e => {
   activate(e.target.dataset.v);
 });
 
+/* ============================ landing page ========================= */
+/* Everything here is built from context.json and the frozen results, so the
+   plain-English front page cannot drift from the numbers behind it. */
+function renderLanding() {
+  const c = S.ctx, t = S.demo.test;
+  const d = c.dataset, sp = c.split;
+
+  $('st-lede').innerHTML =
+    'Big solar flares disrupt satellites, radio, GPS and power grids. Before one happens, the ' +
+    'magnetic field above that part of the Sun behaves in a measurable way. This system reads ' +
+    '<b>' + d.observation_hours + ' hours</b> of those measurements for a single active region ' +
+    'and estimates how likely it is to produce a <b>major flare</b> &mdash; GOES class M or X ' +
+    '&mdash; in the following <b>' + d.prediction_hours + ' hours</b>. It learned the pattern ' +
+    'from <b>' + d.n_windows_total.toLocaleString('en-GB') + '</b> recorded observations spanning ' +
+    esc(d.year_span) + '.';
+
+  $('st-chain').innerHTML = [
+    ['Step 1', 'Observe', d.records_per_window + ' readings taken every ' + d.cadence_minutes +
+      ' minutes over ' + d.observation_hours + ' hours, covering ' + d.n_sharp_parameters +
+      ' measures of the magnetic field.'],
+    ['Step 2', 'Summarise &amp; score', 'Each recording is condensed into ' + d.n_features +
+      ' numbers, which the trained model turns into a single probability.'],
+    ['Step 3', 'Decide', 'The probability is compared with a cut-off fixed in advance, giving ' +
+      'LOW, MODERATE or HIGH risk for the next ' + d.prediction_hours + ' hours.']
+  ].map(([n, h, s], i) =>
+    '<div class="step reveal-up"><div class="n">' + n + '</div><b>' + h + '</b><span>' + s +
+    '</span></div>' + (i < 2 ? '<div class="to">&rarr;</div>' : '')).join('');
+
+  $('st-testn').textContent = t.n.toLocaleString('en-GB');
+  $('st-stats').innerHTML = [
+    [(t.recall * 100).toFixed(0) + '%', 'of real major flares were caught', '#2fbf71'],
+    [(t.precision * 100).toFixed(0) + '%', 'of its alerts were followed by one', '#e5484d'],
+    [fmt(t.tss), 'skill score, where 0 is useless and 1 is perfect', '#ff8a3d'],
+    [esc(c.split.test_base_rate_text), 'of recordings actually preceded a major flare', '#9fb3cc']
+  ].map(([v, k, col]) =>
+    '<div class="s reveal-up"><div class="v num" style="color:' + col + '">' + v +
+    '</div><div class="k">' + k + '</div></div>').join('');
+
+  $('st-feats').innerHTML = [
+    ['replay', '&#9654;', 'Watch it run',
+     'Replay ten days of a real active region and see the forecast climb before the flare.'],
+    ['explore', '&#128269;', 'Inspect real cases',
+     'Twenty recordings including the ones it got wrong. The answer stays hidden until you ask.'],
+    ['live', '&#9881;', 'Run the model yourself',
+     'The real trained model executes in your browser on a recording you provide.'],
+    ['operate', '&#9878;', 'Tune the trade-off',
+     'Move the cut-off and watch caution trade against missed flares.'],
+    ['explain', '&#128202;', 'See why',
+     'Which measurements pushed the score up or down. Exact, not an approximation.'],
+    ['eval', '&#128203;', 'Check the numbers',
+     'The full report card with confidence intervals and the confusion matrix.']
+  ].map(([v, ic, title, body]) =>
+    '<button class="feat reveal-up" type="button" data-goto="' + v + '">' +
+    '<span class="ic">' + ic + '</span><b>' + title + '</b><span>' + body + '</span>' +
+    '<span class="go">Open &rarr;</span></button>').join('');
+
+  document.querySelectorAll('[data-goto]').forEach(b =>
+    b.addEventListener('click', () => { activate(b.dataset.goto); window.scrollTo(0, 0); }));
+  $('st-tour').addEventListener('click', () => $('tourBtn').click());
+}
+
+/* ============================ replay =============================== */
+/* A replay of recorded observations, never a feed. Each frame is a real
+   12-hour window and the probability is the model's frozen prediction for it. */
+const RP = {track: null, i: 0, timer: null};
+const RP_COLOUR = {TP: '#2fbf71', FN: '#f2b134', FP: '#e5484d', TN: '#3d8bfd'};
+
+function renderReplay() {
+  const r = S.replay;
+  if (!r) { $('rp-banner').textContent = 'replay.json not found.'; return; }
+  $('rp-banner').innerHTML = '<b>' + esc(r.what_this_is_not.split('.')[0]) + '.</b> ' +
+    esc(r.what_this_is);
+  $('rp-pick').innerHTML = r.tracks.map((t, i) =>
+    '<button type="button" data-rp="' + i + '"' + (i === 0 ? ' class="on"' : '') +
+    ' aria-pressed="' + (i === 0) + '">' +
+    '<div class="t">HARP ' + t.harp + (t.noaa_ar ? ' (NOAA AR ' + t.noaa_ar + ')' : '') + '</div>' +
+    '<div class="v">' + esc(t.title) + '<br><b>' + esc(t.verdict) + '</b></div></button>').join('');
+  $('rp-pick').querySelectorAll('button').forEach(b =>
+    b.addEventListener('click', () => loadTrack(Number(b.dataset.rp))));
+
+  $('rp-explain').innerHTML =
+    'Each frame is one real ' + S.ctx.dataset.observation_hours + '-hour recording, and the ' +
+    'probability shown is the model’s stored prediction for it &mdash; nothing is ' +
+    'recalculated or invented. Frames advance in the order the observations were taken, about ' +
+    'one per hour of recorded time. The dial turns amber at the alert threshold of ' +
+    S.ctx.thresholds.alert_text + ' and red at the high-risk threshold of ' +
+    S.ctx.thresholds.high_text + '. ' + esc(r.what_this_is_not);
+
+  $('rp-play').addEventListener('click', togglePlay);
+  $('rp-restart').addEventListener('click', () => { stopPlay(); seek(0); });
+  $('rp-scrub').addEventListener('input', e => { stopPlay(); seek(Number(e.target.value)); });
+  loadTrack(0);
+}
+
+function loadTrack(index) {
+  stopPlay();
+  RP.track = S.replay.tracks[index];
+  $('rp-pick').querySelectorAll('button').forEach((b, i) => {
+    b.classList.toggle('on', i === index);
+    b.setAttribute('aria-pressed', String(i === index));
+  });
+  $('rp-story').textContent = RP.track.story;
+  $('rp-scrub').max = RP.track.steps.length - 1;
+  drawTrack();
+  seek(0);
+}
+
+function drawTrack() {
+  const steps = RP.track.steps, n = steps.length;
+  const W = 1000, H = 150, pad = 6;
+  const x = i => (i / (n - 1)) * (W - 2 * pad) + pad;
+  const y = p => H - pad - p * (H - 2 * pad);
+  const line = steps.map((s, i) => x(i).toFixed(1) + ',' + y(s.p).toFixed(1)).join(' ');
+  const thr = y(S.replay.alert_threshold);
+  const marks = steps.map((s, i) => s.outcome === 'TN' ? '' :
+    '<rect x="' + (x(i) - 1.4).toFixed(1) + '" y="' + pad + '" width="2.8" height="' + (H - 2 * pad) +
+    '" fill="' + RP_COLOUR[s.outcome] + '" opacity="' + (s.outcome === 'TP' ? 0.16 : 0.3) + '"/>').join('');
+  // preserveAspectRatio="none" stretches the plot to the panel, so text inside
+  // the SVG would stretch with it. The axis labels are therefore HTML, layered
+  // over the chart rather than drawn in it.
+  $('rp-track').innerHTML =
+    '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true">' +
+    marks +
+    '<line x1="' + pad + '" x2="' + (W - pad) + '" y1="' + thr + '" y2="' + thr +
+    '" stroke="#9fb3cc" stroke-width="1.4" stroke-dasharray="6 5"/>' +
+    '<polyline points="' + line + '" fill="none" stroke="#ff8a3d" stroke-width="2"/>' +
+    '<line id="rp-cursor" x1="0" x2="0" y1="0" y2="' + H + '" stroke="#fff" stroke-width="1.6"/>' +
+    '<circle id="rp-dot" r="4.5" fill="#fff"/></svg>' +
+    '<span class="rp-ax" style="top:4px">1.0 &mdash; certain</span>' +
+    '<span class="rp-ax" style="top:' + ((thr / H) * 100).toFixed(1) + '%;color:#cfdcee">' +
+      'alert at ' + S.replay.alert_threshold.toFixed(2) + '</span>' +
+    '<span class="rp-ax" style="bottom:4px">0.0 &mdash; quiet</span>' +
+    '<span class="rp-ax rp-ax-r" style="bottom:4px">' + esc(RP.track.first_cutoff.slice(0, 10)) +
+      ' &rarr; ' + esc(RP.track.last_cutoff.slice(0, 10)) + '</span>';
+}
+
+function seek(i) {
+  const steps = RP.track.steps;
+  RP.i = Math.max(0, Math.min(steps.length - 1, i));
+  const s = steps[RP.i];
+  const n = steps.length, W = 1000, H = 150, pad = 6;
+  const px = (RP.i / (n - 1)) * (W - 2 * pad) + pad;
+  const py = H - pad - s.p * (H - 2 * pad);
+  const cursor = document.getElementById('rp-cursor');
+  const dot = document.getElementById('rp-dot');
+  if (cursor) { cursor.setAttribute('x1', px); cursor.setAttribute('x2', px); }
+  if (dot) { dot.setAttribute('cx', px); dot.setAttribute('cy', py); }
+
+  const arc = $('rp-arc');
+  const circumference = 2 * Math.PI * Number(arc.getAttribute('r'));
+  arc.setAttribute('stroke-dasharray', circumference.toFixed(2));
+  arc.style.strokeDashoffset = String(circumference * (1 - s.p));
+  const colour = s.risk === 'HIGH' ? '#e5484d' : (s.risk === 'MODERATE' ? '#f2b134' : '#2fbf71');
+  arc.setAttribute('stroke', colour);
+  $('rp-pct').textContent = (s.p * 100).toFixed(1) + '%';
+  $('rp-pct').style.color = colour;
+  $('rp-band').innerHTML = '<span class="tag ' + s.risk + '">' + s.risk + ' RISK</span>';
+  $('rp-clock').textContent = s.cutoff.replace('T', '  ');
+  $('rp-scrub').value = RP.i;
+  $('rp-pos').textContent = 'frame ' + (RP.i + 1) + ' / ' + n;
+
+  const box = $('rp-event');
+  box.className = 'rp-event' +
+    (s.outcome === 'TP' ? ' hit' : s.outcome === 'FN' ? ' miss' : s.outcome === 'FP' ? ' false' : '');
+  const when = 'In the 24 hours after this recording, ';
+  // The article follows how the class letter is read aloud: "an em-one", "an
+  // ex-nine", but "a bee-four", "a see-two".
+  const article = /^[MX]/.test(s.flare_class || '') ? 'an' : 'a';
+  box.innerHTML =
+    s.outcome === 'TP' ? '<b>CAUGHT.</b> ' + when + article + ' <b>' + esc(s.flare_class) +
+      '</b> flare occurred, and the system had raised an alert.' :
+    s.outcome === 'FN' ? '<b>MISSED.</b> ' + when + article + ' <b>' + esc(s.flare_class) +
+      '</b> flare occurred, but the score stayed below the alert threshold. This is a genuine ' +
+      'failure, left in deliberately.' :
+    s.outcome === 'FP' ? '<b>FALSE ALARM.</b> An alert was raised, and no major flare followed.' :
+      '<b>QUIET.</b> No alert raised, and no major flare followed. Correct.';
+}
+
+function togglePlay() {
+  if (RP.timer) { stopPlay(); return; }
+  if (RP.i >= RP.track.steps.length - 1) seek(0);
+  $('rp-play').innerHTML = '&#10073;&#10073;&nbsp; Pause';
+  RP.timer = setInterval(() => {
+    if (RP.i >= RP.track.steps.length - 1) { stopPlay(); return; }
+    seek(RP.i + 1);
+  }, 140);
+}
+
+function stopPlay() {
+  if (RP.timer) { clearInterval(RP.timer); RP.timer = null; }
+  $('rp-play').innerHTML = '&#9654;&nbsp; Play';
+}
+
 /* ============================ guided tour ========================== */
 const TOUR = [
+  ['start', 'What this is',
+   'A trained model that reads twelve hours of magnetic measurements from one patch of the Sun and estimates whether that region will produce a major flare in the next twenty-four hours. It learned from 331,185 recorded observations between 2010 and 2018. Everything here runs on recorded data; nothing is connected to the Sun.'],
+  ['replay', 'Watch it work',
+   'Ten days of a real active region in September 2017, replayed in the order the observations were taken. The forecast climbs as the magnetic field grows more complex and holds in the high-risk band through the X9.3 and X1.3 flares. Two frames are marked MISSED, where a genuine pre-flare window scored below the threshold. Those are left in on purpose.'],
   ['overview', 'The problem and the setup',
    'Forecast whether a solar active region will produce a major M- or X-class flare in the 24 hours after a 12-hour window of SHARP magnetogram data. 331,185 windows from the SWAN-SF benchmark, 2010 to 2018. Major flares are rare, so this is a severe class-imbalance problem, and that shapes every decision that follows.'],
   ['eval', 'The headline result, with its uncertainty',
@@ -990,8 +1425,11 @@ async function main() {
   S.model = await getJSON('model_lr.json', true);
   S.windows = await getJSON('windows.json', true);
   S.operating = await getJSON('operating.json', true);
+  S.replay = await getJSON('replay.json', true);
 
   renderCore();
+  renderLanding();
+  renderReplay();
   wireForecastButton();
   if (S.windows && S.model) renderExplore();
   if (S.model) wireLive(); else $('live-result').innerHTML =

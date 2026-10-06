@@ -21,6 +21,11 @@ Files written:
     risk level, exact feature contributions and true outcome.
 ``operating.json``
     A threshold sweep over the frozen P5 predictions for the slider view.
+``replay.json``
+    Three complete active-region histories from the test partition, in time
+    order, so the model can be watched operating hour by hour. **A replay of
+    recorded observations, never a live feed** - the data ends in 2018 and the
+    page says so on every frame.
 """
 
 from __future__ import annotations
@@ -471,8 +476,130 @@ def build_windows(n_windows: int = 20) -> Path:
     )
 
 
+#: The three active regions replayed, chosen so that the set tells the whole
+#: story rather than only the flattering part of it. Picked from the test
+#: partition by their recorded outcomes, not by eye.
+REPLAY_TRACKS = (
+    {
+        "harp": 7115,
+        "title": "September 2017 — the strongest region of the cycle",
+        "verdict": "catches the major flares, and misses two",
+        "story": (
+            "Ten days of a real active region, beginning while it is quiet. The forecast "
+            "probability climbs as the magnetic field grows more complex, and stays in the "
+            "HIGH band through the X9.3 and X1.3 flares. Watch for the two frames marked "
+            "MISSED: the model scored a genuine pre-flare window below the alert threshold, "
+            "one of them at 0.049. Both are left in."
+        ),
+    },
+    {
+        "harp": 5541,
+        "title": "A region that never produced a major flare",
+        "verdict": "alerts continuously, and is wrong every time",
+        "story": (
+            "The failure mode, in full. This region looked magnetically complex enough to "
+            "alert on for days at a stretch, and never produced an M- or X-class flare. "
+            "Because consecutive windows are an hour apart and share eleven of their twelve "
+            "hours, one misread region becomes a long unbroken run of false alarms. This is "
+            "what the 16 percent precision looks like from the inside."
+        ),
+    },
+    {
+        "harp": 7131,
+        "title": "A quiet region",
+        "verdict": "stays silent, correctly",
+        "story": (
+            "The control case, and the commonest one. The probability never approaches the "
+            "alert threshold and no warning is raised, across the region's whole visible "
+            "lifetime. Most of the test partition looks like this, which is why accuracy is "
+            "a misleading way to score the task."
+        ),
+    },
+)
+
+
+def build_replay() -> Path:
+    """Build three chronological active-region histories for the replay view.
+
+    Every frame is a real recorded window with the model's frozen probability
+    for it; nothing is simulated or interpolated. The replay advances through
+    recorded time, which is what makes it a replay rather than a live feed.
+    """
+    from .analysis._common import load_test_frame
+
+    frame = load_test_frame()
+    frame = frame.assign(_t=pd.to_datetime(frame["end"]))
+    alert_threshold, high_threshold = models.thresholds()
+
+    tracks = []
+    for spec in REPLAY_TRACKS:
+        history = frame[frame["harp"] == spec["harp"]].sort_values("_t")
+        if history.empty:
+            print(f"  WARNING: HARP {spec['harp']} is not in the test partition")
+            continue
+        steps = [
+            {
+                "cutoff": row.end,
+                "p": round(float(row.p), 6),
+                "y": int(row.y),
+                "risk": row.risk,
+                "outcome": row.outcome,
+                "flare_class": row.flare_class if row.y == 1 else None,
+            }
+            for row in history.itertuples()
+        ]
+        counts = history["outcome"].value_counts()
+        tracks.append(
+            {
+                "id": f"harp{spec['harp']}",
+                "harp": int(spec["harp"]),
+                "noaa_ar": 12673 if spec["harp"] == 7115 else None,
+                "title": spec["title"],
+                "verdict": spec["verdict"],
+                "story": spec["story"],
+                "n_steps": len(steps),
+                "first_cutoff": steps[0]["cutoff"],
+                "last_cutoff": steps[-1]["cutoff"],
+                "span_days": round(
+                    (history["_t"].max() - history["_t"].min()).total_seconds() / 86400, 1
+                ),
+                "counts": {k: int(counts.get(k, 0)) for k in ("TP", "FP", "FN", "TN")},
+                "max_p": round(float(history["p"].max()), 6),
+                "flare_classes": sorted(
+                    {str(c) for c in history.loc[history.y == 1, "flare_class"]}
+                ),
+                "steps": steps,
+            }
+        )
+        print(
+            f"  HARP {spec['harp']:>5}: {len(steps):>3} frames over "
+            f"{tracks[-1]['span_days']} days  {tracks[-1]['counts']}"
+        )
+
+    return _write(
+        paths.DASHBOARD / "replay.json",
+        {
+            "generated_from": "results/test_predictions_selected.csv.gz, data/all_meta.csv.gz",
+            "what_this_is": (
+                "A replay of recorded observations from the locked test partition, played "
+                "back in the order they were taken. Every frame is a real 12-hour window "
+                "and the probability shown is the model's frozen prediction for it."
+            ),
+            "what_this_is_not": (
+                "Not a feed. Nothing here is current, nothing is simulated, and the system "
+                "has no connection to any observatory. The recordings end in 2018."
+            ),
+            "alert_threshold": alert_threshold,
+            "high_threshold": high_threshold,
+            "cadence_minutes": 60,
+            "tracks": tracks,
+        },
+    )
+
+
 def build_all(n_windows: int = 20) -> list[Path]:
     """Build every dashboard JSON file. Returns the paths written."""
     written = [build_demo(), build_context(), build_model_parameters(), build_operating()]
+    written.append(build_replay())
     written.append(build_windows(n_windows=n_windows))
     return written

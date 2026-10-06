@@ -359,8 +359,10 @@ def test_tab_semantics_and_landmarks(page):
     page.wait_for_timeout(150)
     assert page.evaluate("document.querySelectorAll('main').length") == 1
     assert page.get_attribute("#nav", "role") == "tablist"
-    assert page.evaluate("document.querySelectorAll('nav button[role=tab]').length") == 9
-    assert page.evaluate("document.querySelectorAll('[role=tabpanel]').length") == 9
+    assert page.evaluate("document.querySelectorAll('nav button[role=tab]').length") == len(
+        ALL_VIEWS
+    )
+    assert page.evaluate("document.querySelectorAll('[role=tabpanel]').length") == len(ALL_VIEWS)
     assert (
         page.evaluate("document.querySelectorAll('nav button[aria-selected=\"true\"]').length") == 1
     )
@@ -408,8 +410,12 @@ def test_head_metadata_is_present(page):
     assert (paths.DASHBOARD / "favicon.svg").is_file()
 
 
-def test_navigation_fits_one_row_on_a_laptop(page):
-    """Nine tabs plus the title and tour launcher used to wrap to two rows."""
+def test_navigation_stays_tidy_on_a_laptop(page):
+    """Eleven tabs cannot fit on one line, but they must stay tidy.
+
+    At most two rows, and report mode - which shows only the report's six tabs -
+    must still be a single row.
+    """
     page.set_viewport_size({"width": 1440, "height": 900})
     page.wait_for_timeout(200)
     rows = page.evaluate(
@@ -417,7 +423,10 @@ def test_navigation_fits_one_row_on_a_laptop(page):
         ".filter(b=>b.offsetParent!==null)"
         ".map(b=>Math.round(b.getBoundingClientRect().top))).size"
     )
-    assert rows == 1, f"the navigation wraps to {rows} rows at 1440px"
+    assert rows <= 2, f"the navigation wraps to {rows} rows at 1440px"
+    assert page.evaluate(
+        "document.body.scrollWidth <= window.innerWidth"
+    ), "the page scrolls horizontally at 1440px"
 
     # Report mode must keep the original 1200px layout and button metrics, or
     # the report's Figures 5.1-5.6 would no longer match the page.
@@ -431,8 +440,114 @@ def test_navigation_fits_one_row_on_a_laptop(page):
         page.evaluate("getComputedStyle(document.querySelector('nav button')).padding")
         == "8px 14px"
     )
+    rows_report = page.evaluate(
+        "new Set([...document.querySelectorAll('nav button')]"
+        ".filter(b=>b.offsetParent!==null)"
+        ".map(b=>Math.round(b.getBoundingClientRect().top))).size"
+    )
+    assert rows_report == 1, f"report mode wraps to {rows_report} rows"
+
     page.evaluate("window.setReportMode(false)")
     page.set_viewport_size({"width": 1440, "height": 960})
+
+
+# --------------------------------------------------------------------------- #
+# landing page and replay
+# --------------------------------------------------------------------------- #
+def test_landing_page_is_the_default_view(page):
+    """Someone who has never heard of this must land on the explanation."""
+    page.goto(page.url.split("#")[0], wait_until="networkidle")
+    page.wait_for_function("window.dashboardReady === true", timeout=30_000)
+    assert page.is_visible("#v-start")
+    # Headings are uppercased by CSS, so compare case-insensitively.
+    text = page.inner_text("#v-start").lower()
+    for phrase in ("major flare", "24 hours", "what this is", "what this is not"):
+        assert phrase in text, f"the landing page never mentions {phrase!r}"
+    assert "not" in page.inner_text(".isnot.isnt").lower()
+
+
+def test_landing_page_numbers_come_from_the_results(page):
+    frozen = json.loads(paths.TEST_JSON.read_text(encoding="utf-8"))[models.selected_key()]
+    page.evaluate("window.showView('start')")
+    page.wait_for_timeout(200)
+    stats = page.inner_text("#st-stats")
+    assert f"{frozen['recall'] * 100:.0f}%" in stats
+    assert f"{frozen['precision'] * 100:.0f}%" in stats
+    assert f"{frozen['tss']:.3f}" in stats
+
+
+def test_landing_page_numbers_use_a_fixed_locale(page):
+    """toLocaleString() without a locale renders 331,185 as 3,31,185 in some."""
+    page.evaluate("window.showView('start')")
+    page.wait_for_timeout(200)
+    text = page.inner_text("#v-start")
+    assert "331,185" in text, "the dataset size is not grouped as expected"
+    assert "3,31,185" not in text
+
+
+def test_landing_cards_navigate(page):
+    page.evaluate("window.showView('start')")
+    page.wait_for_timeout(200)
+    page.evaluate("document.querySelector('[data-goto=\"replay\"]').click()")
+    page.wait_for_timeout(300)
+    assert page.is_visible("#v-replay")
+
+
+def test_replay_never_claims_to_be_live(page):
+    """The honesty requirement, asserted rather than trusted to prose review."""
+    page.evaluate("window.showView('replay')")
+    page.wait_for_timeout(300)
+    text = page.inner_text("#v-replay").lower()
+    assert "not a feed" in text
+    assert "replay of recorded observations" in text
+    for claim in ("real-time", "real time", "live feed", "currently", "right now"):
+        if claim in text:
+            # Permitted only where it is being denied.
+            index = text.find(claim)
+            around = text[max(0, index - 90) : index + 90]
+            assert any(
+                n in around for n in (" no ", "not ", "never", "nothing")
+            ), f"the replay view says {claim!r} without denying it"
+
+
+def test_replay_plays_and_reports_outcomes(page):
+    page.evaluate("window.showView('replay')")
+    page.wait_for_timeout(300)
+    assert page.evaluate("document.querySelectorAll('#rp-pick button').length") >= 3
+
+    first = page.inner_text("#rp-clock")
+    page.evaluate(
+        "const s=document.getElementById('rp-scrub');"
+        "s.value=Math.floor(Number(s.max)*0.8); s.dispatchEvent(new Event('input'))"
+    )
+    page.wait_for_timeout(300)
+    assert page.inner_text("#rp-clock") != first, "scrubbing did not advance the clock"
+
+    event = page.inner_text("#rp-event")
+    assert any(word in event for word in ("CAUGHT", "MISSED", "FALSE ALARM", "QUIET"))
+    assert "%" in page.inner_text("#rp-pct")
+
+
+def test_replay_play_button_advances_then_stops(page):
+    page.evaluate("window.showView('replay')")
+    page.wait_for_timeout(200)
+    page.click("#rp-restart")
+    page.wait_for_timeout(200)
+    start = page.evaluate("Number(document.getElementById('rp-scrub').value)")
+    page.click("#rp-play")
+    page.wait_for_timeout(900)
+    moved = page.evaluate("Number(document.getElementById('rp-scrub').value)")
+    page.click("#rp-play")
+    assert moved > start, "pressing Play did not advance the replay"
+
+
+def test_replay_includes_a_miss_and_a_false_alarm_track(page):
+    """The replay must not be a showcase of only the successes."""
+    payload = json.loads((paths.DASHBOARD / "replay.json").read_text(encoding="utf-8"))
+    outcomes = {k for t in payload["tracks"] for k, v in t["counts"].items() if v}
+    assert "FN" in outcomes, "no replay track contains a missed flare"
+    assert "FP" in outcomes, "no replay track contains a false alarm"
+    assert "TP" in outcomes, "no replay track contains a caught flare"
 
 
 def test_report_mode_still_reproduces_the_reports_figures(page):
@@ -445,23 +560,26 @@ def test_report_mode_still_reproduces_the_reports_figures(page):
     page.evaluate("window.setReportMode(true)")
     page.evaluate("window.showView('predict')")
     page.wait_for_timeout(200)
-    assert page.evaluate(
-        "getComputedStyle(document.querySelector('#runForecast + span')).display"
-    ) == "none", "the Run Forecast caption shows in report mode"
+    assert (
+        page.evaluate("getComputedStyle(document.querySelector('#runForecast + span')).display")
+        == "none"
+    ), "the Run Forecast caption shows in report mode"
     # The button must still work, because that is behaviour, not appearance.
     assert page.is_enabled("#runForecast")
 
     page.evaluate("window.showView('risk')")
     page.wait_for_timeout(150)
-    assert page.evaluate(
-        "getComputedStyle(document.querySelector('.alertbox .msg p.caveat')).color"
-    ) == "rgb(138, 119, 86)", "the disclaimer colour changed in report mode"
+    assert (
+        page.evaluate("getComputedStyle(document.querySelector('.alertbox .msg p.caveat')).color")
+        == "rgb(138, 119, 86)"
+    ), "the disclaimer colour changed in report mode"
 
     page.evaluate("window.setReportMode(false)")
     page.wait_for_timeout(150)
-    assert page.evaluate(
-        "getComputedStyle(document.querySelector('.alertbox .msg p.caveat')).color"
-    ) == "rgb(181, 154, 114)", "the contrast fix is missing outside report mode"
+    assert (
+        page.evaluate("getComputedStyle(document.querySelector('.alertbox .msg p.caveat')).color")
+        == "rgb(181, 154, 114)"
+    ), "the contrast fix is missing outside report mode"
 
 
 def test_disclaimer_contrast_meets_aa(page):

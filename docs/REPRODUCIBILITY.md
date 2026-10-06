@@ -254,7 +254,7 @@ python -m solarflare test           # everything, ~90 s
 python -m solarflare test --fast    # skips slow and browser tests
 ```
 
-172 tests across nine files. Tests that need the 190 MB feature matrix, the trained pipelines,
+184 tests across nine files. Tests that need the 190 MB feature matrix, the trained pipelines,
 Node.js or Chromium **skip cleanly** when those are absent, so a fresh clone with no data still runs
 a meaningful suite — which is exactly what CI does.
 

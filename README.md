@@ -185,7 +185,7 @@ before every write and raises. Additive output goes to `results/extra/`, `figure
 | `figures/` | the report's figures — **frozen** |
 | `figures/extra/` | the eight additive figures |
 | `dashboard/` | the static single-page demo, its generated JSON, and `model.js` |
-| `tests/` | 172 tests across nine files |
+| `tests/` | 184 tests across nine files |
 | `docs/` | the documents listed below |
 | `scripts/` | the consistency checker and the parity-fixture builder |
 | `data/`, `raw_data/` | not in git; see [docs/DATA_CARD.md](docs/DATA_CARD.md) |
@@ -194,6 +194,7 @@ before every write and raises. Additive output goes to `results/extra/`, `figure
 
 | Document | Read it for |
 |---|---|
+| [docs/PROJECT_EXPLAINED.md](docs/PROJECT_EXPLAINED.md) | the whole project from scratch, for a reader with no background |
 | [docs/FEATURES.md](docs/FEATURES.md) | what every view does, in plain English, and how to describe it |
 | [docs/JUDGE_DEMO_SCRIPT.md](docs/JUDGE_DEMO_SCRIPT.md) | the timed three-minute walkthrough |
 | [docs/JUDGES_QA.md](docs/JUDGES_QA.md) | fifteen hard questions, each answered with a file or a number |

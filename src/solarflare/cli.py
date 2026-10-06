@@ -413,7 +413,6 @@ def cmd_demo_data(args: argparse.Namespace) -> int:
 def cmd_dashboard(args: argparse.Namespace) -> int:
     """Serve dashboard/ over HTTP on localhost."""
     import http.server
-    import socketserver
 
     _heading(f"serving the dashboard on http://localhost:{args.port}/index.html")
     missing = [p for p in (paths.DASHBOARD / "index.html", paths.DASHBOARD_DEMO) if not p.exists()]
@@ -431,8 +430,14 @@ def cmd_dashboard(args: argparse.Namespace) -> int:
             if args.verbose:
                 super().log_message(fmt, *a)
 
-    socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("127.0.0.1", args.port), Handler) as httpd:
+    # Threading matters: a single-threaded server is blocked for everyone by one
+    # keep-alive connection, so a second tab - or a screenshot run while the page
+    # is already open - hangs instead of loading.
+    class Server(http.server.ThreadingHTTPServer):
+        allow_reuse_address = True
+        daemon_threads = True
+
+    with Server(("127.0.0.1", args.port), Handler) as httpd:
         print("press Ctrl+C to stop")
         try:
             httpd.serve_forever()
