@@ -233,6 +233,28 @@
   .isnot.isnt h3{color:var(--amber)}
   .isnot ul{margin:0;padding-left:18px;font-size:12.5px;line-height:1.75;color:#cfdcee}
 
+  /* ===================== how to use ===================== */
+  .howto{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;
+    margin-top:16px;counter-reset:ht}
+  .howto .h{background:var(--navy2);border:1px solid var(--line);border-radius:12px;
+    padding:15px 16px 15px 52px;position:relative}
+  .howto .h::before{counter-increment:ht;content:counter(ht);position:absolute;left:15px;top:14px;
+    width:25px;height:25px;border-radius:50%;background:var(--accent);color:#1a0d00;
+    font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+  .howto .h b{display:block;font-size:13.5px;margin-bottom:5px}
+  .howto .h span{font-size:12.5px;color:var(--muted);line-height:1.55}
+  .howto .h kbd{background:#0c1a2e;border:1px solid var(--line);border-radius:4px;
+    padding:1px 6px;font-family:Consolas,monospace;font-size:11px;color:#bcd0ea}
+
+  /* A one-line "what to do here" cue at the top of every view. Hidden in report
+     mode so the report's Figures 5.1-5.6 are unaffected. */
+  .viewhint{display:flex;align-items:flex-start;gap:9px;background:#132a49;
+    border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:9px;
+    padding:10px 14px;margin:0 0 14px;font-size:12.5px;color:#cfdcee;line-height:1.55}
+  .viewhint .ic{font-size:14px;line-height:1.3}
+  .viewhint b{color:#fff}
+  body.report-mode .viewhint{display:none}
+
   /* ===================== replay ===================== */
   .rp-pick{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
   .rp-pick button{background:var(--navy2);border:1px solid var(--line);border-radius:12px;
@@ -396,8 +418,25 @@
       never seen. Both the strength and the weakness are shown.</div>
     <div class="statstrip" id="st-stats"></div>
 
-    <div class="section-title">Where to go</div>
-    <div class="section-sub">Every panel is read-only &mdash; nothing you click can change a result.</div>
+    <div class="section-title">How to use this site</div>
+    <div class="section-sub">Four steps, about three minutes. Nothing you click can change a result
+      &mdash; there is no way to break it.</div>
+    <div class="howto">
+      <div class="h"><b>Watch it work</b><span>Open <b>Replay</b> and press
+        <kbd>&#9654; Play</kbd>. Ten days of a real region pass in about fifteen seconds. The dial
+        climbs and turns red before the flare.</span></div>
+      <div class="h"><b>Look at a real case</b><span>Open <b>Explore</b> and click any tile. You
+        get the raw measurements and the reason for the score. Press
+        <kbd>Reveal the ground truth</kbd> to find out if it was right.</span></div>
+      <div class="h"><b>Run it yourself</b><span>Open <b>Live</b> and press
+        <kbd>Use a built-in example</kbd>. The model runs in your browser and shows its working.</span></div>
+      <div class="h"><b>Check the evidence</b><span>Open <b>Model Evaluation</b> for the full
+        report card, then <b>Operating</b> to drag the cut-off and see the trade-off move.</span></div>
+    </div>
+
+    <div class="section-title">Every view, and what it is for</div>
+    <div class="section-sub">Views marked <b>interactive</b> expect you to click something; the
+      others are there to be read.</div>
     <div class="featgrid" id="st-feats"></div>
 
     <div class="section-title">Being straight about it</div>
@@ -1189,6 +1228,58 @@ document.getElementById('nav').addEventListener('click', e => {
   activate(e.target.dataset.v);
 });
 
+/* ===================== "what to do here" cues ====================== */
+/* Six of the eleven views are read-only panels and gave a newcomer no signal
+   about whether to click or simply read. Each view now opens with one line
+   saying what it is for and what, if anything, to do. Injected rather than
+   written into the markup so the wording stays in one place, and hidden in
+   report mode so the report's figures are untouched. */
+const HINTS = {
+  // A fourth element names an element to sit above, for views whose first
+  // subtitle belongs to a card further down the page.
+  start:    ['\u{1F44B}', 'New here?', 'Read the four steps below, then press <b>Replay</b> in the '
+             + 'menu. That is the quickest way to see what this does.', '.section-title'],
+  overview: ['\u{1F4D6}', 'Just read this one.', 'Background on the dataset and the pipeline. '
+             + 'Nothing to click.'],
+  predict:  ['\u{1F5B1}', 'One thing to click.', 'This is the input: twelve hours of readings from '
+             + 'one region. Press <b>Run Forecast</b> to score it.'],
+  result:   ['\u{1F4D6}', 'Just read this one.', 'The model’s answer for the window on the '
+             + 'previous view, with the true outcome shown underneath so you can check it.'],
+  risk:     ['\u{1F4D6}', 'Just read this one.', 'The same answer expressed as LOW, MODERATE or '
+             + 'HIGH, which is what a user of such a system would actually see.'],
+  explain:  ['\u{1F4D6}', 'Just read this one.', 'Which measurements pushed the score up (red) or '
+             + 'down (blue). Because the model is linear, these are exact, not estimates.'],
+  eval:     ['\u{1F4D6}', 'Just read this one.', 'The report card on 75,365 recordings the model '
+             + 'never saw. The weak number, precision, is shown next to the strong ones.'],
+  explore:  ['\u{1F5B1}', 'Click any tile.', 'Twenty real recordings, including the ones it got '
+             + 'wrong. The true answer stays hidden until you press <b>Reveal</b>.'],
+  live:     ['\u{1F5B1}', 'Press the example button.', 'The real model runs in your browser. '
+             + '“Live” means it calculates as you watch — not that it is watching the Sun.'],
+  operate:  ['\u{1F5B1}', 'Drag the slider.', 'Make the system more or less cautious and watch '
+             + 'caught flares trade against false alarms. <b>Reset</b> returns to the real setting.'],
+  replay:   ['\u{1F5B1}', 'Press Play.', 'Ten days of a real active region, hour by hour. Recorded '
+             + 'data from 2017 — not a live feed.'],
+};
+
+function injectHints() {
+  for (const [view, [icon, lead, body, before]] of Object.entries(HINTS)) {
+    const section = document.getElementById('v-' + view);
+    if (!section || section.querySelector('.viewhint')) continue;
+    const hint = document.createElement('div');
+    hint.className = 'viewhint';
+    hint.innerHTML = '<span class="ic" aria-hidden="true">' + icon + '</span>' +
+      '<span><b>' + lead + '</b> ' + body + '</span>';
+    // Sit above a named element when one is given, otherwise after the title
+    // and subtitle, otherwise at the very top.
+    const target = before && section.querySelector(before);
+    if (target) { target.parentNode.insertBefore(hint, target); continue; }
+    const anchor = section.querySelector('.section-sub') ||
+      section.querySelector('.section-title');
+    if (anchor && anchor.nextSibling) anchor.parentNode.insertBefore(hint, anchor.nextSibling);
+    else section.insertBefore(hint, section.firstChild);
+  }
+}
+
 /* ============================ landing page ========================= */
 /* Everything here is built from context.json and the frozen results, so the
    plain-English front page cannot drift from the numbers behind it. */
@@ -1230,22 +1321,27 @@ function renderLanding() {
     '</div><div class="k">' + k + '</div></div>').join('');
 
   $('st-feats').innerHTML = [
-    ['replay', '&#9654;', 'Watch it run',
+    ['replay', '&#9654;', 'Watch it run', true,
      'Replay ten days of a real active region and see the forecast climb before the flare.'],
-    ['explore', '&#128269;', 'Inspect real cases',
+    ['explore', '&#128269;', 'Inspect real cases', true,
      'Twenty recordings including the ones it got wrong. The answer stays hidden until you ask.'],
-    ['live', '&#9881;', 'Run the model yourself',
+    ['live', '&#9881;', 'Run the model yourself', true,
      'The real trained model executes in your browser on a recording you provide.'],
-    ['operate', '&#9878;', 'Tune the trade-off',
+    ['operate', '&#9878;', 'Tune the trade-off', true,
      'Move the cut-off and watch caution trade against missed flares.'],
-    ['explain', '&#128202;', 'See why',
+    ['eval', '&#128203;', 'Check the numbers', false,
+     'The full report card with confidence intervals and the confusion matrix.'],
+    ['explain', '&#128202;', 'See why', false,
      'Which measurements pushed the score up or down. Exact, not an approximation.'],
-    ['eval', '&#128203;', 'Check the numbers',
-     'The full report card with confidence intervals and the confusion matrix.']
-  ].map(([v, ic, title, body]) =>
+    ['overview', '&#128214;', 'The background', false,
+     'The dataset, the forecasting set-up and how the pipeline fits together.'],
+    ['risk', '&#9888;', 'The alert a user would see', false,
+     'How a probability becomes LOW, MODERATE or HIGH, and the wording that goes with it.']
+  ].map(([v, ic, title, interactive, body]) =>
     '<button class="feat reveal-up" type="button" data-goto="' + v + '">' +
     '<span class="ic">' + ic + '</span><b>' + title + '</b><span>' + body + '</span>' +
-    '<span class="go">Open &rarr;</span></button>').join('');
+    '<span class="go">' + (interactive ? 'Interactive &mdash; open &rarr;' : 'Read &rarr;') +
+    '</span></button>').join('');
 
   document.querySelectorAll('[data-goto]').forEach(b =>
     b.addEventListener('click', () => { activate(b.dataset.goto); window.scrollTo(0, 0); }));
@@ -1456,6 +1552,7 @@ async function main() {
   S.replay = await getJSON('replay.json', true);
 
   renderCore();
+  injectHints();
   renderLanding();
   renderReplay();
   wireForecastButton();

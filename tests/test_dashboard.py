@@ -132,6 +132,37 @@ def test_report_mode_hides_the_new_navigation(page):
     page.evaluate("window.setReportMode(false)")
 
 
+@pytest.mark.parametrize("view", ALL_VIEWS)
+def test_every_view_tells_the_reader_what_to_do(page, view):
+    """A newcomer should never land on a view with no cue about what it is for."""
+    page.evaluate(f"window.showView('{view}')")
+    page.wait_for_timeout(120)
+    hint = page.query_selector(f"#v-{view} .viewhint")
+    assert hint is not None, f"{view} has no .viewhint cue"
+    assert hint.is_visible(), f"{view}'s cue is in the DOM but not visible"
+    assert len(hint.inner_text().strip()) > 40, f"{view}'s cue says almost nothing"
+
+
+def test_the_cues_are_hidden_in_report_mode(page):
+    """They are post-report additions, so Figures 5.1-5.6 must not show them."""
+    page.evaluate("window.setReportMode(true)")
+    page.wait_for_timeout(150)
+    visible = page.evaluate(
+        "[...document.querySelectorAll('.viewhint')].filter(e=>e.offsetParent!==null).length"
+    )
+    assert visible == 0, f"{visible} cues are still visible in report mode"
+    page.evaluate("window.setReportMode(false)")
+
+
+def test_the_landing_page_explains_how_to_use_the_site(page):
+    page.evaluate("window.showView('start')")
+    page.wait_for_timeout(150)
+    text = page.inner_text("#v-start").lower()
+    assert "how to use" in text, "the landing page never says how to use the site"
+    steps = page.evaluate("document.querySelectorAll('#v-start .howto > *').length")
+    assert steps >= 4, f"only {steps} how-to steps on the landing page"
+
+
 def test_evaluation_view_numbers_equal_results_json(page):
     """Every KPI on the evaluation view must match results/test_results.json."""
     frozen = json.loads(paths.TEST_JSON.read_text(encoding="utf-8"))[models.selected_key()]
