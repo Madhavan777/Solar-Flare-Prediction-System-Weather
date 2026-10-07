@@ -54,16 +54,21 @@ def f(x, n=3):
     return f"{x:.{n}f}"
 
 
-# ------------------------------------------------------------------- palette
-HEAD = RGBColor(0x1F, 0x38, 0x64)  # dark navy, for the block headings
-BODY = RGBColor(0x26, 0x26, 0x26)
-MUTED = RGBColor(0x59, 0x59, 0x59)
-BULLET = RGBColor(0x44, 0x72, 0xC4)  # theme accent 1
-WARN = RGBColor(0xC0, 0x50, 0x0D)  # theme accent 2, darkened
-GOOD = RGBColor(0x1E, 0x6B, 0x3A)
+# ------------------------------------------------------------- type and colour
+# The deck is black-on-white in one typeface throughout, so the names below all
+# resolve to the same colour; they are kept distinct only to document intent at
+# each call site. enforce_type() at the end of this file is what guarantees it,
+# including for the text that came with the template.
+FONT = "Times New Roman"
+BLACK = RGBColor(0x00, 0x00, 0x00)
+HEAD = BODY = MUTED = BULLET = WARN = GOOD = BLACK
 
-BUL = "▪"  # ▪
-DASH = "–"  # –
+# Times New Roman sets smaller on the page than the template's Calibri at the
+# same point size, and narrower, so every size written here is scaled up.
+SCALE = 1.10
+
+BUL = "•"  # bullet, present in Times New Roman
+DASH = "–"
 
 
 # ------------------------------------------------------------------- helpers
@@ -83,12 +88,11 @@ def runs(p, text, size, color, bold=False, italic=False, font=None):
             continue
         r = p.add_run()
         r.text = part
-        r.font.size = Pt(size)
+        r.font.size = Pt(round(size * SCALE, 1))
         r.font.bold = bold or (i % 2 == 1)
         r.font.italic = italic
         r.font.color.rgb = color
-        if font:
-            r.font.name = font
+        r.font.name = font or FONT
 
 
 def write(shape, items, anchor_top=True):
@@ -119,9 +123,10 @@ def write(shape, items, anchor_top=True):
         if it.get("bullet"):
             r = p.add_run()
             r.text = it["bullet"] + "  "
-            r.font.size = Pt(it.get("sz", 13))
+            r.font.size = Pt(round(it.get("sz", 13) * SCALE, 1))
             r.font.bold = True
             r.font.color.rgb = it.get("bc", BULLET)
+            r.font.name = FONT
         runs(
             p,
             it["t"],
@@ -205,7 +210,7 @@ def place(slide, img, left, top, width=None, height=None, border=True):
         str(img), Inches(left), Inches(top), Inches(width), Inches(height)
     )
     if border:
-        pic.line.color.rgb = RGBColor(0xBF, 0xBF, 0xBF)
+        pic.line.color.rgb = BLACK
         pic.line.width = Pt(0.75)
     return pic
 
@@ -272,7 +277,7 @@ write(
 # ===================================================================== slide 2
 s = S[1]
 sh = find(s, "Problem Statement")
-box(sh, height=2.30)
+box(sh, height=2.60)
 write(
     sh,
     [
@@ -299,7 +304,7 @@ write(
 )
 
 sh = find(s, "Objective")
-box(sh, top=3.55, height=3.40)
+box(sh, top=3.78, height=3.17)
 write(
     sh,
     [
@@ -328,7 +333,7 @@ write(
 )
 
 sh = find(s, "Expected Outcome")
-box(sh, top=3.55, height=3.40)
+box(sh, top=3.78, height=3.17)
 write(
     sh,
     [
@@ -358,7 +363,7 @@ write(
 # ===================================================================== slide 3
 s = S[2]
 sh = find(s, "Input/ Data Sources")
-box(sh, height=2.60)
+box(sh, height=2.92)
 write(
     sh,
     [
@@ -422,7 +427,7 @@ caption(
 )
 
 sh = find(s, "Key Insights")
-box(sh, top=3.80, height=3.15)
+box(sh, top=4.08, height=2.87)
 write(
     sh,
     [
@@ -489,9 +494,11 @@ write(
         head("ML Methodology and Implementation Process"),
     ],
 )
-place(s, PROJ / "figures/fig4_1_architecture.png", 6.95, 1.76, width=5.68, border=False)
+# Redrawn for the slide by scripts/make_arch_figure.py, and placed at its natural
+# size so its type sits at the same scale as the rest of the deck.
+place(s, PROJ / "figures/extra/architecture_flow.png", 7.60, 1.70, width=4.38, border=False)
 caption(
-    s, "Figure 4.1 — implemented end-to-end forecasting architecture.", 6.92, 6.50, 5.74, size=9
+    s, "Figure 4.1 — implemented end-to-end forecasting architecture.", 6.92, 6.56, 5.74, size=9
 )
 
 sh = find(s, "Technology Stack")
@@ -565,46 +572,45 @@ write(
         bullet(
             "**Severe class imbalance.** Positives are 1.3–2.0 % of windows, so accuracy is "
             "misleading and naive training learns to answer “no flare” always.",
-            sz=11.5,
+            sz=11.0,
             bc=WARN,
         ),
         bullet(
             "**Data leakage is the dominant failure mode** in flare forecasting: overlapping "
             "windows and shuffled splits inflate published results.",
-            sz=11.5,
+            sz=11.0,
             bc=WARN,
         ),
         bullet(
             "**Low precision.** At the operating point, **"
             f"{(1 - M['precision']) * 100:.0f} %** of alerts are not followed by a major flare.",
-            sz=11.5,
+            sz=11.0,
             bc=WARN,
         ),
         bullet(
             "**Outputs are not calibrated probabilities** — they rank well but must not be "
             "read as literal chances.",
-            sz=11.5,
+            sz=11.0,
             bc=WARN,
         ),
         bullet(
             "**Two raw partition archives (P2, P5) are corrupt** gzip streams that fail silently "
             "mid-stream rather than raising an error.",
-            sz=11.5,
+            sz=11.0,
             bc=WARN,
         ),
         bullet(
-            "**Retraining from scratch is not bit-identical** across operating systems and "
-            "library versions.",
-            sz=11.5,
+            "**Retraining is not bit-identical** across platforms.",
+            sz=11.0,
             bc=WARN,
         ),
     ],
 )
 # The two risks that cannot be engineered away are instead made inspectable.
-place(s, IMG / "d_operate.png", 6.95, 4.00, width=5.68)
-caption(s, "Moving the threshold shows what each choice costs.", 6.95, 5.10, 5.68)
-place(s, IMG / "d_risk.png", 6.95, 5.50, width=5.68)
-caption(s, "An uncalibrated probability is delivered as a three-level band.", 6.95, 6.68, 5.68)
+place(s, IMG / "d_operate.png", 7.09, 4.24, width=5.40)
+caption(s, "Moving the threshold shows what each choice costs.", 7.09, 5.28, 5.40)
+place(s, IMG / "d_risk.png", 7.09, 5.56, width=5.40)
+caption(s, "An uncalibrated probability is delivered as a three-level band.", 7.09, 6.67, 5.40)
 
 sh = find(s, "Mitigation")
 box(sh, top=3.76, height=3.19)
@@ -863,7 +869,7 @@ qr = qrcode.QRCode(box_size=10, border=2, error_correction=qrcode.constants.ERRO
 qr.add_data(REPO)
 qr.make(fit=True)
 qr_png = IMG / "qr_repo.png"
-qr.make_image(fill_color="#1F3864", back_color="white").save(qr_png)
+qr.make_image(fill_color="black", back_color="white").save(qr_png)
 place(s, qr_png, 10.52, 5.62, width=1.15, border=False)
 caption(s, "Scan for the repository", 9.95, 6.78, 2.30, size=9)
 
@@ -874,6 +880,81 @@ for s in S:
             for p in sh.text_frame.paragraphs:
                 for r in p.runs:
                     r.text = r.text.replace("DD/MM/YYYY", "07/10/2026")
+
+
+# ------------------------------------------- one typeface, one colour, no exceptions
+def _mirror_latin(rPr):
+    """Copy the latin typeface onto the east-asian and complex-script slots.
+
+    font.name writes only <a:latin>. Without the other two, PowerPoint picks a
+    substitute for anything outside the latin range - the bullet, the arrows,
+    the en dash - and the deck ends up in two typefaces after all.
+    """
+    latin = rPr.find(qn("a:latin"))
+    if latin is None:
+        return
+    for tag in ("a:ea", "a:cs"):
+        for e in rPr.findall(qn(tag)):
+            rPr.remove(e)
+    at = list(rPr).index(latin)
+    for offset, tag in enumerate(("a:ea", "a:cs"), start=1):
+        rPr.insert(at + offset, rPr.makeelement(qn(tag), {"typeface": FONT}))
+
+
+def _force_rPr(rPr):
+    """Black Times New Roman on any run-properties element.
+
+    Used for the ones python-pptx does not reach: a:fld (the slide-number
+    placeholder is a field and owns no run, which is why it stayed grey), and
+    a:defRPr / a:endParaRPr, which still point at the theme's minor font and
+    the tx1 scheme colour. Those are invisible today but decide what anything
+    typed into the deck later will look like.
+    """
+    for tag in ("a:solidFill", "a:gradFill", "a:noFill", "a:latin", "a:ea", "a:cs"):
+        for e in rPr.findall(qn(tag)):
+            rPr.remove(e)
+    fill = rPr.makeelement(qn("a:solidFill"), {})
+    fill.append(rPr.makeelement(qn("a:srgbClr"), {"val": "000000"}))
+    rPr.insert(0, fill)
+    for tag in ("a:latin", "a:ea", "a:cs"):
+        rPr.append(rPr.makeelement(qn(tag), {"typeface": FONT}))
+
+
+def enforce_type(prs):
+    """Force every piece of text in the deck to black Times New Roman.
+
+    This runs last and covers the text that came with the template too - slide
+    titles, footers, the date and the slide numbers - which otherwise keep the
+    theme's Calibri and its greys.
+    """
+    runs_done = others = 0
+    for slide in prs.slides:
+        for sh in walk(slide.shapes):
+            if not sh.has_text_frame:
+                continue
+            body = sh.text_frame._txBody
+            for p in sh.text_frame.paragraphs:
+                for r in p.runs:
+                    r.font.name = FONT
+                    r.font.color.rgb = BLACK
+                    _mirror_latin(r._r.get_or_add_rPr())
+                    runs_done += 1
+            for tag in ("a:fld", "a:defRPr", "a:endParaRPr"):
+                for el in body.iter(qn(tag)):
+                    if tag == "a:fld":
+                        rPr = el.find(qn("a:rPr"))
+                        if rPr is None:
+                            rPr = el.makeelement(qn("a:rPr"), {"lang": "en-US"})
+                            el.insert(0, rPr)
+                    else:
+                        rPr = el
+                    _force_rPr(rPr)
+                    others += 1
+    return runs_done, others
+
+
+_runs, _others = enforce_type(prs)
+print(f"set {_runs} runs and {_others} fields and defaults to black {FONT}")
 
 prs.save(str(OUT))
 print(f"wrote {OUT}  ({OUT.stat().st_size/1024:.0f} KB, {len(S)} slides)")
