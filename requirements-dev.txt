@@ -8,3 +8,7 @@ pre-commit==4.3.0
 # Only needed for the dashboard smoke tests and screenshot regeneration.
 # After installing, fetch the browser once:  python -m playwright install chromium
 playwright==1.56.0
+
+# Only needed to rebuild the review deck: python scripts/make_deck.py
+python-pptx==1.0.2
+qrcode==8.2
