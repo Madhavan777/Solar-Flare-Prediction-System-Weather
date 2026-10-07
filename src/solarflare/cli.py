@@ -470,6 +470,19 @@ def cmd_dashboard(args: argparse.Namespace) -> int:
         def __init__(self, *a, **kw):
             super().__init__(*a, directory=directory, **kw)
 
+        def end_headers(self):
+            # SimpleHTTPRequestHandler sends Last-Modified and no Cache-Control
+            # at all, so browsers fall back to heuristic freshness and may serve
+            # index.html and the JSON from cache for hours without revalidating.
+            # After 'demo-data' regenerates a file, or after one transient
+            # failure, the page then keeps showing the stale state until someone
+            # knows to hard-reload - which during a review reads as a bug in the
+            # project. Nothing here is worth caching: it is localhost.
+            self.send_header("Cache-Control", "no-store, must-revalidate")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
+            super().end_headers()
+
         def log_message(self, fmt, *a):  # quieter output
             if args.verbose:
                 super().log_message(fmt, *a)

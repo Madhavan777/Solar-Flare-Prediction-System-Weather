@@ -176,7 +176,7 @@ def test_explorer_shows_its_windows(page):
     page.wait_for_timeout(200)
     tiles = page.evaluate("document.querySelectorAll('#wlist .wcard').length")
     assert tiles >= 15, f"the explorer rendered {tiles} windows"
-    assert "missing or unreadable" not in page.inner_text("#wlist")
+    assert "could not be loaded" not in page.inner_text("#wlist")
     page.locator("#wlist .wcard").first.click()
     page.wait_for_timeout(300)
     reveal = page.evaluate(
@@ -730,7 +730,11 @@ DEGRADED_PORT = 8798
 
 @pytest.fixture(scope="module")
 def degraded_server(tmp_path_factory):
-    """Serve a copy of dashboard/ with windows.json deleted."""
+    """Serve a copy of dashboard/ with windows.json withheld.
+
+    Yields (port, served_dir) so a test can put the file back and check that
+    the view recovers without a reload.
+    """
     root = tmp_path_factory.mktemp("degraded")
     shutil.copytree(paths.DASHBOARD, root / "dashboard")
     (root / "dashboard" / "windows.json").unlink()
@@ -754,7 +758,7 @@ def degraded_server(tmp_path_factory):
         else:
             process.terminate()
             pytest.skip("the degraded server did not start")
-        yield DEGRADED_PORT
+        yield DEGRADED_PORT, root / "dashboard"
     finally:
         process.terminate()
         with contextlib.suppress(Exception):
@@ -762,13 +766,14 @@ def degraded_server(tmp_path_factory):
 
 
 def test_a_missing_explorer_file_does_not_break_the_live_example(page, degraded_server):
+    port, _served = degraded_server
     # Borrow the module's browser: its sync_playwright context is already open,
     # and opening a second one inside it is an error.
     broken = page.context.browser.new_page(viewport={"width": 1440, "height": 1000})
     errors: list[str] = []
     broken.on("pageerror", lambda e: errors.append(str(e)))
     try:
-        broken.goto(f"http://localhost:{degraded_server}/index.html", wait_until="domcontentloaded")
+        broken.goto(f"http://localhost:{port}/index.html", wait_until="domcontentloaded")
         broken.wait_for_function("window.dashboardReady === true", timeout=30_000)
         broken.wait_for_timeout(400)
 
@@ -779,7 +784,7 @@ def test_a_missing_explorer_file_does_not_break_the_live_example(page, degraded_
         # The explorer explains itself instead of showing an empty grid.
         broken.evaluate("window.showView('explore')")
         broken.wait_for_timeout(200)
-        assert "missing or unreadable" in broken.inner_text("#wlist")
+        assert "could not be loaded" in broken.inner_text("#wlist")
 
         # ... and the live view is entirely unaffected.
         broken.evaluate("window.showView('live')")
@@ -801,3 +806,55 @@ def test_a_missing_explorer_file_does_not_break_the_live_example(page, degraded_
         assert not errors, "console errors: " + "; ".join(errors)
     finally:
         broken.close()
+
+
+def test_the_explorer_recovers_without_a_reload(page, degraded_server):
+    """The commonest cause is a stale tab or a server that was still starting.
+
+    Both are fixed by asking again, so the degraded view offers that rather than
+    expecting the reader to know about hard-reload.
+    """
+    port, served = degraded_server
+    broken = page.context.browser.new_page(viewport={"width": 1440, "height": 1000})
+    errors: list[str] = []
+    broken.on("pageerror", lambda e: errors.append(str(e)))
+    try:
+        broken.goto(f"http://localhost:{port}/index.html", wait_until="domcontentloaded")
+        broken.wait_for_function("window.dashboardReady === true", timeout=30_000)
+        broken.evaluate("window.showView('explore')")
+        broken.wait_for_timeout(300)
+
+        assert broken.evaluate("!!document.getElementById('ex-retry')"), "no way to retry"
+        # The real reason is shown, not a generic one.
+        assert "404" in broken.inner_text("#wlist")
+
+        # The file comes back, as it would after demo-data or a server restart.
+        shutil.copy(paths.DASHBOARD_WINDOWS, served / "windows.json")
+        broken.click("#ex-retry")
+        broken.wait_for_timeout(2000)
+
+        tiles = broken.evaluate("document.querySelectorAll('#wlist .wcard').length")
+        assert tiles >= 15, f"retry did not recover the explorer: {tiles} tiles"
+        assert broken.evaluate(
+            "document.getElementById('load-banner') === null"
+        ), "the banner outlived the failure it described"
+        assert not errors, "console errors: " + "; ".join(errors)
+    finally:
+        with contextlib.suppress(Exception):
+            (served / "windows.json").unlink()
+        broken.close()
+
+
+def test_the_server_forbids_caching(server):
+    """Heuristic caching is what makes a regenerated file keep looking broken.
+
+    SimpleHTTPRequestHandler sends Last-Modified and no Cache-Control, so a
+    browser may serve index.html and the JSON from cache for hours without
+    revalidating, and the page shows a stale state until someone hard-reloads.
+    """
+    import urllib.request
+
+    for name in ("index.html", "windows.json"):
+        with urllib.request.urlopen(f"http://localhost:{server}/{name}", timeout=10) as response:
+            cache_control = response.headers.get("Cache-Control", "")
+        assert "no-store" in cache_control, f"{name} is cacheable: Cache-Control={cache_control!r}"
