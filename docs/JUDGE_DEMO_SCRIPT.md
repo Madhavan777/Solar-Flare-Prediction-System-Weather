@@ -1,7 +1,7 @@
 # Three-minute demonstration script
 
 A timed walkthrough for the review panel. The dashboard has a **"▶ 3-minute tour"** button that
-drives exactly these seven steps in order, with the captions on screen — use it if you would rather
+drives exactly these nine steps in order, with the captions on screen — use it if you would rather
 not navigate manually, and press **Auto-play** to advance hands-free.
 
 ---
@@ -29,18 +29,47 @@ Then open **http://localhost:8791/index.html**. It runs entirely offline — no 
 
 Checklist:
 
-- [ ] the page loads and the Overview view shows "SWAN-SF" and "12h → 24h";
-- [ ] the Explore Windows view lists 20 windows;
-- [ ] the Live Inference view's "Use a built-in example" button returns a probability;
+- [ ] the page loads with no red bar across the top;
+- [ ] the Overview view shows "SWAN-SF" and "12h → 24h";
+- [ ] the Explore view lists 20 windows;
+- [ ] the Live view's "Use a built-in example" button returns a probability;
+- [ ] the Replay view's **▶ Play** advances the dial;
 - [ ] have `results/extra/RESULTS.md` open in a second window for follow-up questions.
 
-If anything fails: `python -m solarflare demo-data` regenerates every JSON the page reads.
+If a view reports a missing file, press its **Try again** button first — it is usually a tab left
+open. If that does not clear it, `python -m solarflare demo-data` regenerates every JSON the page
+reads.
 
 ---
 
 ## The script
 
-### 0:00 — 0:25 · The problem *(Overview)*
+### 0:00 — 0:15 · What this is *(Start)*
+
+> "Before the detail: this reads twelve hours of magnetic measurements from one patch of the Sun
+> and estimates whether that region will produce a major flare in the next twenty-four hours. It
+> learned from 331,185 recorded observations between 2010 and 2018. Everything here runs on
+> recorded data — nothing is connected to the Sun."
+
+Point at: the headline question and the four numbers beneath it.
+
+### 0:15 — 0:45 · Watch it work *(Replay)*
+
+Press **▶ Play** on the HARP 7115 track and let it run while you talk.
+
+> "This is a real active region, September 2017, played back hour by hour. Every frame is a real
+> twelve-hour window and the probability is the model's stored prediction for it. Watch the dial:
+> it climbs and crosses the alert threshold *before* the X9.3 flare, and stays high through it. Two
+> frames are marked MISSED — genuine pre-flare windows it scored too low. They are left in."
+
+**Then switch to the HARP 5541 track** for ten seconds.
+
+> "And here is the same model on a region that never produced a major flare. It alerts continuously
+> and is wrong every single time — 211 false alarms. That is the cost of the recall you just saw."
+
+Showing 5541 is braver than showing only 7115, and it lands better with a panel.
+
+### 0:45 — 1:10 · The problem *(Overview)*
 
 > "The task is to forecast whether a solar active region will produce a major flare — GOES class M
 > or X — in the 24 hours after a 12-hour observation window of magnetogram data. We use SWAN-SF:
@@ -49,7 +78,7 @@ If anything fails: `python -m solarflare demo-data` regenerates every JSON the p
 
 Point at: the three cards — dataset, 12h → 24h, and the **Academic Prototype** badge.
 
-### 0:25 — 0:55 · The protocol *(stay on Overview)*
+### 1:10 — 1:30 · The protocol *(stay on Overview)*
 
 > "The split is by SWAN-SF partition, chronological, never shuffled: partitions 1 to 3 train,
 > partition 4 validates, partition 5 is the locked test set. That matters because consecutive
@@ -60,7 +89,7 @@ Point at: the three cards — dataset, 12h → 24h, and the **Academic Prototype
 
 Point at: the **Pipeline** card, the "P1–P3 train / P4 val / P5 test" pill.
 
-### 0:55 — 1:30 · The result, with its uncertainty *(Model Evaluation)*
+### 1:30 — 2:00 · The result, with its uncertainty *(Model Evaluation)*
 
 > "On the locked test partition the model reaches a true skill statistic of 0.853 and a PR-AUC of
 > 0.489, detecting 91.6 % of major flares. The intervals under each figure come from resampling
@@ -77,7 +106,7 @@ misses, 4,707 false alarms.
 a real B- or C-class flare; only 22 % land on a genuinely quiet window. Full answer in
 [JUDGES_QA.md](JUDGES_QA.md) §1.
 
-### 1:30 — 2:00 · Why the threshold is honest *(Operating Point)*
+### 2:00 — 2:20 · Why the threshold is honest *(Operating)*
 
 > "This slider shows every operating point available on the test partition. Our threshold was fixed
 > on the validation partition before this data was ever scored. The best threshold on this curve
@@ -87,7 +116,7 @@ a real B- or C-class flare; only 22 % land on a genuinely quiet window. Full ans
 Point at: the orange marker, then drag the slider and let them watch recall and precision trade off.
 Press **Reset** — the confusion matrix returns to exactly 907 / 4,707 / 83 / 69,668.
 
-### 2:00 — 2:30 · Successes and failures together *(Explore Windows)*
+### 2:20 — 2:45 · Successes and failures together *(Explore)*
 
 > "Twenty real windows from the test partition, chosen by a seeded rule that deliberately includes
 > the misses and the false alarms, not just the wins. Each shows the raw twelve-hour SHARP series,
@@ -100,7 +129,7 @@ truth**.
 > "This one is a genuine pre-flare window the model scored below threshold. We show the failures
 > because an examiner will find them anyway."
 
-### 2:30 — 2:50 · It is the real model *(Live Inference)*
+### 2:45 — 3:00 · It is the real model *(Live)*
 
 > "This runs the actual fitted pipeline in the browser — signed-log, median imputation,
 > standardisation, logistic regression — from parameters exported out of the joblib file. It is
@@ -109,7 +138,7 @@ truth**.
 
 Click **Use a built-in example**. Let the probability and contribution bars appear.
 
-### 2:50 — 3:00 · What it is not *(Risk & Alert)*
+### 3:00 — 3:15 · What it is not *(Risk & Alert)*
 
 > "Finally, the honest framing. This is an academic prototype, not an operational warning service.
 > It uses historical data only, it has no live feed, it was never validated beyond 2018 or beyond
@@ -148,9 +177,14 @@ Point at: the footer disclaimer, visible on every view.
 
 | Symptom | Fix |
 |---|---|
-| Page shows a red error bar | `python -m solarflare demo-data`, then reload |
-| Port 8791 already in use | `python -m solarflare dashboard --port 8795` |
-| A view looks empty | Re-run `python -m solarflare demo-data`; `windows.json` or `operating.json` is missing |
+| A view says a `.json` file could not be loaded | Press its **Try again** button. A tab left open or a server still starting is the usual cause, and one press clears both |
+| Still failing after that | `python -m solarflare demo-data`, then reload |
+| Every view is empty, red banner mentioning `file:` | The page was opened from disk by double-clicking. Serve it instead: `python -m solarflare dashboard` |
+| The page looks out of date | Hard-reload once with **Ctrl + F5** |
+| Port 8791 already in use | It names the next free port. Or `python -m solarflare dashboard --port 8795` |
 | Ctrl + Alt + S does nothing | The shortcut must be on the Desktop. Re-run `scripts\install_shortcut.ps1` |
-| You lose your place after a refresh | You will not — the view is in the URL. `#explore`, `#live`, `#operate` all deep-link |
+| You lose your place after a refresh | You will not — the view is in the URL. Every view deep-links, `#start` through `#replay` |
 | Asked to prove reproduction on the spot | `python -m solarflare evaluate` — 375 checks, about two minutes |
+
+The server also prints a warning naming any missing data file and the view it costs, so the
+terminal tells you before the browser does.

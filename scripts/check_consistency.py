@@ -29,6 +29,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from solarflare import models, paths
+from solarflare.shoot_views import ALL_VIEWS
 
 FIXTURE = paths.ROOT / "tests" / "fixtures" / "ground_truth.json"
 
@@ -491,12 +492,16 @@ def check_counts(checker: Checker) -> None:
         ),
         "candidate models": len(list(paths.MODELS.glob("*.joblib"))),
         "additive figures": len(list(paths.FIGURES_EXTRA.glob("*.png"))),
+        "dashboard views": len(ALL_VIEWS),
     }
 
     patterns = {
         "test files": r"tests? across (\w+) files",
         "post-hoc analyses": r"(\w+) post-hoc analyses",
         "candidate models": r"(\w+) candidates? (?:were |are )?(?:trained|compared)",
+        # docs/FEATURES.md sat at "the nine views" for three days after the
+        # tenth and eleventh were added, because nothing was watching it.
+        "dashboard views": r"(?:the )?(\w+) views\b",
     }
 
     docs = [
