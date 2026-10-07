@@ -185,7 +185,7 @@ before every write and raises. Additive output goes to `results/extra/`, `figure
 | `figures/` | the report's figures — **frozen** |
 | `figures/extra/` | the eight additive figures |
 | `dashboard/` | the static single-page demo, its generated JSON, and `model.js` |
-| `tests/` | 189 tests across nine files |
+| `tests/` | 208 tests across nine files |
 | `docs/` | the documents listed below |
 | `scripts/` | the consistency checker and the parity-fixture builder |
 | `data/`, `raw_data/` | not in git; see [docs/DATA_CARD.md](docs/DATA_CARD.md) |

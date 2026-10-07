@@ -480,6 +480,42 @@ def build_windows(n_windows: int = 20) -> Path:
     )
 
 
+def build_example() -> Path:
+    """Write one real window on its own, for the live view's example button.
+
+    The button used to rebuild its example out of windows.json, which is 650 KB
+    and exists for the explorer. That coupled two unrelated views: if the
+    explorer's file was missing the live view lost its example too, and said
+    only that no example was available. This file is a few tens of kilobytes,
+    is the live view's own input, and is the first window in the explorer set
+    that carries a real series, so the two views still agree.
+    """
+    windows = json.loads(paths.DASHBOARD_WINDOWS.read_text(encoding="utf-8"))["windows"]
+    chosen = next((w for w in windows if w.get("series_available") and w.get("series")), None)
+    if chosen is None:
+        raise RuntimeError(
+            "no window in windows.json carries a raw series, so no example can be built. "
+            "Check raw_data/partition5_instances.tar.gz with "
+            "'python -m solarflare features --check-archives'."
+        )
+    return _write(
+        paths.DASHBOARD_EXAMPLE,
+        {
+            "generated_from": paths.relative(paths.DASHBOARD_WINDOWS),
+            "note": (
+                "One real SWAN-SF window from the locked test partition P5, kept separate "
+                "so the live view works even when windows.json is absent."
+            ),
+            "file": chosen["file"],
+            "harp": chosen["harp"],
+            "window_end_cutoff": chosen["window_end_cutoff"],
+            "probability": chosen["probability"],
+            "outcome": chosen["outcome"],
+            "series": chosen["series"],
+        },
+    )
+
+
 #: The three active regions replayed, chosen so that the set tells the whole
 #: story rather than only the flattering part of it. Picked from the test
 #: partition by their recorded outcomes, not by eye.
@@ -606,4 +642,5 @@ def build_all(n_windows: int = 20) -> list[Path]:
     written = [build_demo(), build_context(), build_model_parameters(), build_operating()]
     written.append(build_replay())
     written.append(build_windows(n_windows=n_windows))
+    written.append(build_example())  # reads windows.json, so it comes after it
     return written

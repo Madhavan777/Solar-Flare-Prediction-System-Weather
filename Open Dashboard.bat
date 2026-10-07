@@ -36,8 +36,15 @@ if %errorlevel%==0 (
 echo Starting the dashboard on http://localhost:%PORT% ...
 start "Solar Flare dashboard" /min "%PY%" -m solarflare dashboard --port %PORT%
 
-rem Give the server a moment, then open the browser.
-powershell -NoProfile -Command "Start-Sleep -Milliseconds 1400" >nul 2>&1
+rem Wait until the port actually answers. A fixed sleep was not enough: importing
+rem numpy, pandas and scikit-learn on a cold start can take several seconds, and
+rem the browser would open on a refused connection.
+powershell -NoProfile -Command "$d=(Get-Date).AddSeconds(30); while((Get-Date) -lt $d){ try { $c=New-Object Net.Sockets.TcpClient; $c.Connect('127.0.0.1',%PORT%); $c.Close(); exit 0 } catch { Start-Sleep -Milliseconds 250 } }; exit 1" >nul 2>&1
+if errorlevel 1 (
+  echo [!] The server did not start within 30 seconds.
+  echo     Run it directly to see why:  "%PY%" -m solarflare dashboard --port %PORT%
+  exit /b 1
+)
 start "" "http://localhost:%PORT%/index.html"
 
 echo.

@@ -89,6 +89,11 @@ DASHBOARD_DEMO = DASHBOARD / "demo.json"
 DASHBOARD_MODEL_LR = DASHBOARD / "model_lr.json"
 DASHBOARD_WINDOWS = DASHBOARD / "windows.json"
 DASHBOARD_OPERATING = DASHBOARD / "operating.json"
+DASHBOARD_REPLAY = DASHBOARD / "replay.json"
+DASHBOARD_CONTEXT = DASHBOARD / "context.json"
+#: One real window, on its own, so the live view's example button does not
+#: depend on the 650 KB explorer file. See dashboard_data.build_example().
+DASHBOARD_EXAMPLE = DASHBOARD / "example_window.json"
 
 # --- documentation ------------------------------------------------------------
 DOCS = ROOT / "docs"

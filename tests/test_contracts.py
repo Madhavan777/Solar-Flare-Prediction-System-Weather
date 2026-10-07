@@ -278,6 +278,37 @@ def test_most_explorer_windows_carry_their_raw_series():
     assert payload["n_with_raw_series"] == with_series
 
 
+def test_example_window_json_contract():
+    """The live view's own example, kept separate from the explorer's file.
+
+    The example button used to rebuild its CSV out of windows.json, so a missing
+    explorer file silently disabled the live view's example as well. This file
+    exists to break that coupling, and must stand on its own.
+    """
+    payload = load(paths.DASHBOARD_EXAMPLE)
+    assert {"file", "harp", "probability", "outcome", "series"} <= set(payload)
+    series = payload["series"]
+    assert series["timestamps"], "the example carries no timestamps"
+    assert series["values"], "the example carries no parameter columns"
+    model = load(paths.DASHBOARD_MODEL_LR)
+    missing = set(model["sharp_parameters"]) - set(series["values"])
+    assert not missing, f"the example is missing SHARP columns the model needs: {sorted(missing)}"
+    n = len(series["timestamps"])
+    for name, values in series["values"].items():
+        assert len(values) == n, f"{name} has {len(values)} points, expected {n}"
+
+
+def test_the_live_example_agrees_with_the_explorer():
+    """Both views show the same window, so they must not disagree about it."""
+    example = load(paths.DASHBOARD_EXAMPLE)
+    windows = load(paths.DASHBOARD_WINDOWS)["windows"]
+    twin = next((w for w in windows if w["file"] == example["file"]), None)
+    assert twin is not None, "the example window is not one of the explorer's windows"
+    assert example["probability"] == twin["probability"]
+    assert example["outcome"] == twin["outcome"]
+    assert example["harp"] == twin["harp"]
+
+
 def test_replay_json_contract():
     """The replay view's recorded active-region histories."""
     payload = load(paths.DASHBOARD / "replay.json")

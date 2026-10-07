@@ -765,14 +765,19 @@ const fmt = (v, d = 3) => Number(v).toFixed(d);
 const esc = s => String(s).replace(/[&<>"']/g, c =>
   ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-async function getJSON(name, optional = false) {
+/* Every load failure is recorded rather than thrown. A single unreadable file
+   used to reject main() and take all eleven views down with it, leaving a page
+   of placeholder dashes and one line of explanation. */
+const LOAD_ERRORS = [];
+
+async function getJSON(name) {
   try {
     const r = await fetch(name);
-    if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+    if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + r.statusText);
     return await r.json();
   } catch (e) {
-    if (optional) return null;
-    throw new Error('could not load ' + name + ': ' + e.message);
+    LOAD_ERRORS.push({ name: name, message: e.message });
+    return null;
   }
 }
 
@@ -986,8 +991,14 @@ function showWindow(i, scroll) {
     b.setAttribute('aria-pressed', on ? 'true' : 'false');
   });
 
+  // The parameter names come from model_lr.json, which the explorer does not
+  // otherwise need. Fall back to the series' own keys so a missing model file
+  // costs the live view only, and does not break clicking a tile here.
   const series = x.series && x.series.values ? x.series.values : null;
-  const shown = series ? S.model.sharp_parameters.slice(0, 6) : [];
+  const names = S.model && S.model.sharp_parameters
+    ? S.model.sharp_parameters
+    : (series ? Object.keys(series) : []);
+  const shown = series ? names.slice(0, 6) : [];
   const seriesHTML = series
     ? '<div class="serieswrap">' + shown.map(name => {
         const v = series[name] || [];
@@ -1089,10 +1100,16 @@ function runLive(text, label) {
 }
 
 function buildExampleCSV() {
-  /* Rebuilds a tab-separated window from the series stored in windows.json, so the
-     example button works offline and uses genuine SWAN-SF data. */
-  const w = (S.windows && S.windows.windows || []).find(x => x.series && x.series.values);
-  if (!w) return null;
+  /* Rebuilds a tab-separated window from a stored series, so the example button
+     works offline and uses genuine SWAN-SF data.
+
+     example_window.json is this view's own 30 KB input and is tried first.
+     windows.json is the 650 KB explorer file and is only a fallback: reading it
+     here is what used to make a missing explorer file break this button too. */
+  const w = S.example && S.example.series && S.example.series.values
+    ? S.example
+    : (S.windows && S.windows.windows || []).find(x => x.series && x.series.values);
+  if (!w || !S.model) return null;
   const params = S.model.sharp_parameters;
   const n = w.series.timestamps.length;
   const lines = ['Timestamp\t' + params.join('\t')];
@@ -1107,6 +1124,23 @@ function buildExampleCSV() {
 }
 
 function wireLive() {
+  // Say which input is missing and leave the controls disabled, rather than
+  // leaving live buttons on the page that silently do nothing when pressed.
+  if (!S.model) {
+    $('live-result').innerHTML = '<p class="muted" style="font-size:12.5px">' +
+      'model_lr.json could not be loaded, so the model cannot run in your browser. ' +
+      'Regenerate it with <code class="k">python -m solarflare demo-data</code> and reload.</p>';
+    ['pick', 'useExample', 'file'].forEach(id => { $(id).disabled = true; });
+    $('live-status').textContent = 'Disabled: model_lr.json is unavailable.';
+    return;
+  }
+  if (!buildExampleCSV()) {
+    $('useExample').disabled = true;
+    $('useExample').title = 'example_window.json is unavailable';
+    $('live-status').textContent =
+      'The built-in example needs dashboard/example_window.json. You can still load your own ' +
+      'window file; regenerate the example with: python -m solarflare demo-data';
+  }
   $('pick').addEventListener('click', () => $('file').click());
   $('file').addEventListener('change', e => {
     const f = e.target.files[0];
@@ -1543,25 +1577,75 @@ document.addEventListener('keydown', e => {
 });
 
 /* ============================ boot ================================= */
+function showLoadBanner() {
+  /* Name what failed and say what to do about it. The commonest cause by far is
+     opening this file from disk: fetch() cannot read a sibling file over the
+     file: protocol, so every JSON load fails at once and the page looks broken
+     for a reason that has nothing to do with the project. */
+  const fileProtocol = location.protocol === 'file:';
+  const names = LOAD_ERRORS.map(e => e.name);
+  const lines = LOAD_ERRORS.map(e =>
+    '<li><code>' + esc(e.name) + '</code> &mdash; ' + esc(e.message) + '</li>').join('');
+  const advice = fileProtocol
+    ? 'This page was opened straight from the file system, so the browser blocks it from ' +
+      'reading its own data files. Serve the folder instead:<br>' +
+      '<code>python -m solarflare dashboard</code><br>then open the ' +
+      '<code>localhost:8000/index.html</code> address it prints. On Windows, ' +
+      '<b>Open Dashboard.bat</b> does both in one step.'
+    : 'Regenerate the missing files with <code>python -m solarflare demo-data</code>, then ' +
+      'reload. Views that do not need them keep working.';
+  document.body.insertAdjacentHTML('afterbegin',
+    '<div id="load-banner" role="alert" style="background:#3a1414;color:#f3c3c4;' +
+    'padding:12px 18px;font-size:13px;line-height:1.6;border-bottom:1px solid #7a2b2b">' +
+    '<b>' + (fileProtocol ? 'Opened as a file, not served.' :
+      names.length + ' data file' + (names.length === 1 ? '' : 's') + ' could not be loaded.') +
+    '</b> ' + advice +
+    '<ul style="margin:8px 0 0;padding-left:20px">' + lines + '</ul></div>');
+  window.dashboardError = names.join(', ');
+}
+
+function markCoreUnavailable() {
+  /* demo.json feeds the six original views and the landing page's numbers. */
+  const msg = '<p class="muted" style="font-size:12.5px">This view needs ' +
+    '<code class="k">dashboard/demo.json</code>, which could not be loaded. ' +
+    'Regenerate it with <code class="k">python -m solarflare demo-data</code> and reload.</p>';
+  ['v-start', 'v-overview', 'v-predict', 'v-result', 'v-risk', 'v-explain', 'v-eval']
+    .forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.insertAdjacentHTML('beforeend', msg);
+    });
+}
+
 async function main() {
+  // Every file is optional at load time. Each view either renders or explains
+  // its own absence, so one unreadable file can no longer take the site down.
   S.demo = await getJSON('demo.json');
   S.ctx = await getJSON('context.json');
-  S.model = await getJSON('model_lr.json', true);
-  S.windows = await getJSON('windows.json', true);
-  S.operating = await getJSON('operating.json', true);
-  S.replay = await getJSON('replay.json', true);
+  S.model = await getJSON('model_lr.json');
+  S.windows = await getJSON('windows.json');
+  S.example = await getJSON('example_window.json');
+  S.operating = await getJSON('operating.json');
+  S.replay = await getJSON('replay.json');
 
-  renderCore();
-  injectHints();
-  renderLanding();
-  renderReplay();
-  wireForecastButton();
-  // Called unconditionally: it explains its own absence rather than leaving an
-  // empty grid behind if windows.json could not be read.
-  renderExplore();
-  if (S.model) wireLive(); else $('live-result').innerHTML =
-    '<p class="muted">model_lr.json not found - run: python -m solarflare demo-data</p>';
-  renderOperate();
+  // Each block is isolated: a render that throws must not stop the next one.
+  const step = (label, fn) => {
+    try { fn(); } catch (e) { LOAD_ERRORS.push({ name: label, message: e.message }); }
+  };
+
+  if (S.demo) {
+    step('the forecast views', renderCore);
+    step('the Run Forecast button', wireForecastButton);
+  } else {
+    step('the forecast views', markCoreUnavailable);
+  }
+  step('the view cues', injectHints);
+  if (S.demo && S.ctx) step('the landing page', renderLanding);
+  step('the replay view', renderReplay);
+  step('the explorer', renderExplore);
+  step('the live view', wireLive);
+  step('the operating view', renderOperate);
+
+  if (LOAD_ERRORS.length) step('the error banner', showLoadBanner);
 
   // Open whatever view the address bar asks for, so a reload or a shared link
   // lands where it should.
@@ -1574,10 +1658,9 @@ async function main() {
 main().catch(err => {
   document.body.insertAdjacentHTML('afterbegin',
     '<div style="background:#3a1414;color:#f08b8e;padding:12px 18px;font-size:13px">' +
-    'Dashboard failed to load: ' + esc(err.message) +
-    '. Run <code>python -m solarflare demo-data</code>, then serve this folder with ' +
-    '<code>python -m solarflare dashboard</code>.</div>');
+    'Dashboard failed to start: ' + esc(err.message) + '</div>');
   window.dashboardError = String(err.message);
+  window.dashboardReady = true;
 });
 </script>
 </body>

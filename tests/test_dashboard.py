@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import contextlib
 import json
+import re
+import shutil
 import socket
 import subprocess
 import sys
@@ -161,6 +163,41 @@ def test_the_landing_page_explains_how_to_use_the_site(page):
     assert "how to use" in text, "the landing page never says how to use the site"
     steps = page.evaluate("document.querySelectorAll('#v-start .howto > *').length")
     assert steps >= 4, f"only {steps} how-to steps on the landing page"
+
+
+def test_no_data_file_failed_to_load(page):
+    """A silent partial load is how the explorer and live views went missing."""
+    assert page.evaluate("window.dashboardError || null") is None
+    assert page.evaluate("document.getElementById('load-banner') === null")
+
+
+def test_explorer_shows_its_windows(page):
+    page.evaluate("window.showView('explore')")
+    page.wait_for_timeout(200)
+    tiles = page.evaluate("document.querySelectorAll('#wlist .wcard').length")
+    assert tiles >= 15, f"the explorer rendered {tiles} windows"
+    assert "missing or unreadable" not in page.inner_text("#wlist")
+    page.locator("#wlist .wcard").first.click()
+    page.wait_for_timeout(300)
+    reveal = page.evaluate(
+        "[...document.querySelectorAll('#wdetail button')].map(b=>b.textContent.trim())"
+    )
+    assert any("Reveal" in r for r in reveal), f"no reveal control after clicking a tile: {reveal}"
+
+
+def test_live_example_button_runs_the_model(page):
+    page.evaluate("window.showView('live')")
+    page.wait_for_timeout(200)
+    button = page.query_selector("#useExample")
+    assert button is not None, "the built-in example button is not on the page"
+    assert button.is_visible(), "the built-in example button is not visible"
+    assert not page.evaluate("document.getElementById('useExample').disabled")
+    button.click()
+    page.wait_for_timeout(700)
+    result = page.inner_text("#live-result")
+    assert "No window loaded yet" not in result, "the example button did nothing"
+    assert re.search(r"0\.\d{3,}", result), f"no probability in the result: {result[:120]}"
+    assert page.evaluate("document.getElementById('live-contrib-card').offsetParent !== null")
 
 
 def test_evaluation_view_numbers_equal_results_json(page):
@@ -680,3 +717,87 @@ def test_disclaimer_contrast_meets_aa(page):
            })()"""
     )
     assert ratio >= 4.5, f"disclaimer contrast is {ratio:.2f}:1, below the 4.5:1 minimum"
+
+
+# --------------------------------------------------------------- degraded serve
+# Regression for the failure the explorer and the live view hit together: one
+# unreadable JSON file used to reject main(), which left every view showing
+# placeholder dashes, and the live view's example button read windows.json even
+# though that file belongs to the explorer.
+
+DEGRADED_PORT = 8798
+
+
+@pytest.fixture(scope="module")
+def degraded_server(tmp_path_factory):
+    """Serve a copy of dashboard/ with windows.json deleted."""
+    root = tmp_path_factory.mktemp("degraded")
+    shutil.copytree(paths.DASHBOARD, root / "dashboard")
+    (root / "dashboard" / "windows.json").unlink()
+    process = subprocess.Popen(
+        [
+            sys.executable,
+            "-m",
+            "http.server",
+            str(DEGRADED_PORT),
+            "--directory",
+            str(root / "dashboard"),
+        ],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    try:
+        for _ in range(60):
+            if _port_open(DEGRADED_PORT):
+                break
+            time.sleep(0.25)
+        else:
+            process.terminate()
+            pytest.skip("the degraded server did not start")
+        yield DEGRADED_PORT
+    finally:
+        process.terminate()
+        with contextlib.suppress(Exception):
+            process.wait(timeout=10)
+
+
+def test_a_missing_explorer_file_does_not_break_the_live_example(page, degraded_server):
+    # Borrow the module's browser: its sync_playwright context is already open,
+    # and opening a second one inside it is an error.
+    broken = page.context.browser.new_page(viewport={"width": 1440, "height": 1000})
+    errors: list[str] = []
+    broken.on("pageerror", lambda e: errors.append(str(e)))
+    try:
+        broken.goto(f"http://localhost:{degraded_server}/index.html", wait_until="domcontentloaded")
+        broken.wait_for_function("window.dashboardReady === true", timeout=30_000)
+        broken.wait_for_timeout(400)
+
+        # The boot completes and says exactly which file is missing.
+        assert broken.evaluate("window.dashboardError") == "windows.json"
+        assert "windows.json" in broken.inner_text("#load-banner")
+
+        # The explorer explains itself instead of showing an empty grid.
+        broken.evaluate("window.showView('explore')")
+        broken.wait_for_timeout(200)
+        assert "missing or unreadable" in broken.inner_text("#wlist")
+
+        # ... and the live view is entirely unaffected.
+        broken.evaluate("window.showView('live')")
+        broken.wait_for_timeout(200)
+        assert not broken.evaluate(
+            "document.getElementById('useExample').disabled"
+        ), "the built-in example was disabled by a file it does not need"
+        broken.click("#useExample")
+        broken.wait_for_timeout(800)
+        result = broken.inner_text("#live-result")
+        assert re.search(r"0\.\d{3,}", result), f"the example did not run: {result[:140]}"
+
+        # Views that need none of it keep working.
+        for view in ("eval", "operate", "replay"):
+            broken.evaluate(f"window.showView('{view}')")
+            broken.wait_for_timeout(150)
+            assert len(broken.inner_text(f"#v-{view}").strip()) > 80, f"{view} is empty"
+
+        assert not errors, "console errors: " + "; ".join(errors)
+    finally:
+        broken.close()

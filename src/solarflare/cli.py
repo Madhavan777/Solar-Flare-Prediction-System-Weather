@@ -424,10 +424,32 @@ def cmd_dashboard(args: argparse.Namespace) -> int:
     import http.server
 
     _heading(f"serving the dashboard on http://localhost:{args.port}/index.html")
-    missing = [p for p in (paths.DASHBOARD / "index.html", paths.DASHBOARD_DEMO) if not p.exists()]
+
+    # index.html and demo.json are fatal: without them there is no page worth
+    # serving. The rest only disable a view each, so the server starts and says
+    # which views will be degraded - it used to start silently and let the
+    # browser be the first to notice.
+    required = (paths.DASHBOARD / "index.html", paths.DASHBOARD_DEMO)
+    optional = {
+        paths.DASHBOARD_CONTEXT: "the landing page",
+        paths.DASHBOARD_MODEL_LR: "the live view",
+        paths.DASHBOARD_EXAMPLE: "the live view's built-in example",
+        paths.DASHBOARD_WINDOWS: "the explorer",
+        paths.DASHBOARD_OPERATING: "the operating-point view",
+        paths.DASHBOARD_REPLAY: "the replay view",
+    }
+    missing = [p for p in required if not p.exists()]
     if missing:
         print("FAIL - missing: " + ", ".join(paths.relative(m) for m in missing))
+        print("  Regenerate with: python -m solarflare demo-data")
         return 1
+
+    degraded = {p: what for p, what in optional.items() if not p.exists()}
+    if degraded:
+        print(f"WARN - {len(degraded)} data file(s) missing; those views will explain themselves:")
+        for p, what in degraded.items():
+            print(f"    {paths.relative(p):<32} {what}")
+        print("  Regenerate with: python -m solarflare demo-data")
 
     # On Windows, SO_REUSEADDR lets a second process bind a port that is already
     # being served, so running this command twice silently leaves two servers

@@ -243,6 +243,32 @@ no console errors, but the view was simply blank.
 **Evidence:** `tests/test_dashboard.py::test_explore_explains_itself_when_its_data_is_unreadable`.
 **Affects:** presentation only.
 
+## D-21 — One missing file may cost one view, never the page
+
+**Date:** 2026-10-07
+**Decision:** Every dashboard JSON file is loaded optionally. Failures are collected rather than
+thrown, each render step is isolated so one that raises cannot stop the next, and a banner names
+each file that failed with the command that regenerates it. The live view's example moved out of
+`windows.json` into its own `dashboard/example_window.json`.
+**Why:** `demo.json` and `context.json` were required, so one failed fetch rejected `main()` and
+took all eleven views down together — no cues, no explorer, dead buttons on the live view, and one
+line of explanation. The commonest way to hit it is not a missing file at all: opening `index.html`
+from disk means `fetch` cannot read a sibling file, so every load fails at once and the page looks
+broken for a reason that has nothing to do with the project. It now says exactly that.
+
+Separately, the live view's example button rebuilt its CSV out of `windows.json`, which is 650 KB
+and belongs to the explorer. That coupled two unrelated views: losing the explorer's file silently
+disabled the live view's example too, and the button reported only that no example was available.
+The example is now a 30 KB file of its own, carrying one real P5 window; `windows.json` remains a
+fallback. A test asserts the two agree on that window's probability and outcome.
+
+`showWindow()` also read `S.model.sharp_parameters` to label the series, so a missing
+`model_lr.json` threw on every explorer tile click. It falls back to the series' own keys.
+**Evidence:** `tests/test_dashboard.py::test_a_missing_explorer_file_does_not_break_the_live_example`
+serves a copy with `windows.json` deleted and asserts the example still runs;
+`tests/test_contracts.py::test_the_live_example_agrees_with_the_explorer`.
+**Affects:** presentation and engineering; no published number depends on it.
+
 ## D-20 — British spelling
 
 **Date:** 2026-10-05
