@@ -291,6 +291,25 @@ the port answers, and one refused connection used to disable a view for the life
 the real HTTP status, restores it, and presses Try again.
 **Affects:** presentation only; no published number depends on it.
 
+## D-23 — A drawn mark, with the old disc kept for report mode
+
+**Date:** 2026-10-08
+**Decision:** The header logo is an inline SVG: a glowing solar disc with an eruption sweeping off
+its limb, over the same hazy corona the old mark had. `favicon.svg` matches it. The previous flat
+disc is kept in the markup and shown only under `body.report-mode`.
+**Why:** the old mark was a CSS radial gradient on an empty `<div>` — a featureless orange blob that
+said nothing about the project. Five candidate marks were drawn and rendered at 96, 38 and 20 px
+before choosing, because the failures are only visible at size: a small disc with a single curling
+arc reads as a lit bomb fuse, a cropped limb under an arch reads as a handbag, a tapered plume
+reads as a lollipop, and concentric arcs read as a wifi icon. The eruption crescent is the only one
+that stayed legible at 20 px and unambiguous at 96 px.
+
+The logo appears in every view, so changing it would have altered the captures of Figures 5.1-5.6.
+It is held back in report mode exactly as the added navigation and the view cues are, and the six
+report-mode captures are byte-identical after the change.
+**Evidence:** `tests/test_dashboard.py::test_the_mark_is_held_back_in_report_mode`.
+**Affects:** presentation only.
+
 ## D-20 — British spelling
 
 **Date:** 2026-10-05

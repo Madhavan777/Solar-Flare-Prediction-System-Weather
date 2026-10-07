@@ -165,6 +165,20 @@ def test_the_landing_page_explains_how_to_use_the_site(page):
     assert steps >= 4, f"only {steps} how-to steps on the landing page"
 
 
+def test_the_mark_is_held_back_in_report_mode(page):
+    """The logo changed after the report, so Figures 5.1-5.6 keep the old disc."""
+    display = (
+        "[getComputedStyle(document.querySelector('.logomark')).display,"
+        " getComputedStyle(document.querySelector('.brand .logo')).display]"
+    )
+    assert page.evaluate(display) == ["block", "none"], "the live interface shows the old disc"
+    page.evaluate("window.setReportMode(true)")
+    page.wait_for_timeout(150)
+    assert page.evaluate(display) == ["none", "block"], "the new mark leaks into report mode"
+    page.evaluate("window.setReportMode(false)")
+    page.wait_for_timeout(150)
+
+
 def test_no_data_file_failed_to_load(page):
     """A silent partial load is how the explorer and live views went missing."""
     assert page.evaluate("window.dashboardError || null") is None

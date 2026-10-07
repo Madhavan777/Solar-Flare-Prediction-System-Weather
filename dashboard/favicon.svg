@@ -1,11 +1,32 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Solar flare">
-  <rect width="32" height="32" rx="7" fill="#0b1626"/>
-  <circle cx="16" cy="16" r="7" fill="#ff8a3d"/>
-  <circle cx="16" cy="16" r="7" fill="none" stroke="#ffcf8a" stroke-width="1.2" opacity="0.8"/>
-  <g stroke="#ffb26b" stroke-width="2" stroke-linecap="round" opacity="0.95">
-    <path d="M16 2.5v4"/><path d="M16 25.5v4"/>
-    <path d="M2.5 16h4"/><path d="M25.5 16h4"/>
-    <path d="M6.4 6.4l2.8 2.8"/><path d="M22.8 22.8l2.8 2.8"/>
-    <path d="M25.6 6.4l-2.8 2.8"/><path d="M9.2 22.8l-2.8 2.8"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" role="img" aria-label="Solar flare forecast">
+  <defs>
+    <linearGradient id="fv-tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#16304f"/><stop offset="1" stop-color="#091120"/>
+    </linearGradient>
+    <radialGradient id="fv-disc" cx="34%" cy="30%" r="80%">
+      <stop offset="0" stop-color="#fff2d4"/><stop offset=".35" stop-color="#ffb470"/>
+      <stop offset=".74" stop-color="#f4701d"/><stop offset="1" stop-color="#8c2f00"/>
+    </radialGradient>
+    <linearGradient id="fv-cme" gradientUnits="userSpaceOnUse" x1="18" y1="33" x2="30" y2="7">
+      <stop offset="0" stop-color="#ff8a3d" stop-opacity="0"/>
+      <stop offset=".5" stop-color="#ffcf8a"/><stop offset="1" stop-color="#fff8ec"/>
+    </linearGradient>
+    <filter id="fv-haze" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="2.8"/>
+    </filter>
+    <filter id="fv-soft" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="1.1"/>
+    </filter>
+  </defs>
+  <rect width="40" height="40" rx="9.5" fill="url(#fv-tile)"/>
+  <circle cx="17" cy="23" r="13" fill="#ff8a3d" opacity=".45" filter="url(#fv-haze)"/>
+  <circle cx="17" cy="23" r="10.5" fill="url(#fv-disc)"/>
+  <g filter="url(#fv-soft)">
+    <path d="M17.5 34.5A15 15 0 0 0 30.8 10" fill="none" stroke="url(#fv-cme)"
+          stroke-width="4.4" stroke-linecap="round"/>
   </g>
+  <path d="M17.5 34.5A15 15 0 0 0 30.8 10" fill="none" stroke="url(#fv-cme)"
+        stroke-width="2" stroke-linecap="round"/>
+  <rect x=".5" y=".5" width="39" height="39" rx="9" fill="none" stroke="#ffb26b"
+        stroke-opacity=".22"/>
 </svg>
